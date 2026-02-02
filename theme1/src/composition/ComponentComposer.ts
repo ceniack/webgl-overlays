@@ -18,6 +18,10 @@ import type {
 import { BroadcasterInfo } from '../components/sections/BroadcasterInfo/BroadcasterInfo';
 import { CounterCarousel } from '../components/sections/CounterCarousel/CounterCarousel';
 import { HealthMonitor } from '../components/sections/HealthMonitor/HealthMonitor';
+// Components available but not yet integrated into overlay:
+// import { AlertFeed } from '../components/sections/AlertFeed/AlertFeed';
+// import { GoalTracker } from '../components/sections/GoalTracker/GoalTracker';
+// import { RecentActivity } from '../components/sections/RecentActivity/RecentActivity';
 
 interface ComponentModule {
   html: string;
@@ -238,6 +242,9 @@ export class ComponentComposer implements IComponentComposer {
       }
       return new HealthMonitor(container) as unknown as Component;
     });
+
+    // Components available but not yet integrated:
+    // AlertFeed, GoalTracker, RecentActivity
 
     console.log('📦 ComponentComposer initialized with component factories:', this.registry.list());
   }

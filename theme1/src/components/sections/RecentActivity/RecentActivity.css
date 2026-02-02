@@ -1,0 +1,293 @@
+/**
+ * RecentActivity Component Styles
+ * Scrolling feed of recent stream activity
+ */
+
+/* Container */
+.activity-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.activity-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary, #00d4ff) transparent;
+}
+
+.activity-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.activity-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.activity-container::-webkit-scrollbar-thumb {
+  background: var(--primary, #00d4ff);
+  border-radius: 2px;
+}
+
+/* Activity List */
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Empty State */
+.activity-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0.5;
+}
+
+.activity-empty-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+/* Activity Item */
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(30, 30, 40, 0.7) 100%);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary, #00d4ff);
+  transition: transform 0.2s ease, background 0.2s ease, opacity 0.3s ease;
+}
+
+.activity-item:hover {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(40, 40, 50, 0.9) 100%);
+  transform: translateX(4px);
+}
+
+/* New item animation */
+.activity-item.activity-new {
+  animation: activitySlideIn 0.3s ease-out;
+}
+
+@keyframes activitySlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Activity Icon */
+.activity-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--primary, #00d4ff);
+}
+
+/* Activity Body */
+.activity-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.activity-user {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.activity-detail {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Activity Timestamp */
+.activity-time {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Type-specific Styles */
+
+/* Follow */
+.activity-follow {
+  border-left-color: #ff6b9d;
+}
+
+.activity-follow .activity-icon svg {
+  fill: #ff6b9d;
+}
+
+/* Subscription */
+.activity-sub {
+  border-left-color: #9b59b6;
+}
+
+.activity-sub .activity-icon svg {
+  fill: #9b59b6;
+}
+
+/* Cheer/Bits */
+.activity-cheer {
+  border-left-color: #f1c40f;
+}
+
+.activity-cheer .activity-icon svg {
+  fill: #f1c40f;
+}
+
+/* Raid */
+.activity-raid {
+  border-left-color: #e74c3c;
+}
+
+.activity-raid .activity-icon svg {
+  fill: #e74c3c;
+}
+
+/* Donation */
+.activity-donation {
+  border-left-color: #2ecc71;
+}
+
+.activity-donation .activity-icon svg {
+  fill: #2ecc71;
+}
+
+/* Redemption */
+.activity-redemption {
+  border-left-color: #3498db;
+}
+
+.activity-redemption .activity-icon svg {
+  fill: #3498db;
+}
+
+/* Compact Mode */
+.activity-list.activity-compact .activity-item {
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.activity-list.activity-compact .activity-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.activity-list.activity-compact .activity-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.activity-list.activity-compact .activity-user {
+  font-size: 12px;
+}
+
+.activity-list.activity-compact .activity-detail {
+  font-size: 11px;
+}
+
+/* Horizontal Mode (for bottom bar layouts) */
+.activity-container.activity-horizontal {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.activity-container.activity-horizontal .activity-list {
+  flex-direction: row;
+  gap: 8px;
+  padding: 4px;
+}
+
+.activity-container.activity-horizontal .activity-item {
+  flex-shrink: 0;
+  max-width: 200px;
+}
+
+/* Animations for scrolling */
+@keyframes activityScroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.activity-list.auto-scroll {
+  animation: activityScroll 30s linear infinite;
+}
+
+.activity-list.auto-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Fade effect at edges */
+.activity-container::before,
+.activity-container::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.activity-container::before {
+  top: 0;
+  background: linear-gradient(180deg,
+    var(--bg-panel, rgba(0, 0, 0, 0.9)) 0%,
+    transparent 100%);
+}
+
+.activity-container::after {
+  bottom: 0;
+  background: linear-gradient(0deg,
+    var(--bg-panel, rgba(0, 0, 0, 0.9)) 0%,
+    transparent 100%);
+}
+
+/* No fade when scrolled to top/bottom */
+.activity-container.at-top::before {
+  opacity: 0;
+}
+
+.activity-container.at-bottom::after {
+  opacity: 0;
+}

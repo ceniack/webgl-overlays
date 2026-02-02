@@ -1,7 +1,18 @@
 import { eventBus } from './EventBus';
 import { EVENT_TYPES, HEALTH_STATUS } from './EventConstants';
 import { logger } from './Logger';
-import type { CounterUpdateEvent, BroadcasterInfoEvent, HealthStatusEvent, StreamerbotConnectionEvent } from '../types/events';
+import type {
+  CounterUpdateEvent,
+  BroadcasterInfoEvent,
+  HealthStatusEvent,
+  StreamerbotConnectionEvent,
+  AlertTriggerEvent,
+  StreamStatusEvent,
+  GoalProgressEvent,
+  ActivityItemEvent
+} from '../types/events';
+import type { AlertType, AlertPlatform } from '../types/alerts';
+import type { GoalType } from '../types/goals';
 
 const sbLogger = logger.createChildLogger('Streamerbot');
 
@@ -146,6 +157,46 @@ class StreamerbotIntegration {
     }
   }
 
+  /**
+   * Process goal-related variables from Streamer.bot global variables
+   * Expected format: goal{Type}Current, goal{Type}Target (e.g., goalFollowerCurrent)
+   */
+  private processGoalVariable(name: string, value: any): void {
+    // Match goal variable patterns: goalFollowerCurrent, goalSubTarget, etc.
+    const goalMatch = name.match(/^goal(Follower|Sub|Bit|Donation|Custom)?(Current|Target)$/i);
+    if (!goalMatch) return;
+
+    const goalTypeStr = (goalMatch[1] || 'custom').toLowerCase();
+    const valueType = goalMatch[2].toLowerCase(); // 'current' or 'target'
+
+    // Map to GoalType
+    const goalTypeMap: Record<string, GoalType> = {
+      follower: 'follower',
+      sub: 'sub',
+      bit: 'bit',
+      donation: 'donation',
+      custom: 'custom'
+    };
+    const goalType = goalTypeMap[goalTypeStr] || 'custom';
+    const goalId = `${goalType}-goal`;
+
+    // Parse numeric value
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numericValue)) return;
+
+    sbLogger.debug(`Goal variable update: ${name} = ${numericValue} (type: ${goalType}, ${valueType})`);
+
+    const goalEvent: GoalProgressEvent = {
+      goalId,
+      type: goalType,
+      current: valueType === 'current' ? numericValue : 0,
+      target: valueType === 'target' ? numericValue : undefined,
+      timestamp: Date.now()
+    };
+
+    eventBus.emit(EVENT_TYPES.GOAL_PROGRESS, goalEvent);
+  }
+
   private async waitForClientReady(maxWait: number = 1000): Promise<boolean> {
     const startTime = Date.now();
     sbLogger.debug('Verifying client readiness');
@@ -164,10 +215,283 @@ class StreamerbotIntegration {
     return false;
   }
 
+  /**
+   * Normalize platform-specific events into unified AlertTriggerEvent format
+   */
+  private normalizeAlertEvent(source: string, type: AlertType, data: any): AlertTriggerEvent {
+    const platform = source.split('.')[0].toLowerCase() as AlertPlatform;
+    const baseEvent: AlertTriggerEvent = {
+      type,
+      platform,
+      user: data.user_name || data.displayName || data.userName || data.name || 'Unknown',
+      timestamp: Date.now(),
+      isTest: data.isTest ?? false,
+      id: `${type}-${platform}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    };
+
+    switch (type) {
+      case 'follow':
+        return baseEvent;
+
+      case 'sub':
+        return {
+          ...baseEvent,
+          tier: data.tier || data.sub_tier || '1',
+          months: data.cumulative_months || data.cumulativeMonths || data.months || 1,
+          isGift: data.is_gift || data.isGift || false,
+          giftRecipient: data.recipient_user_name || data.recipientUserName,
+          message: data.message?.text || data.message
+        };
+
+      case 'cheer':
+        return {
+          ...baseEvent,
+          amount: data.bits || data.amount || 0,
+          message: data.message?.text || data.message
+        };
+
+      case 'raid':
+        return {
+          ...baseEvent,
+          viewers: data.viewers || data.viewer_count || data.viewerCount || 0
+        };
+
+      case 'donation':
+        return {
+          ...baseEvent,
+          amount: parseFloat(data.amount) || data.amount || 0,
+          currency: data.currency || 'USD',
+          message: data.message?.text || data.message
+        };
+
+      case 'redemption':
+        return {
+          ...baseEvent,
+          reward: data.reward?.title || data.rewardTitle || data.title || 'Unknown Reward',
+          cost: data.reward?.cost || data.rewardCost || data.cost || 0,
+          message: data.user_input || data.userInput || data.message
+        };
+
+      default:
+        return baseEvent;
+    }
+  }
+
+  /**
+   * Emit an alert event and corresponding activity item
+   */
+  private emitAlertEvent(alertEvent: AlertTriggerEvent): void {
+    sbLogger.info(`📢 Alert: ${alertEvent.type} from ${alertEvent.platform} - ${alertEvent.user}`);
+
+    // Emit main alert trigger event
+    eventBus.emit(EVENT_TYPES.ALERT_TRIGGER, alertEvent);
+
+    // Also emit as activity item for the activity feed
+    const activityItem: ActivityItemEvent = {
+      id: alertEvent.id || `activity-${Date.now()}`,
+      type: alertEvent.type,
+      platform: alertEvent.platform,
+      user: alertEvent.user,
+      detail: this.getActivityDetail(alertEvent),
+      timestamp: alertEvent.timestamp
+    };
+    eventBus.emit(EVENT_TYPES.ACTIVITY_ITEM, activityItem);
+  }
+
+  /**
+   * Generate detail text for activity feed based on alert type
+   */
+  private getActivityDetail(alert: AlertTriggerEvent): string {
+    switch (alert.type) {
+      case 'follow':
+        return 'followed';
+      case 'sub':
+        if (alert.isGift && alert.giftRecipient) {
+          return `gifted a Tier ${alert.tier || '1'} sub to ${alert.giftRecipient}`;
+        }
+        return alert.months && alert.months > 1
+          ? `subscribed for ${alert.months} months`
+          : `subscribed (Tier ${alert.tier || '1'})`;
+      case 'cheer':
+        return `cheered ${alert.amount} bits`;
+      case 'raid':
+        return `raided with ${alert.viewers} viewers`;
+      case 'donation':
+        return `donated ${alert.currency || '$'}${alert.amount}`;
+      case 'redemption':
+        return `redeemed ${alert.reward}`;
+      default:
+        return '';
+    }
+  }
+
   private setupEventListeners(): void {
     if (!this.client) return;
 
     sbLogger.debug('Registering event listeners');
+
+    // ============================================
+    // TWITCH EVENTS
+    // ============================================
+
+    // Twitch Follow
+    this.client.on('Twitch.Follow', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.Follow event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.Follow', 'follow', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // Twitch Subscription events
+    this.client.on('Twitch.Sub', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.Sub event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.Sub', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Twitch.ReSub', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.ReSub event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.ReSub', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Twitch.GiftSub', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.GiftSub event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.GiftSub', 'sub', {
+        ...data,
+        isGift: true
+      });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Twitch.GiftBomb', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.GiftBomb event received', data);
+      // Gift bomb = multiple gift subs, emit one alert for the gifter
+      const alertEvent = this.normalizeAlertEvent('Twitch.GiftBomb', 'sub', {
+        ...data,
+        isGift: true,
+        giftRecipient: `${data.gifts || data.total || 1} viewers`
+      });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // Twitch Cheer (Bits)
+    this.client.on('Twitch.Cheer', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.Cheer event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.Cheer', 'cheer', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // Twitch Raid
+    this.client.on('Twitch.Raid', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.Raid event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.Raid', 'raid', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // Twitch Channel Point Redemption
+    this.client.on('Twitch.RewardRedemption', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.RewardRedemption event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.RewardRedemption', 'redemption', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // Twitch Stream Status
+    this.client.on('Twitch.StreamOnline', ({ event, data }: any) => {
+      sbLogger.info('Twitch.StreamOnline event received', data);
+      const statusEvent: StreamStatusEvent = {
+        status: 'online',
+        platform: 'twitch',
+        timestamp: Date.now()
+      };
+      eventBus.emit(EVENT_TYPES.STREAM_STATUS, statusEvent);
+    });
+
+    this.client.on('Twitch.StreamOffline', ({ event, data }: any) => {
+      sbLogger.info('Twitch.StreamOffline event received', data);
+      const statusEvent: StreamStatusEvent = {
+        status: 'offline',
+        platform: 'twitch',
+        timestamp: Date.now()
+      };
+      eventBus.emit(EVENT_TYPES.STREAM_STATUS, statusEvent);
+    });
+
+    // ============================================
+    // YOUTUBE EVENTS
+    // ============================================
+
+    // YouTube New Subscriber (equivalent to Twitch Follow)
+    this.client.on('YouTube.NewSubscriber', ({ event, data }: any) => {
+      sbLogger.debug('YouTube.NewSubscriber event received', data);
+      const alertEvent = this.normalizeAlertEvent('YouTube.NewSubscriber', 'follow', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // YouTube SuperChat (equivalent to Twitch Bits/Cheer)
+    this.client.on('YouTube.SuperChat', ({ event, data }: any) => {
+      sbLogger.debug('YouTube.SuperChat event received', data);
+      const alertEvent = this.normalizeAlertEvent('YouTube.SuperChat', 'cheer', {
+        ...data,
+        bits: data.amount // Map amount to bits for normalization
+      });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // YouTube SuperSticker (similar to SuperChat)
+    this.client.on('YouTube.SuperSticker', ({ event, data }: any) => {
+      sbLogger.debug('YouTube.SuperSticker event received', data);
+      const alertEvent = this.normalizeAlertEvent('YouTube.SuperSticker', 'cheer', {
+        ...data,
+        bits: data.amount
+      });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // ============================================
+    // DONATION PLATFORM EVENTS
+    // ============================================
+
+    // Streamlabs Donation
+    this.client.on('Streamlabs.Donation', ({ event, data }: any) => {
+      sbLogger.debug('Streamlabs.Donation event received', data);
+      const alertEvent = this.normalizeAlertEvent('Streamlabs.Donation', 'donation', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // Ko-Fi Donation
+    this.client.on('Kofi.Donation', ({ event, data }: any) => {
+      sbLogger.debug('Kofi.Donation event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kofi.Donation', 'donation', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // StreamElements Tip
+    this.client.on('StreamElements.Tip', ({ event, data }: any) => {
+      sbLogger.debug('StreamElements.Tip event received', data);
+      const alertEvent = this.normalizeAlertEvent('StreamElements.Tip', 'donation', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // ============================================
+    // GOAL EVENTS
+    // ============================================
+
+    // Twitch Community Goal Contribution
+    this.client.on('Twitch.CommunityGoalContribution', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.CommunityGoalContribution event received', data);
+      const goalEvent: GoalProgressEvent = {
+        goalId: data.id || 'community-goal',
+        type: 'custom',
+        current: data.total || data.current_amount || 0,
+        target: data.target_amount || data.goal || 0,
+        timestamp: Date.now()
+      };
+      eventBus.emit(EVENT_TYPES.GOAL_PROGRESS, goalEvent);
+    });
+
+    // ============================================
+    // EXISTING EVENT HANDLERS
+    // ============================================
 
     this.client.on('Misc.GlobalVariableUpdated', ({ event, data }: any) => {
       sbLogger.debug('GlobalVariableUpdated event received', data);
@@ -179,6 +503,9 @@ class StreamerbotIntegration {
       if (variableName && variableValue !== undefined) {
         sbLogger.info(`Processing real-time update: ${variableName} = ${variableValue}`);
         this.processVariable(variableName, variableValue);
+
+        // Check if this is a goal-related variable
+        this.processGoalVariable(variableName, variableValue);
       }
     });
 

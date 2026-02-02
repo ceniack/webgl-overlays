@@ -35,6 +35,50 @@ export interface ComponentReadyEvent {
   timestamp: number;
 }
 
+// Alert system events
+export interface AlertTriggerEvent {
+  type: 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption';
+  platform: 'twitch' | 'youtube' | 'streamlabs' | 'kofi';
+  user: string;
+  amount?: number;
+  currency?: string;
+  message?: string;
+  tier?: string;
+  months?: number;
+  isGift?: boolean;
+  giftRecipient?: string;
+  viewers?: number;
+  reward?: string;
+  cost?: number;
+  isTest?: boolean;
+  timestamp: number;
+  id?: string;
+}
+
+export interface StreamStatusEvent {
+  status: 'online' | 'offline';
+  platform: 'twitch' | 'youtube';
+  timestamp: number;
+}
+
+export interface GoalProgressEvent {
+  goalId: string;
+  type: 'follower' | 'sub' | 'bit' | 'donation' | 'custom';
+  current: number;
+  target?: number;
+  previousValue?: number;
+  timestamp: number;
+}
+
+export interface ActivityItemEvent {
+  id: string;
+  type: 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption';
+  platform: 'twitch' | 'youtube' | 'streamlabs' | 'kofi';
+  user: string;
+  detail?: string;
+  timestamp: number;
+}
+
 export type EventMap = {
   'counter:update': CounterUpdateEvent;
   'carousel:control': CarouselControlEvent;
@@ -42,6 +86,11 @@ export type EventMap = {
   'health:status': HealthStatusEvent;
   'streamerbot:connection': StreamerbotConnectionEvent;
   'component:ready': ComponentReadyEvent;
+  // New alert system events
+  'alert:trigger': AlertTriggerEvent;
+  'stream:status': StreamStatusEvent;
+  'goal:progress': GoalProgressEvent;
+  'activity:item': ActivityItemEvent;
 };
 
 export type EventType = keyof EventMap;

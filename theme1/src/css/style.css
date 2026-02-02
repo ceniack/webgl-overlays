@@ -2019,3 +2019,7 @@ body {
         #original-counters {
             display: none;
         }
+
+/* ===== NEW MODULE COMPONENT STYLES ===== */
+/* AlertFeed, GoalTracker, RecentActivity */
+/* Component CSS is imported via TypeScript in main.ts */

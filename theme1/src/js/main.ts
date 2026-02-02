@@ -1,6 +1,11 @@
 import '@splidejs/splide/css';
 import '../css/style.css';
 
+// Component styles available but not yet integrated:
+// import '../components/sections/AlertFeed/AlertFeed.css';
+// import '../components/sections/GoalTracker/GoalTracker.css';
+// import '../components/sections/RecentActivity/RecentActivity.css';
+
 import { eventBus } from './EventBus';
 import { EVENT_TYPES } from './EventConstants';
 import { logger } from './Logger';
@@ -52,19 +57,46 @@ async function initializeApp(): Promise<void> {
 
     // Initialize components in-place (don't use composeLayout which moves containers)
     // Each component is initialized in its existing DOM container
+    // Note: AlertFeed, GoalTracker, RecentActivity sections are hidden by default
+    // Enable them in CSS by setting `display: flex` on the section
     const componentConfigs = [
       { name: 'BroadcasterInfo', path: '.branding-section' },
       { name: 'CounterCarousel', path: '.counters-section' },
       { name: 'HealthMonitor', path: '.heart-rate-section' }
+      // Components available but not yet integrated:
+      // { name: 'AlertFeed', path: '.alert-section', optional: true },
+      // { name: 'GoalTracker', path: '.goal-section', optional: true },
+      // { name: 'RecentActivity', path: '.activity-section', optional: true }
     ];
 
     for (const config of componentConfigs) {
       try {
+        // Check if container exists for optional components
+        const container = document.querySelector(config.path) as HTMLElement;
+        if (!container) {
+          if ((config as any).optional) {
+            mainLogger.debug(`Optional component ${config.name} skipped - container not found`);
+            continue;
+          }
+          throw new Error(`Container not found: ${config.path}`);
+        }
+
+        // Skip hidden optional components (display: none)
+        const isVisible = window.getComputedStyle(container).display !== 'none';
+        if ((config as any).optional && !isVisible) {
+          mainLogger.debug(`Optional component ${config.name} skipped - container hidden`);
+          continue;
+        }
+
         const component = await composer.addComponent(config);
         await component.initialize();
         mainLogger.debug(`Component ${config.name} initialized`);
       } catch (error) {
-        mainLogger.error(`Failed to initialize ${config.name}:`, error);
+        if ((config as any).optional) {
+          mainLogger.debug(`Optional component ${config.name} not initialized:`, error);
+        } else {
+          mainLogger.error(`Failed to initialize ${config.name}:`, error);
+        }
       }
     }
 
