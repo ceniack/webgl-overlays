@@ -6,9 +6,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "build:dev": "tsc && npm run dev"
+    "build": "vite build",
+    "build:check": "tsc --noEmit",
+    "build:watch": "vite build --watch",
+    "build:dev": "vite build && npm run dev"
   },
   "dependencies": {
     "@streamerbot/client": "^1.12.2",
@@ -18,7 +19,8 @@
   "devDependencies": {
     "@types/node": "^25.1.0",
     "nodemon": "^3.0.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
   },
   "author": "",
   "license": "MIT"
