@@ -78,7 +78,7 @@ app.post('/api/debug-log', (req, res) => {
 app.get('/debug/system', (req, res) => {
   res.json({
     overlay_system: {
-      production: '/template/example',
+      production: '/template/overlay',
       description: 'Modular TypeScript component system',
       features: ['ComponentComposer', 'Design Tokens', 'TypeScript', 'Vite Build'],
       components: ['BroadcasterInfo', 'CounterCarousel', 'HealthMonitor'],
@@ -99,7 +99,7 @@ app.get('/debug/system', (req, res) => {
 
 // Basic route for clean example.html system - now redirects to template
 app.get('/', (req, res) => {
-  res.redirect('/template/example');
+  res.redirect('/template/overlay');
 });
 
 // Routes for template rendering
@@ -228,7 +228,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Start the HTTP server
 const server = app.listen(PORT, () => {
   console.log(`🚀 OBS Overlay Server running at http://localhost:${PORT}`);
-  console.log(`📺 Production Overlay: http://localhost:${PORT}/template/example`);
+  console.log(`📺 Production Overlay: http://localhost:${PORT}/template/overlay`);
   console.log(`🎯 Add to OBS Browser Source with URL above`);
   console.log(`✨ Modular TypeScript components with ComponentComposer`);
   console.log(`🔗 Official @streamerbot/client integration`);

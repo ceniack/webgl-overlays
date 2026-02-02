@@ -42,68 +42,77 @@ async function initializeApp(): Promise<void> {
       });
     }
 
+    // Get component name from body data attribute for conditional initialization
+    const componentName = document.body.getAttribute('data-component') || 'unknown';
+    mainLogger.debug(`Component identified: ${componentName}`);
+
     mainLogger.debug('DOM ready, initializing Streamer.bot client first');
 
-    // Initialize Streamer.bot client FIRST so components can use it
+    // Initialize Streamer.bot client FIRST - needed for all pages (overlay and alerts)
     streamerbotIntegration.initialize();
 
     // Small delay to let the client establish connection
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    mainLogger.debug('Initializing ComponentComposer');
+    // Only initialize full component system on main overlay page
+    if (componentName === 'overlay-html') {
+      mainLogger.debug('Initializing ComponentComposer for overlay');
 
-    // Create the ComponentComposer
-    const composer = new ComponentComposer();
+      // Create the ComponentComposer
+      const composer = new ComponentComposer();
 
-    // Initialize components in-place (don't use composeLayout which moves containers)
-    // Each component is initialized in its existing DOM container
-    // Note: AlertFeed, GoalTracker, RecentActivity sections are hidden by default
-    // Enable them in CSS by setting `display: flex` on the section
-    const componentConfigs = [
-      { name: 'BroadcasterInfo', path: '.branding-section' },
-      { name: 'CounterCarousel', path: '.counters-section' },
-      { name: 'HealthMonitor', path: '.heart-rate-section' }
-      // Components available but not yet integrated:
-      // { name: 'AlertFeed', path: '.alert-section', optional: true },
-      // { name: 'GoalTracker', path: '.goal-section', optional: true },
-      // { name: 'RecentActivity', path: '.activity-section', optional: true }
-    ];
+      // Initialize components in-place (don't use composeLayout which moves containers)
+      // Each component is initialized in its existing DOM container
+      // Note: AlertFeed, GoalTracker, RecentActivity sections are hidden by default
+      // Enable them in CSS by setting `display: flex` on the section
+      const componentConfigs = [
+        { name: 'BroadcasterInfo', path: '.branding-section' },
+        { name: 'CounterCarousel', path: '.counters-section' },
+        { name: 'HealthMonitor', path: '.heart-rate-section' }
+        // Components available but not yet integrated:
+        // { name: 'AlertFeed', path: '.alert-section', optional: true },
+        // { name: 'GoalTracker', path: '.goal-section', optional: true },
+        // { name: 'RecentActivity', path: '.activity-section', optional: true }
+      ];
 
-    for (const config of componentConfigs) {
-      try {
-        // Check if container exists for optional components
-        const container = document.querySelector(config.path) as HTMLElement;
-        if (!container) {
-          if ((config as any).optional) {
-            mainLogger.debug(`Optional component ${config.name} skipped - container not found`);
+      for (const config of componentConfigs) {
+        try {
+          // Check if container exists for optional components
+          const container = document.querySelector(config.path) as HTMLElement;
+          if (!container) {
+            if ((config as any).optional) {
+              mainLogger.debug(`Optional component ${config.name} skipped - container not found`);
+              continue;
+            }
+            throw new Error(`Container not found: ${config.path}`);
+          }
+
+          // Skip hidden optional components (display: none)
+          const isVisible = window.getComputedStyle(container).display !== 'none';
+          if ((config as any).optional && !isVisible) {
+            mainLogger.debug(`Optional component ${config.name} skipped - container hidden`);
             continue;
           }
-          throw new Error(`Container not found: ${config.path}`);
-        }
 
-        // Skip hidden optional components (display: none)
-        const isVisible = window.getComputedStyle(container).display !== 'none';
-        if ((config as any).optional && !isVisible) {
-          mainLogger.debug(`Optional component ${config.name} skipped - container hidden`);
-          continue;
-        }
-
-        const component = await composer.addComponent(config);
-        await component.initialize();
-        mainLogger.debug(`Component ${config.name} initialized`);
-      } catch (error) {
-        if ((config as any).optional) {
-          mainLogger.debug(`Optional component ${config.name} not initialized:`, error);
-        } else {
-          mainLogger.error(`Failed to initialize ${config.name}:`, error);
+          const component = await composer.addComponent(config);
+          await component.initialize();
+          mainLogger.debug(`Component ${config.name} initialized`);
+        } catch (error) {
+          if ((config as any).optional) {
+            mainLogger.debug(`Optional component ${config.name} not initialized:`, error);
+          } else {
+            mainLogger.error(`Failed to initialize ${config.name}:`, error);
+          }
         }
       }
+
+      // Setup global functions for backward compatibility
+      setupGlobalFunctions(composer);
+
+      mainLogger.info('ComponentComposer fully initialized');
+    } else {
+      mainLogger.info(`Skipping ComponentComposer for ${componentName} - streamerbot connection active`);
     }
-
-    // Setup global functions for backward compatibility
-    setupGlobalFunctions(composer);
-
-    mainLogger.info('ComponentComposer fully initialized');
 
     // Small delay before dispatching ready event
     await new Promise(resolve => setTimeout(resolve, 50));
@@ -154,9 +163,12 @@ function setupGlobalFunctions(composer: ComponentComposer): void {
 }
 
 function dispatchReadyEvent(): void {
+  // Get component name from body data attribute for dynamic identification
+  const componentName = document.body.getAttribute('data-component') || 'unknown';
+
   const readyEvent = new CustomEvent('streamoverlay:ready', {
     detail: {
-      component: 'example-html',
+      component: componentName,
       timestamp: Date.now(),
       functions: [
         'updateCounterFromGlobalVariable',

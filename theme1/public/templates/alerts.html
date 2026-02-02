@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Alerts</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="../js/streamerbot-client.js"></script>
+    <script src="../dist/stream-overlay.iife.js"></script>
+
+    <style>
+        :root {
+            --font-display: 'Orbitron', monospace;
+            --font-body: 'Rajdhani', sans-serif;
+            --primary: #00d4ff;
+            --secondary: #ff3366;
+            --accent: #ffaa00;
+            --bg-dark: rgba(10, 10, 15, 0.9);
+            --text-primary: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .alerts-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            pointer-events: none;
+        }
+
+        .alert-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .alert-item {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 15px 30px;
+            background: var(--bg-dark);
+            border-left: 4px solid var(--primary);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            animation: alertSlideIn 0.3s ease-out, alertFadeOut 0.5s ease-in 4.5s forwards;
+            white-space: nowrap;
+        }
+
+        .alert-item[data-type="follow"] {
+            border-left-color: var(--primary);
+        }
+
+        .alert-item[data-type="sub"] {
+            border-left-color: var(--secondary);
+        }
+
+        .alert-item[data-type="cheer"] {
+            border-left-color: var(--accent);
+        }
+
+        .alert-item[data-type="raid"] {
+            border-left-color: #9b59b6;
+        }
+
+        .alert-item[data-type="donation"] {
+            border-left-color: #2ecc71;
+        }
+
+        .alert-item[data-type="redemption"] {
+            border-left-color: #e91e63;
+        }
+
+        @keyframes alertSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes alertFadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Debug panel - hidden by default */
+        .debug-panel {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            pointer-events: auto;
+        }
+
+        .debug-panel.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body data-component="alerts-html">
+
+    <div class="alerts-overlay">
+        <div class="alert-container" id="alert-container">
+            <!-- Alerts render here dynamically -->
+        </div>
+    </div>
+
+    <div class="debug-panel" id="debug-panel">
+        <div>Alerts: <span id="debug-count">0</span></div>
+        <div>Queue: <span id="debug-queue">0</span></div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            const ALERT_DURATION = 5000; // 5 seconds per alert
+            const MAX_VISIBLE_ALERTS = 3;
+
+            let alertQueue = [];
+            let visibleAlerts = 0;
+            let alertCount = 0;
+            let isProcessing = false;
+
+            const container = document.getElementById('alert-container');
+            const debugPanel = document.getElementById('debug-panel');
+            const debugCount = document.getElementById('debug-count');
+            const debugQueue = document.getElementById('debug-queue');
+
+            // Format alert text based on type
+            function formatAlertText(alert) {
+                const typeTag = `[${alert.type.toUpperCase()}]`;
+
+                switch (alert.type) {
+                    case 'follow':
+                        return `${typeTag} ${alert.user}`;
+
+                    case 'sub':
+                        let subText = `${typeTag} ${alert.user}`;
+                        if (alert.tier && alert.tier !== '1') {
+                            subText += ` - Tier ${alert.tier}`;
+                        }
+                        if (alert.months && alert.months > 1) {
+                            subText += ` (${alert.months} months)`;
+                        }
+                        if (alert.isGift && alert.giftRecipient) {
+                            subText = `${typeTag} ${alert.user} gifted to ${alert.giftRecipient}`;
+                        }
+                        return subText;
+
+                    case 'cheer':
+                        let cheerText = `${typeTag} ${alert.user} - ${alert.amount} bits`;
+                        if (alert.message) {
+                            cheerText += `: "${truncate(alert.message, 50)}"`;
+                        }
+                        return cheerText;
+
+                    case 'raid':
+                        return `${typeTag} ${alert.user} - ${alert.viewers} viewers`;
+
+                    case 'donation':
+                        let donationText = `${typeTag} ${alert.user} - ${alert.currency || '$'}${alert.amount}`;
+                        if (alert.message) {
+                            donationText += `: "${truncate(alert.message, 50)}"`;
+                        }
+                        return donationText;
+
+                    case 'redemption':
+                        return `${typeTag} ${alert.user} - ${alert.reward}`;
+
+                    default:
+                        return `${typeTag} ${alert.user}`;
+                }
+            }
+
+            function truncate(str, maxLen) {
+                if (!str) return '';
+                return str.length > maxLen ? str.substring(0, maxLen) + '...' : str;
+            }
+
+            function updateDebug() {
+                if (debugCount) debugCount.textContent = alertCount;
+                if (debugQueue) debugQueue.textContent = alertQueue.length;
+            }
+
+            function createAlertElement(alert) {
+                const el = document.createElement('div');
+                el.className = 'alert-item';
+                el.setAttribute('data-type', alert.type);
+                el.textContent = formatAlertText(alert);
+                return el;
+            }
+
+            function displayAlert(alert) {
+                if (visibleAlerts >= MAX_VISIBLE_ALERTS) {
+                    alertQueue.push(alert);
+                    updateDebug();
+                    return;
+                }
+
+                const el = createAlertElement(alert);
+                container.appendChild(el);
+                visibleAlerts++;
+                alertCount++;
+                updateDebug();
+
+                // Remove after duration
+                setTimeout(() => {
+                    el.remove();
+                    visibleAlerts--;
+                    processQueue();
+                }, ALERT_DURATION);
+            }
+
+            function processQueue() {
+                if (alertQueue.length > 0 && visibleAlerts < MAX_VISIBLE_ALERTS) {
+                    const nextAlert = alertQueue.shift();
+                    displayAlert(nextAlert);
+                }
+                updateDebug();
+            }
+
+            function queueAlert(alert) {
+                if (visibleAlerts < MAX_VISIBLE_ALERTS) {
+                    displayAlert(alert);
+                } else {
+                    alertQueue.push(alert);
+                    updateDebug();
+                }
+            }
+
+            // Listen for alert events via EventBus (exposed by the JS bundle)
+            function setupEventListeners() {
+                // Wait for the bundle to load and expose eventBus
+                const checkInterval = setInterval(() => {
+                    if (window.eventBus) {
+                        clearInterval(checkInterval);
+
+                        // Subscribe to alert trigger events
+                        window.eventBus.on('alert:trigger', (alertData) => {
+                            console.log('[Alerts] Received alert:', alertData);
+                            queueAlert(alertData);
+                        });
+
+                        console.log('[Alerts] EventBus listeners registered');
+                    }
+                }, 100);
+
+                // Fallback timeout
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    if (!window.eventBus) {
+                        console.warn('[Alerts] EventBus not available after timeout');
+                    }
+                }, 5000);
+            }
+
+            // Test functions for debugging
+            window.testAlert = function(type, user) {
+                const testData = {
+                    type: type || 'follow',
+                    user: user || 'TestUser123',
+                    platform: 'twitch',
+                    timestamp: Date.now()
+                };
+
+                // Add type-specific data
+                if (type === 'sub') {
+                    testData.tier = '1';
+                    testData.months = 3;
+                }
+                if (type === 'cheer') {
+                    testData.amount = 500;
+                    testData.message = 'Great stream!';
+                }
+                if (type === 'raid') {
+                    testData.viewers = 150;
+                }
+                if (type === 'donation') {
+                    testData.amount = 25;
+                    testData.currency = '$';
+                    testData.message = 'Keep it up!';
+                }
+                if (type === 'redemption') {
+                    testData.reward = 'Hydrate!';
+                }
+
+                queueAlert(testData);
+            };
+
+            window.testAlertQueue = function(count) {
+                const types = ['follow', 'sub', 'cheer', 'raid', 'donation', 'redemption'];
+                for (let i = 0; i < (count || 5); i++) {
+                    setTimeout(() => {
+                        const type = types[i % types.length];
+                        window.testAlert(type, `Tester${i + 1}`);
+                    }, i * 200);
+                }
+            };
+
+            window.showDebug = function() {
+                debugPanel.classList.add('visible');
+            };
+
+            window.hideDebug = function() {
+                debugPanel.classList.remove('visible');
+            };
+
+            // Initialize
+            setupEventListeners();
+            console.log('[Alerts] Alert overlay initialized');
+            console.log('[Alerts] Test with: testAlert("follow", "Username") or testAlertQueue(5)');
+        })();
+    </script>
+
+</body>
+</html>

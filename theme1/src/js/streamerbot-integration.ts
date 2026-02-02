@@ -68,9 +68,9 @@ class StreamerbotIntegration {
       const { component, timestamp, functions } = event.detail;
       sbLogger.debug(`Component ready: ${component} at ${timestamp}`);
 
-      if (component === 'example-html') {
+      if (component === 'overlay-html') {
         this.componentReady = true;
-        sbLogger.info('Example.html functions available', functions);
+        sbLogger.info('Overlay functions available', functions);
 
         if (Object.keys(this.pendingVariables).length > 0) {
           sbLogger.debug('Processing pending initial data');
