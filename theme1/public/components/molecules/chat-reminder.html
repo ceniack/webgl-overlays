@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Reminder Component</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Chat Reminder Molecule Component */
+        :root {
+            /* BRB color scheme */
+            --brb-primary: #00d4ff;
+            --brb-secondary: #ff3366;
+            --brb-accent: #a855f7;
+            --brb-bg-dark: #0a0a0a;
+            --brb-bg-panel: rgba(13, 13, 13, 0.9);
+            --brb-border: rgba(0, 212, 255, 0.3);
+            --brb-text-primary: #ffffff;
+            --brb-text-secondary: rgba(255, 255, 255, 0.7);
+
+            /* Fonts */
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: var(--font-body);
+        }
+
+        .chat-reminder {
+            background: var(--brb-bg-panel);
+            border: 1px solid var(--brb-border);
+            border-radius: 12px;
+            padding: 40px 60px;
+            margin: 20px auto;
+            max-width: 900px;
+            font-family: var(--font-body);
+            font-size: 36px;
+            color: var(--brb-text-secondary);
+            text-align: center;
+            line-height: 1.4;
+            animation: gentle-glow 5s ease-in-out infinite;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes gentle-glow {
+            0%, 100% {
+                border-color: var(--brb-border);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 212, 255, 0.2);
+            }
+            50% {
+                border-color: rgba(0, 212, 255, 0.6);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 212, 255, 0.4);
+            }
+        }
+
+        .chat-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        .highlight {
+            color: var(--brb-primary);
+            font-weight: 600;
+        }
+
+        .chat-suggestions {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: var(--brb-text-secondary);
+            opacity: 0.8;
+        }
+
+        .suggestion-item {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 5px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            font-size: 0.8em;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1000px) {
+            .chat-reminder {
+                padding: 30px 40px;
+                font-size: 32px;
+                max-width: 800px;
+                margin: 15px;
+            }
+
+            .chat-suggestions {
+                font-size: 0.85em;
+            }
+
+            .suggestion-item {
+                font-size: 0.75em;
+                margin: 4px 6px;
+                padding: 4px 10px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .chat-reminder {
+                padding: 25px 30px;
+                font-size: 28px;
+                margin: 10px;
+            }
+
+            .chat-suggestions {
+                font-size: 0.8em;
+                margin-top: 15px;
+            }
+
+            .suggestion-item {
+                font-size: 0.7em;
+                margin: 3px 4px;
+                padding: 3px 8px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .chat-reminder {
+                padding: 20px 25px;
+                font-size: 24px;
+            }
+
+            .chat-suggestions {
+                font-size: 0.75em;
+                margin-top: 12px;
+            }
+
+            .suggestion-item {
+                display: block;
+                margin: 4px 0;
+                text-align: center;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+
+        .bounce-in {
+            animation: bounceIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Glow effect variations */
+        .chat-reminder.active-glow {
+            animation: active-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes active-glow {
+            0%, 100% {
+                border-color: var(--brb-primary);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 25px var(--brb-primary);
+            }
+            50% {
+                border-color: var(--brb-accent);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 35px var(--brb-accent);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-reminder" id="chatReminder">
+        <span class="chat-icon">💬</span>
+        <span id="reminderText">Keep the chat alive while I'm away!</span>
+        <br>
+        <span id="suggestionText">Talk to each other, share memes, or drop some game suggestions 🎮</span>
+
+        <div class="chat-suggestions" id="chatSuggestions" style="display: none;">
+            <div class="suggestion-item">Share your favorite games</div>
+            <div class="suggestion-item">Tell us about your day</div>
+            <div class="suggestion-item">Drop some memes</div>
+            <div class="suggestion-item">What should we play next?</div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Chat Reminder Molecule Component
+         *
+         * URL Parameters:
+         *   reminder_text - Main reminder text (default: "Keep the chat alive while I'm away!")
+         *   suggestion_text - Suggestion text (default: suggestions about games/memes)
+         *   show_suggestions - Show suggestion bubbles (default: false)
+         *   glow_type - Glow animation type: "gentle", "active" (default: "gentle")
+         *   animate - Enable entry animation (default: true)
+         *   animation_type - Animation type: "fade", "bounce" (default: "fade")
+         */
+
+        // Default suggestion sets
+        const SUGGESTION_SETS = {
+            gaming: [
+                "Share your favorite games",
+                "What should we play next?",
+                "Any game recommendations?",
+                "Best gaming moments?"
+            ],
+            general: [
+                "Tell us about your day",
+                "Share interesting stories",
+                "What's everyone up to?",
+                "How's your week going?"
+            ],
+            fun: [
+                "Drop some memes",
+                "Share funny stories",
+                "Best jokes in chat",
+                "Funny moments from stream"
+            ],
+            interactive: [
+                "Ask each other questions",
+                "Share your hobbies",
+                "What's your favorite movie?",
+                "Best music recommendations"
+            ]
+        };
+
+        // Parse URL parameters
+        function parseUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                reminderText: urlParams.get('reminder_text') || "Keep the chat alive while I'm away!",
+                suggestionText: urlParams.get('suggestion_text') || "Talk to each other, share memes, or drop some game suggestions 🎮",
+                showSuggestions: urlParams.get('show_suggestions') === 'true',
+                glowType: urlParams.get('glow_type') || 'gentle',
+                animate: urlParams.get('animate') !== 'false',
+                animationType: urlParams.get('animation_type') || 'fade',
+                suggestionSet: urlParams.get('suggestion_set') || 'gaming'
+            };
+        }
+
+        // Update reminder content
+        function updateReminder(params) {
+            const reminderTextEl = document.getElementById('reminderText');
+            const suggestionTextEl = document.getElementById('suggestionText');
+            const chatSuggestionsEl = document.getElementById('chatSuggestions');
+            const chatReminderEl = document.getElementById('chatReminder');
+
+            // Update text content
+            reminderTextEl.textContent = params.reminderText;
+            suggestionTextEl.textContent = params.suggestionText;
+
+            // Show/hide suggestions
+            if (params.showSuggestions && SUGGESTION_SETS[params.suggestionSet]) {
+                const suggestions = SUGGESTION_SETS[params.suggestionSet];
+                chatSuggestionsEl.innerHTML = suggestions
+                    .map(suggestion => `<div class="suggestion-item">${suggestion}</div>`)
+                    .join('');
+                chatSuggestionsEl.style.display = 'block';
+            } else {
+                chatSuggestionsEl.style.display = 'none';
+            }
+
+            // Apply glow type
+            chatReminderEl.classList.remove('active-glow');
+            if (params.glowType === 'active') {
+                chatReminderEl.classList.add('active-glow');
+            }
+
+            // Apply animation
+            if (params.animate) {
+                chatReminderEl.classList.remove('fade-in', 'bounce-in');
+                if (params.animationType === 'bounce') {
+                    chatReminderEl.classList.add('bounce-in');
+                } else {
+                    chatReminderEl.classList.add('fade-in');
+                }
+            }
+        }
+
+        // Initialize the chat reminder
+        function init() {
+            console.log('💬 Initializing chat reminder molecule...');
+
+            const params = parseUrlParams();
+            updateReminder(params);
+
+            console.log('✅ Chat reminder molecule initialized');
+
+            // Listen for parent window messages to update content
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'updateChatReminder') {
+                    console.log('Updating chat reminder:', event.data);
+                    updateReminder({ ...params, ...event.data });
+                }
+            });
+
+            // Optional: Cycle through different suggestion sets every 30 seconds
+            if (params.showSuggestions) {
+                const suggestionKeys = Object.keys(SUGGESTION_SETS);
+                let currentIndex = suggestionKeys.indexOf(params.suggestionSet);
+
+                setInterval(() => {
+                    currentIndex = (currentIndex + 1) % suggestionKeys.length;
+                    const newSuggestionSet = suggestionKeys[currentIndex];
+
+                    const suggestions = SUGGESTION_SETS[newSuggestionSet];
+                    const chatSuggestionsEl = document.getElementById('chatSuggestions');
+
+                    chatSuggestionsEl.innerHTML = suggestions
+                        .map(suggestion => `<div class="suggestion-item">${suggestion}</div>`)
+                        .join('');
+
+                    console.log('Cycled to suggestion set:', newSuggestionSet);
+                }, 30000); // 30 seconds
+            }
+        }
+
+        // Initialize when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

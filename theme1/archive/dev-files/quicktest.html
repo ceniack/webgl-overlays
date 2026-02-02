@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Rate Monitor - Quick Diagnostic</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid;
+        }
+        .status.success {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+        .status.error {
+            background: rgba(255, 68, 68, 0.2);
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+        .status.warning {
+            background: rgba(255, 165, 0, 0.2);
+            border-color: #ffa500;
+            color: #ffa500;
+        }
+        .steps {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .steps h3 {
+            color: #00d4ff;
+            margin: 0 0 15px 0;
+        }
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 8px 0;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💓 Heart Rate Monitor Quick Diagnostic</h1>
+
+        <div id="test-status" class="status warning">
+            <span class="loading">🔄</span> Testing connection to Streamer.bot...
+        </div>
+
+        <div id="details" style="display: none;">
+            <!-- Content will be filled by JavaScript -->
+        </div>
+
+        <button onclick="runTest()">🔄 Test Again</button>
+        <button onclick="openDemo()">🎮 Open Demo</button>
+        <button onclick="openDebug()">🔧 Debug Console</button>
+    </div>
+
+    <script>
+        function updateStatus(type, message, details = '') {
+            const statusDiv = document.getElementById('test-status');
+            const detailsDiv = document.getElementById('details');
+
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+
+            if (details) {
+                detailsDiv.innerHTML = details;
+                detailsDiv.style.display = 'block';
+            } else {
+                detailsDiv.style.display = 'none';
+            }
+        }
+
+        async function testStreamerbotConnection() {
+            return new Promise((resolve) => {
+                const ws = new WebSocket('ws://127.0.0.1:8080/');
+                let timeout = setTimeout(() => {
+                    ws.close();
+                    resolve(false);
+                }, 3000);
+
+                ws.onopen = () => {
+                    clearTimeout(timeout);
+                    ws.close();
+                    resolve(true);
+                };
+
+                ws.onerror = () => {
+                    clearTimeout(timeout);
+                    resolve(false);
+                };
+
+                ws.onclose = () => {
+                    clearTimeout(timeout);
+                };
+            });
+        }
+
+        async function runTest() {
+            updateStatus('warning', '<span class="loading">🔄</span> Testing connection to Streamer.bot...');
+
+            // Test 1: Check if Streamer.bot is accessible
+            const connectionWorking = await testStreamerbotConnection();
+
+            if (connectionWorking) {
+                updateStatus('success', '✅ Streamer.bot is running and accessible!', `
+                    <div class="steps">
+                        <h3>🎉 Connection Successful!</h3>
+                        <p>Your heart rate monitor component should work with real Streamer.bot events.</p>
+                        <p><strong>Next steps:</strong></p>
+                        <ol>
+                            <li>Use the component in OBS: <code>http://localhost:3000/components/heartrate-monitor/</code></li>
+                            <li>Configure heart rate events in Streamer.bot</li>
+                            <li>Test with the demo page to verify functionality</li>
+                        </ol>
+                    </div>
+                `);
+            } else {
+                updateStatus('error', '❌ Cannot connect to Streamer.bot', `
+                    <div class="steps">
+                        <h3>🔧 Fix Required: Streamer.bot Not Accessible</h3>
+                        <p><strong>The component is working, but Streamer.bot needs to be configured:</strong></p>
+                        <ol>
+                            <li><strong>Start Streamer.bot</strong> application</li>
+                            <li>Go to <strong>Settings → WebSocket Server</strong></li>
+                            <li><strong>Enable</strong> the WebSocket Server</li>
+                            <li>Set port to <strong>8080</strong> (default)</li>
+                            <li>Set bind address to <strong>127.0.0.1</strong></li>
+                            <li>Click <strong>Apply/Save</strong></li>
+                            <li>Test again with the button above</li>
+                        </ol>
+
+                        <h3>💡 Alternative: Test Mode</h3>
+                        <p>The component includes test mode for development without Streamer.bot. Use the demo page to test functionality.</p>
+                    </div>
+                `);
+            }
+        }
+
+        function openDemo() {
+            window.open('/components/heartrate-monitor/demo.html', '_blank');
+        }
+
+        function openDebug() {
+            window.open('/components/heartrate-monitor/debug.html', '_blank');
+        }
+
+        // Run test automatically when page loads
+        document.addEventListener('DOMContentLoaded', runTest);
+    </script>
+</body>
+</html>

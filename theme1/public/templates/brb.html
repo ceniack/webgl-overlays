@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRB Template - Atomic Design</title>
+
+    <!--
+    ============================================================
+    BRB TEMPLATE - ATOMIC DESIGN IMPLEMENTATION
+    ============================================================
+
+    Full-screen BRB template with 16:9 video cutout area.
+    Uses atomic design components for modularity and reusability.
+
+    OBS SETUP:
+    1. Create new Scene: "BRB"
+    2. Add Browser Source: 1920x1080
+    3. Point to: http://localhost:3000/template/brb
+    4. Switch to this scene during breaks
+
+    OPTIONAL - Two-Source Setup:
+    1. Source 1: This BRB template (transparent cutout)
+    2. Source 2: Video player organism component
+    3. Position video player over cutout area
+
+    FEATURES:
+    - Atomic design component composition
+    - 16:9 transparent video cutout on the right
+    - Animated background with particles
+    - Real-time Streamer.bot integration
+    - Enhanced common utilities
+    - Responsive design
+    ============================================================
+    -->
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Theme Styles -->
+    <link rel="stylesheet" href="/dist/assets/stream-overlay.css">
+    <link rel="stylesheet" href="/css/theme1.css">
+
+    <style>
+        /* BRB Template Specific Styles */
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 0;
+        }
+
+        .brb-template {
+            width: 100%;
+            height: 100%;
+            background: var(--brb-bg-dark);
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Layout: 60% content + 35% video cutout + 5% spacing */
+        .content-area {
+            flex: 0 0 60%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .video-cutout-area {
+            flex: 0 0 35%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 40px 40px 20px;
+        }
+
+        .video-cutout {
+            width: 100%;
+            max-width: 640px;
+            aspect-ratio: 16 / 9;
+            background: transparent;
+            position: relative;
+            border-radius: 12px;
+        }
+
+        .video-cutout.show-border {
+            border: 2px dashed var(--brb-border);
+        }
+
+        .video-cutout-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--brb-text-muted);
+            font-family: var(--font-display);
+            font-size: 24px;
+            text-align: center;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Animated background grid */
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(var(--brb-border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--brb-border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--brb-secondary);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: float-up 12s linear infinite;
+        }
+
+        /* Component containers */
+        .profile-section {
+            margin-bottom: 40px;
+        }
+
+        .message-section {
+            margin-bottom: 30px;
+        }
+
+        .chat-section {
+            margin-bottom: 40px;
+        }
+
+        .social-section {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Social links styling */
+        .social-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--brb-text-secondary);
+            font-size: 36px;
+            letter-spacing: 1px;
+            font-family: var(--font-body);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .social-link__icon {
+            font-size: 48px;
+        }
+
+        /* Corner decorations */
+        .corner-decor {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 3px solid var(--brb-secondary);
+            opacity: 0.4;
+            animation: corner-breathe 6s ease-in-out infinite;
+        }
+
+        .corner-decor--tl {
+            top: 40px;
+            left: 40px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-decor--tr {
+            top: 40px;
+            right: 40px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-decor--bl {
+            bottom: 40px;
+            left: 40px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-decor--br {
+            bottom: 40px;
+            right: 40px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* Component iframe styling */
+        .component-frame {
+            border: none;
+            background: transparent;
+            width: 100%;
+        }
+
+        .profile-frame {
+            height: 200px;
+        }
+
+        .message-frame {
+            height: 400px;
+        }
+
+        .chat-frame {
+            height: 200px;
+        }
+
+        /* Loading states */
+        .loading-component {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brb-text-muted);
+            font-family: var(--font-display);
+            font-size: 18px;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--brb-border);
+            border-top-color: var(--brb-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Debug mode styles */
+        .debug-mode .video-cutout {
+            border: 2px dashed var(--brb-primary) !important;
+            background: rgba(0, 212, 255, 0.1) !important;
+        }
+
+        .debug-mode .video-cutout-placeholder {
+            opacity: 0.8 !important;
+            color: var(--brb-primary) !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1600px) {
+            .content-area {
+                padding: 30px;
+            }
+
+            .video-cutout-area {
+                padding: 30px 30px 30px 15px;
+            }
+
+            .social-link {
+                font-size: 32px;
+            }
+
+            .social-link__icon {
+                font-size: 42px;
+            }
+        }
+
+        @media (max-height: 900px) {
+            .content-area {
+                padding: 25px;
+            }
+
+            .profile-section {
+                margin-bottom: 25px;
+            }
+
+            .message-section {
+                margin-bottom: 20px;
+            }
+
+            .chat-section {
+                margin-bottom: 25px;
+            }
+
+            .social-section {
+                bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="brb-template">
+        <!-- Animated background -->
+        <div class="bg-grid"></div>
+        <div class="particles" id="particles"></div>
+
+        <!-- Corner decorations -->
+        <div class="corner-decor corner-decor--tl"></div>
+        <div class="corner-decor corner-decor--tr"></div>
+        <div class="corner-decor corner-decor--bl"></div>
+        <div class="corner-decor corner-decor--br"></div>
+
+        <!-- Main content area (60% width) -->
+        <div class="content-area">
+            <!-- Profile Component -->
+            <div class="profile-section">
+                <div class="loading-component profile-frame" id="profileLoading">
+                    <div class="loading-spinner"></div>
+                    Loading profile...
+                </div>
+                <iframe
+                    id="profileFrame"
+                    class="component-frame profile-frame"
+                    src="/component/molecule/profile-card?username=ceniack&fallback_name=ceniack&fallback_letter=C"
+                    style="display: none;"
+                    onload="showComponent('profile')">
+                </iframe>
+            </div>
+
+            <!-- Break Message Component -->
+            <div class="message-section">
+                <div class="loading-component message-frame" id="messageLoading">
+                    <div class="loading-spinner"></div>
+                    Loading message...
+                </div>
+                <iframe
+                    id="messageFrame"
+                    class="component-frame message-frame"
+                    src="/component/molecule/break-message?animate=true&animation_type=fade"
+                    style="display: none;"
+                    onload="showComponent('message')">
+                </iframe>
+            </div>
+
+            <!-- Chat Reminder Component -->
+            <div class="chat-section">
+                <div class="loading-component chat-frame" id="chatLoading">
+                    <div class="loading-spinner"></div>
+                    Loading chat reminder...
+                </div>
+                <iframe
+                    id="chatFrame"
+                    class="component-frame chat-frame"
+                    src="/component/molecule/chat-reminder?show_suggestions=false&glow_type=gentle&animate=true"
+                    style="display: none;"
+                    onload="showComponent('chat')">
+                </iframe>
+            </div>
+
+            <!-- Social Links Section -->
+            <div class="social-section">
+                <div class="social-links">
+                    <a href="#" class="social-link" id="websiteLink">
+                        <span class="social-link__icon">🌐</span>
+                        <span id="websiteUrl">ceniack.com</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video cutout area (35% width) -->
+        <div class="video-cutout-area">
+            <div class="video-cutout" id="videoCutout">
+                <div class="video-cutout-placeholder">
+                    16:9 Video Area<br>
+                    <small>For video player or content</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Streamer.bot Client and TypeScript Bundle -->
+    <script src="/js/streamerbot-client.js"></script>
+    <script src="/dist/stream-overlay.iife.js"></script>
+
+    <script>
+        /**
+         * BRB Template - Atomic Design Implementation
+         *
+         * Features:
+         * - Component-based architecture using iframes
+         * - Real-time Streamer.bot integration
+         * - 16:9 video cutout area
+         * - Enhanced common utilities
+         * - Particle animation system
+         * - Responsive design
+         */
+
+        // Template configuration
+        const BRBConfig = {
+            particles: {
+                count: 25,
+                colors: ['#ff3366', '#a855f7', '#00d4ff']
+            },
+            debug: false,
+            streamerbot: {
+                enabled: true,
+                fallbackUsername: 'ceniack',
+                fallbackDisplayName: 'ceniack'
+            },
+            cutout: {
+                showBorder: false,
+                showPlaceholder: true
+            }
+        };
+
+        // Parse URL parameters for configuration
+        function parseTemplateParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                debug: urlParams.has('debug'),
+                username: urlParams.get('username') || BRBConfig.streamerbot.fallbackUsername,
+                displayName: urlParams.get('display_name') || BRBConfig.streamerbot.fallbackDisplayName,
+                showCutoutBorder: urlParams.has('show_cutout_border'),
+                particleCount: parseInt(urlParams.get('particles') || BRBConfig.particles.count),
+                websiteUrl: urlParams.get('website') || 'ceniack.com'
+            };
+        }
+
+        // Show component when iframe loads
+        function showComponent(type) {
+            const loadingEl = document.getElementById(`${type}Loading`);
+            const frameEl = document.getElementById(`${type}Frame`);
+
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (frameEl) frameEl.style.display = 'block';
+
+            console.log(`✅ ${type} component loaded`);
+        }
+
+        // Initialize particle system (inline implementation)
+        function initializeParticles(count = BRBConfig.particles.count) {
+            const container = document.getElementById('particles');
+            if (!container) return;
+
+            // Create particles directly
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.bottom = `${Math.random() * -20}%`;
+
+                // Random color from palette
+                const color = BRBConfig.particles.colors[Math.floor(Math.random() * BRBConfig.particles.colors.length)];
+                particle.style.background = color;
+
+                // Random animation delay and duration
+                particle.style.animationDelay = `${Math.random() * 12}s`;
+                particle.style.animationDuration = `${8 + Math.random() * 8}s`;
+
+                // Random size variation
+                const size = 3 + Math.random() * 4;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                container.appendChild(particle);
+            }
+
+            console.log(`🎆 Particle system initialized with ${count} particles`);
+        }
+
+        // Update video cutout appearance
+        function updateVideoCutout(showBorder = false, showPlaceholder = true) {
+            const cutout = document.getElementById('videoCutout');
+            if (!cutout) return;
+
+            if (showBorder) {
+                cutout.classList.add('show-border');
+            }
+
+            const placeholder = cutout.querySelector('.video-cutout-placeholder');
+            if (placeholder && !showPlaceholder) {
+                placeholder.style.display = 'none';
+            }
+        }
+
+        // Update social links
+        function updateSocialLinks(websiteUrl) {
+            const websiteUrlEl = document.getElementById('websiteUrl');
+            const websiteLinkEl = document.getElementById('websiteLink');
+
+            if (websiteUrlEl && websiteUrl) {
+                websiteUrlEl.textContent = websiteUrl;
+            }
+
+            if (websiteLinkEl && websiteUrl) {
+                websiteLinkEl.href = `https://${websiteUrl}`;
+            }
+        }
+
+        // Update profile component with Streamer.bot data
+        function updateProfileComponent(username, displayName) {
+            const profileFrame = document.getElementById('profileFrame');
+            if (!profileFrame) return;
+
+            try {
+                profileFrame.contentWindow.postMessage({
+                    type: 'updateProfile',
+                    username: username,
+                    displayName: displayName,
+                    fallbackLetter: username ? username.charAt(0).toUpperCase() : 'S'
+                }, '*');
+
+                console.log('📤 Updated profile component:', { username, displayName });
+            } catch (error) {
+                console.log('Profile component not ready for updates yet');
+            }
+        }
+
+        // Handle Streamer.bot integration using official @streamerbot/client
+        function initializeStreamerbotIntegration(params) {
+            if (!BRBConfig.streamerbot.enabled) return;
+
+            console.log('🎮 Initializing Streamer.bot integration for BRB template...');
+
+            // Check for Streamer.bot client
+            const ClientClass = window.StreamerbotClient || (window.Streamerbot && window.Streamerbot.Client);
+
+            if (!ClientClass) {
+                console.log('⚠️ Streamer.bot client not available, using fallback values');
+                setTimeout(() => {
+                    updateProfileComponent(params.username, params.displayName);
+                }, 1000);
+                return;
+            }
+
+            try {
+                // Create client with official configuration
+                const client = new ClientClass({
+                    host: '127.0.0.1',
+                    port: 8080,
+                    endpoint: '/',
+                    autoReconnect: true,
+                    retries: 5,
+                    retryInterval: 2000
+                });
+
+                // Connection event
+                client.on('WebsocketClient.Open', async () => {
+                    console.log('✅ Connected to Streamer.bot');
+
+                    // Request initial broadcaster data
+                    try {
+                        const displayNameResp = await client.getGlobal('broadcasterDisplayName');
+                        const usernameResp = await client.getGlobal('broadcasterUsername');
+
+                        const username = usernameResp?.variable || params.username;
+                        const displayName = displayNameResp?.variable || params.displayName;
+
+                        setTimeout(() => {
+                            updateProfileComponent(username, displayName);
+                        }, 500);
+                    } catch (error) {
+                        console.log('Could not get initial global variables:', error.message);
+                        setTimeout(() => {
+                            updateProfileComponent(params.username, params.displayName);
+                        }, 500);
+                    }
+                });
+
+                // Global variable updates
+                client.on('Misc.GlobalVariableUpdated', (data) => {
+                    const variableName = data.variableName;
+                    const variableValue = data.variableValue;
+
+                    console.log('📊 Global variable updated:', variableName, '=', variableValue);
+
+                    switch (variableName) {
+                        case 'broadcasterDisplayName':
+                        case 'broadcasterUsername':
+                            // Update profile with new value
+                            if (variableName === 'broadcasterDisplayName') {
+                                updateProfileComponent(params.username, variableValue);
+                            } else {
+                                updateProfileComponent(variableValue, params.displayName);
+                            }
+                            break;
+
+                        case 'brbMessage':
+                            // Update break message component
+                            try {
+                                const messageFrame = document.getElementById('messageFrame');
+                                if (messageFrame) {
+                                    messageFrame.contentWindow.postMessage({
+                                        type: 'updateBreakMessage',
+                                        customMessage: variableValue
+                                    }, '*');
+                                }
+                            } catch (error) {
+                                console.log('Message component not ready for updates yet');
+                            }
+                            break;
+                    }
+                });
+
+                // Connect
+                client.connect();
+                console.log('🔌 Connecting to Streamer.bot...');
+
+            } catch (error) {
+                console.error('❌ Failed to initialize Streamer.bot client:', error);
+                setTimeout(() => {
+                    updateProfileComponent(params.username, params.displayName);
+                }, 1000);
+            }
+        }
+
+        // Initialize the BRB template
+        function init() {
+            console.log('🎬 Initializing BRB template with atomic design...');
+
+            const params = parseTemplateParams();
+
+            // Enable debug mode if requested
+            if (params.debug) {
+                document.body.classList.add('debug-mode');
+                BRBConfig.debug = true;
+                console.log('🐛 Debug mode enabled');
+            }
+
+            // Initialize particle system
+            initializeParticles(params.particleCount);
+
+            // Update video cutout appearance
+            updateVideoCutout(params.showCutoutBorder, BRBConfig.cutout.showPlaceholder);
+
+            // Update social links
+            updateSocialLinks(params.websiteUrl);
+
+            // Initialize Streamer.bot integration
+            initializeStreamerbotIntegration(params);
+
+            console.log('✅ BRB template initialized successfully');
+            console.log('📊 Template config:', { ...BRBConfig, params });
+
+            // Log URLs for each component for debugging
+            if (BRBConfig.debug) {
+                console.log('🔗 Component URLs:');
+                console.log('  Profile:', document.getElementById('profileFrame')?.src);
+                console.log('  Message:', document.getElementById('messageFrame')?.src);
+                console.log('  Chat:', document.getElementById('chatFrame')?.src);
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // Global debug functions
+        if (BRBConfig.debug || window.location.search.includes('debug')) {
+            window.toggleCutoutBorder = () => {
+                const cutout = document.getElementById('videoCutout');
+                cutout.classList.toggle('show-border');
+                console.log('🎯 Video cutout border toggled');
+            };
+
+            window.testProfileUpdate = (username, displayName) => {
+                updateProfileComponent(username, displayName);
+                console.log('🧪 Profile component test update triggered');
+            };
+
+            window.recreateParticles = (count = 25) => {
+                const container = document.getElementById('particles');
+                container.innerHTML = '';
+                initializeParticles(count);
+                console.log('🎆 Particles recreated');
+            };
+        }
+    </script>
+</body>
+</html>

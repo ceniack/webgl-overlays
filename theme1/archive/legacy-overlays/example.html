@@ -1,0 +1,3488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Stream Overlay Bar</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #ff3366;
+            --accent: #a855f7;
+            --bg-dark: #0a0a0a;
+            --bg-panel: rgba(13, 13, 13, 0.9);
+            --border-color: rgba(0, 212, 255, 0.3);
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 257px;
+            background: transparent;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .overlay-bar {
+            position: relative;
+            width: 1920px;
+            height: 257px;
+            display: flex;
+            background: var(--bg-panel);
+        }
+
+        /* Animated gradient border on top */
+        .overlay-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg,
+                var(--secondary) 0%,
+                var(--primary) 25%,
+                var(--accent) 50%,
+                var(--primary) 75%,
+                var(--secondary) 100%);
+            background-size: 200% 100%;
+            animation: gradientFlow 4s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* Section styling */
+        .section {
+            height: 100%;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .section:last-child {
+            border-right: none;
+        }
+
+        .section-header {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 12px 15px 8px;
+            border-bottom: 1px solid var(--border-color);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Live indicator blinking light */
+        .live-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            box-shadow:
+                0 0 6px var(--secondary),
+                0 0 12px rgba(255, 51, 102, 0.6);
+            animation: live-blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes live-blink {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow:
+                    0 0 6px var(--secondary),
+                    0 0 12px rgba(255, 51, 102, 0.6);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(0.9);
+                box-shadow:
+                    0 0 3px var(--secondary),
+                    0 0 6px rgba(255, 51, 102, 0.3);
+            }
+        }
+
+        .section-content {
+            flex: 1;
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Camera cutout section */
+        .camera-section {
+            width: 457px;
+            flex-shrink: 0;
+            background: transparent;
+            border-right: 2px solid var(--primary);
+            box-shadow: inset -5px 0 15px rgba(0, 212, 255, 0.1);
+        }
+
+        /* Branding section */
+        .branding-section {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .branding-section .section-content {
+            flex-direction: row;
+        }
+
+        .profile-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .profile-image-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            position: relative;
+            background: var(--bg-dark);
+            flex-shrink: 0;
+            aspect-ratio: 1 / 1;
+        }
+
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-fallback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name {
+            font-family: var(--font-display);
+            font-size: 60px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-link {
+            font-size: 24px;
+            color: var(--secondary);
+            text-shadow: 0 0 5px rgba(255, 51, 102, 0.4);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Goals container - supports multiple dynamic goals */
+        .goals-container {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .goal-item {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .goal-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .goal-type {
+            font-family: var(--font-display);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .goal-type.follower { color: var(--primary); }
+        .goal-type.subscription { color: var(--secondary); }
+        .goal-type.new_subscription { color: var(--accent); }
+        .goal-type.subscriber { color: var(--primary); }
+        .goal-type.donation { color: #f59e0b; }
+        .goal-type.bit { color: #f59e0b; }
+        .goal-type.bits { color: #f59e0b; }
+        .goal-type.cheer { color: #f59e0b; }
+        .goal-type.raid { color: var(--accent); }
+        .goal-type.host { color: var(--secondary); }
+        .goal-type.viewer { color: #10b981; }
+        .goal-type.stream_time { color: #8b5cf6; }
+        .goal-type.custom { color: #6b7280; }
+        .goal-type.unknown { color: #ef4444; }
+        .goal-type.parse_error { color: #ef4444; }
+
+        .goal-bar {
+            height: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .goal-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .goal-fill.follower {
+            background: linear-gradient(90deg, var(--primary), #0099cc);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+
+        .goal-fill.subscription {
+            background: linear-gradient(90deg, var(--secondary), #cc0044);
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.5);
+        }
+
+        .goal-fill.new_subscription {
+            background: linear-gradient(90deg, var(--accent), #7c3aed);
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
+        }
+
+        .goal-fill.subscriber {
+            background: linear-gradient(90deg, var(--primary), #0099cc);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+
+        .goal-fill.donation, .goal-fill.bit, .goal-fill.bits, .goal-fill.cheer {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+        }
+
+        .goal-fill.raid {
+            background: linear-gradient(90deg, var(--accent), #7c3aed);
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
+        }
+
+        .goal-fill.host {
+            background: linear-gradient(90deg, var(--secondary), #cc0044);
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.5);
+        }
+
+        .goal-fill.viewer {
+            background: linear-gradient(90deg, #10b981, #059669);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        .goal-fill.stream_time {
+            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+        }
+
+        .goal-fill.custom {
+            background: linear-gradient(90deg, #6b7280, #4b5563);
+            box-shadow: 0 0 8px rgba(107, 114, 128, 0.5);
+        }
+
+        .goal-fill.unknown, .goal-fill.parse_error {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+        }
+
+        .goal-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-display);
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+        }
+
+        .no-goals {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        /* Counters + Socials section */
+        .counters-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .counters-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .counter-box {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px 8px;  /* Increased vertical padding from 8px to 12px */
+            text-align: center;
+        }
+
+
+        .counter-value {
+            font-family: var(--font-display);
+            font-size: 56px;  /* Doubled from 28px for better readability */
+            font-weight: 900;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+            margin-bottom: 4px;  /* Added spacing for better layout */
+        }
+
+        .counter-label {
+            font-size: 24px;  /* Doubled from 12px for better readability */
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Pure CSS Scroll-Snap Carousel System */
+        .carousel-container {
+            position: relative;
+            height: 180px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Ensure section-content maintains height in counters section */
+        .counters-section .section-content {
+            height: 180px;
+            min-height: 180px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .carousel-track {
+            display: flex;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            /* No scrolling - pure transforms for smooth animation */
+        }
+
+        .carousel-slide {
+            flex: 0 0 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            min-height: 160px;
+        }
+
+        /* Hidden navigation anchors */
+        .carousel-nav {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Indicators */
+        .carousel-indicators {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+            max-width: 120px;
+            overflow: hidden;
+        }
+
+        .indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .indicator.active {
+            background: var(--primary);
+            box-shadow: 0 0 6px rgba(0, 212, 255, 0.5);
+        }
+
+        /* Pause auto-rotation on hover */
+        .carousel-container:hover .carousel-track.autoplay {
+            animation-play-state: paused;
+        }
+
+        /* Simplified debug CSS */
+        .carousel-container.debug {
+            border: 2px solid lime !important;
+        }
+
+        .carousel-track.debug {
+            border: 1px solid yellow !important;
+        }
+
+        .carousel-slide.debug {
+            border: 1px solid red !important;
+        }
+
+        /* Pure CSS Carousel Animation System */
+        .carousel-track.auto-rotate {
+            animation: carousel-auto-rotate var(--carousel-duration) infinite linear;
+        }
+
+        .carousel-track.paused {
+            animation-play-state: paused;
+        }
+
+        /* Manual navigation states - override animation */
+        .carousel-track.manual-slide-0 { transform: translateX(0%); animation: none; }
+        .carousel-track.manual-slide-1 { transform: translateX(-100%); animation: none; }
+        .carousel-track.manual-slide-2 { transform: translateX(-200%); animation: none; }
+        .carousel-track.manual-slide-3 { transform: translateX(-300%); animation: none; }
+        .carousel-track.manual-slide-4 { transform: translateX(-400%); animation: none; }
+        .carousel-track.manual-slide-5 { transform: translateX(-500%); animation: none; }
+        .carousel-track.manual-slide-6 { transform: translateX(-600%); animation: none; }
+        .carousel-track.manual-slide-7 { transform: translateX(-700%); animation: none; }
+
+        /* Hover pause for auto-rotation */
+        .carousel-container:hover .carousel-track.auto-rotate {
+            animation-play-state: paused;
+        }
+
+        /* Single Counter Display (Large Format) */
+        .single-counter-display {
+            text-align: center;
+            width: 100%;
+        }
+
+        .counter-value-large {
+            font-family: var(--font-display);
+            font-size: 96px;            /* Doubled from 48px for better readability */
+            font-weight: 900;
+            color: var(--secondary);
+            text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .counter-label-large {
+            font-size: 32px;            /* Doubled from 16px for better readability */
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Single Goal Display (Large Format) */
+        .single-goal-display {
+            width: 100%;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .goal-type-large {
+            font-family: var(--font-display);
+            font-size: 18px;            /* Much larger than original 9px */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .goal-percentage {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .goal-bar-large {
+            height: 24px;               /* Larger than original 16px */
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .goal-bar-large .goal-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .goal-text-large {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;            /* Larger than original 10px */
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Color variants for large goal types */
+        .goal-type-large.follower { color: var(--primary); }
+        .goal-type-large.subscription { color: var(--secondary); }
+        .goal-type-large.new_subscription { color: var(--accent); }
+        .goal-type-large.subscriber { color: var(--primary); }
+        .goal-type-large.donation { color: #f59e0b; }
+        .goal-type-large.bit { color: #f59e0b; }
+        .goal-type-large.bits { color: #f59e0b; }
+        .goal-type-large.cheer { color: #f59e0b; }
+        .goal-type-large.raid { color: var(--accent); }
+        .goal-type-large.host { color: var(--secondary); }
+        .goal-type-large.viewer { color: #10b981; }
+        .goal-type-large.stream_time { color: #8b5cf6; }
+        .goal-type-large.custom { color: #6b7280; }
+        .goal-type-large.unknown { color: #ef4444; }
+        .goal-type-large.parse_error { color: #ef4444; }
+
+
+        /* Vitals Section */
+        .heart-rate-section {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .heart-rate-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            min-width: 260px;
+            width: 100%;
+            margin: 0 auto;
+            height: 100%;
+        }
+
+        .heart-rate-graph {
+            position: relative;
+            width: 275px;
+            height: 90px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .heart-rate-monitor {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000000;
+            --animation-duration: 2.5s; /* Default 60 BPM equivalent */
+        }
+
+        .heart-rate-monitor svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .fade-in {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            background: #000000;
+            animation: heartRateIn var(--animation-duration, 2.5s) linear infinite;
+            z-index: 2;
+        }
+
+        .fade-out {
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 120%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                rgba(0,0,0,1) 0%,
+                rgba(0,0,0,0.8) 50%,
+                rgba(0,0,0,0) 100%);
+            animation: heartRateOut var(--animation-duration, 2.5s) linear infinite;
+            z-index: 1;
+        }
+
+
+        @keyframes heartRateIn {
+            0% { width: 100%; }
+            50%, 100% { width: 0%; }
+        }
+
+        @keyframes heartRateOut {
+            0%, 30% { left: -120%; }
+            100% { left: 0%; }
+        }
+
+        /* Active/Inactive states */
+        .heart-rate-container.active .heart-rate-monitor svg polyline {
+            stroke: var(--primary);
+            filter: drop-shadow(0 0 4px var(--primary));
+        }
+
+        .heart-rate-container.inactive .heart-rate-monitor {
+            opacity: 0.5;
+        }
+
+        .heart-rate-container.inactive .heart-rate-monitor svg polyline {
+            stroke: rgba(0, 212, 255, 0.3);
+            filter: none;
+        }
+
+        .heart-rate-container.inactive .heart-rate-monitor .fade-in,
+        .heart-rate-container.inactive .heart-rate-monitor .fade-out {
+            animation-play-state: paused;
+        }
+
+        .heart-rate-section .section-content {
+            padding: 0;
+        }
+
+        /* BPM Display */
+        .heart-rate-display {
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .heart-rate-value {
+            font-family: var(--font-display);
+            font-size: 56px;
+            font-weight: 900;
+            color: var(--secondary);
+            text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+            line-height: 1;
+        }
+
+        .heart-rate-label {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 4px;
+        }
+
+        .heart-rate-status {
+            font-size: 12px;
+            color: var(--text-muted);
+            opacity: 0.6;
+            text-align: center;
+            display: none;
+        }
+
+        /* Active/Inactive States */
+        .heart-rate-container.active {
+            border-color: var(--secondary);
+        }
+
+        .heart-rate-container.active .heart-rate-graph {
+            border-color: var(--secondary);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
+        }
+
+        .heart-rate-container.inactive {
+            opacity: 0.5;
+        }
+
+        .heart-rate-container.inactive .heart-rate-graph {
+            background: rgba(64, 64, 64, 0.3);
+        }
+
+
+
+
+        /* SVG Icons */
+        .icon-svg {
+            display: none;
+        }
+    </style>
+
+    <!-- Modern bundled overlay system with ComponentComposer -->
+    <link rel="stylesheet" href="../dist/assets/stream-overlay.css">
+    <script src="../js/streamerbot-client.js"></script>
+    <script src="../dist/stream-overlay.iife.js"></script>
+</head>
+<body>
+
+    <!-- Hidden SVG icons -->
+    <svg class="icon-svg">
+        <defs>
+            <symbol id="icon-discord" viewBox="0 0 24 24">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+            </symbol>
+            <symbol id="icon-twitter" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </symbol>
+            <symbol id="icon-youtube" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </symbol>
+            <symbol id="icon-twitch" viewBox="0 0 24 24">
+                <path d="M11.571 4.714h1.714v5.143h-1.714zm4.714 0H18v5.143h-1.715zM6 24L1.714 19.714V4.286H6.857V0L11.143 4.286h3.428L22.286 12V24zM20.571 12.857L17.143 9.429h-3.429L12 7.714v2.143H6.857V22.286H20.57z"/>
+            </symbol>
+            <symbol id="icon-follow" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </symbol>
+            <symbol id="icon-sub" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </symbol>
+            <symbol id="icon-raid" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </symbol>
+            <symbol id="icon-bits" viewBox="0 0 24 24">
+                <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm3.5 12.09l-1.41 1.41L12 13.42 9.91 15.5 8.5 14.09 10.59 12 8.5 9.91 9.91 8.5 12 10.59l2.09-2.09 1.41 1.41L13.42 12l2.08 2.09z"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <div class="overlay-bar">
+        <!-- Camera Cutout Section -->
+        <div class="section camera-section">
+            <!-- Transparent area for webcam -->
+        </div>
+
+        <!-- Branding Section -->
+        <div class="section branding-section">
+            <div class="section-header">
+                <span class="live-indicator"></span>
+                Live Now
+            </div>
+            <div class="section-content">
+                <div class="profile-area">
+                    <div class="profile-image-container">
+                        <img class="profile-image" id="profile-image" src="" alt="" style="display: none;">
+                        <span class="profile-fallback" id="profile-fallback">?</span>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name" id="profile-name">STREAMER</div>
+                        <div class="profile-link" id="profile-link">twitch.tv/streamer</div>
+                    </div>
+                </div>
+                <div class="goals-container" id="goals-container">
+                    <div class="no-goals">Loading goals...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Counters + Socials Section (Carousel) -->
+        <div class="section counters-section">
+            <div class="section-header">
+                Stats
+                <div class="carousel-indicators" id="carousel-indicators">
+                    <!-- Dynamic indicators generated per visible content -->
+                </div>
+            </div>
+            <div class="section-content carousel-container" id="stats-carousel-container">
+                <!-- Hidden anchor navigation -->
+                <div class="carousel-nav" aria-hidden="true" id="carousel-nav">
+                    <!-- Dynamic anchor links generated by JS -->
+                </div>
+
+                <!-- Scrollable carousel track -->
+                <div class="carousel-track" id="carousel-track">
+                    <!-- Dynamic slides with unique IDs generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Original counter elements (hidden, for data source) -->
+        <div style="display: none;" id="original-counters">
+            <div class="counter-box" id="counter1-box">
+                <div class="counter-value" id="counter-counter1">0</div>
+                <div class="counter-label" id="counter1-label">Counter 1</div>
+            </div>
+            <div class="counter-box" id="counter2-box">
+                <div class="counter-value" id="counter-counter2">0</div>
+                <div class="counter-label" id="counter2-label">Counter 2</div>
+            </div>
+            <div class="counter-box" id="counter3-box">
+                <div class="counter-value" id="counter-counter3">0</div>
+                <div class="counter-label" id="counter3-label">Counter 3</div>
+            </div>
+            <div class="counter-box" id="counter4-box">
+                <div class="counter-value" id="counter-counter4">0</div>
+                <div class="counter-label" id="counter4-label">Counter 4</div>
+            </div>
+        </div>
+
+        <!-- Heart Rate Monitor Section -->
+        <div class="section heart-rate-section">
+            <div class="section-header">Vitals</div>
+            <div class="section-content">
+                <div id="heart-rate-monitor" class="heart-rate-container">
+                    <!-- Heart Rate Line Graph -->
+                    <div class="heart-rate-graph">
+                        <div class="heart-rate-monitor">
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                                 width="200px" height="60px" viewBox="0 0 200 60">
+                                <polyline fill="none" stroke="var(--primary)" stroke-width="2"
+                                          stroke-miterlimit="10"
+                                          points="0,37 21,37 25,34 29,37 33,37 37,37 42,39 46,37 50,15 54,44 58,37 62,37 71,33 79,37 83,37 104,37 108,34 112,37 117,37 121,37 125,39 129,37 133,15 137,44 142,37 146,37 154,33 162,37 167,37 200,37"/>
+                            </svg>
+                            <div class="fade-in"></div>
+                            <div class="fade-out"></div>
+                        </div>
+                    </div>
+
+                    <!-- BPM Display -->
+                    <div class="heart-rate-display">
+                        <div class="heart-rate-value" id="heart-rate-value">--</div>
+                        <div class="heart-rate-label">BPM</div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="heart-rate-status" id="heart-rate-status">Waiting for data...</div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Direct WebSocket connection like universal overlay -->
+
+    <script>
+        /*
+        ============================================================
+        GAMING STREAM OVERLAY - BOTTOM BAR
+        ============================================================
+        */
+
+        // CONFIGURATION - Streamer.bot Global Variables to watch
+        const GLOBAL_VARIABLE_CONFIG = {
+            counter1: {
+                valueVariable: 'counter1',        // Global variable name for counter value
+                labelVariable: 'counter1label',   // Global variable name for counter label
+                toggleVariable: 'counter1toggle',  // Global variable name for counter visibility
+                defaultValue: 0,                // Default value if not set
+                defaultLabel: 'Counter 1',          // Default label if not set
+                defaultVisible: true             // Show by default
+            },
+            counter2: {
+                valueVariable: 'counter2',          // Global variable name for counter value
+                labelVariable: 'counter2label',     // Global variable name for counter label
+                toggleVariable: 'counter2toggle',  // Global variable name for counter visibility
+                defaultValue: 0,                // Default value if not set
+                defaultLabel: 'Counter 2',            // Default label if not set
+                defaultVisible: true             // Show by default
+            },
+            counter3: {
+                valueVariable: 'counter3',          // Global variable name for counter value
+                labelVariable: 'counter3label',     // Global variable name for counter label
+                toggleVariable: 'counter3toggle',  // Global variable name for counter visibility
+                defaultValue: 0,                // Default value if not set
+                defaultLabel: 'Counter 3',            // Default label if not set
+                defaultVisible: true             // Show by default
+            },
+            counter4: {
+                valueVariable: 'counter4',          // Global variable name for counter value
+                labelVariable: 'counter4label',     // Global variable name for counter label
+                toggleVariable: 'counter4toggle',  // Global variable name for counter visibility
+                defaultValue: 0,                // Default value if not set
+                defaultLabel: 'Counter 4',            // Default label if not set
+                defaultVisible: true             // Show by default
+            },
+            broadcaster: {
+                // NEW: Broadcaster information variables
+                displayNameVariable: 'broadcasterDisplayName',   // Twitch display name
+                usernameVariable: 'broadcasterUsername',         // Twitch username/login
+                userIdVariable: 'broadcasterUserId',             // Twitch user ID
+                twitchUrlVariable: 'broadcasterTwitchUrl',       // twitch.tv/username
+                profileImageTriggerVariable: 'broadcasterProfileImageTrigger', // Username to trigger DecAPI call
+                defaultDisplayName: 'STREAMER',                  // Fallback display name
+                defaultUsername: 'streamer',                     // Fallback username
+                defaultTwitchUrl: 'twitch.tv/streamer'          // Fallback URL
+            },
+            goals: {
+                // NEW: Type-based goal system
+                // C# event handlers create variables like:
+                // goalFollowerType, goalFollowerCurrent, goalFollowerTarget, goalFollowerDescription, goalFollowerId
+                // goalSubscriptionType, goalSubscriptionCurrent, goalSubscriptionTarget, etc.
+                // activeGoalTypes: comma-separated list of active goal types
+                activeTypesVariable: 'activeGoalTypes',  // List of active goal types
+                supportedTypes: ['Follower', 'Subscription', 'Bit', 'Donation', 'Raid', 'Host', 'Viewer'], // Supported goal types
+                defaultCurrent: 150,                  // Default current value
+                defaultTarget: 200,                   // Default target value
+                defaultDescription: 'No Active Goals', // Default description
+                defaultType: 'follower'               // Default goal type
+            }
+        };
+
+        console.log('=== OVERLAY BAR SCRIPT STARTING ===');
+
+        // Activity feed configuration
+        const activityFeed = [];
+        const MAX_ACTIVITY_ITEMS = 5;
+
+        // Streamer data state
+        let streamerData = {
+            displayName: 'ceniack',
+            username: 'ceniack',
+            profileImage: null,
+            isLive: false,
+            followers: 0
+        };
+
+        // Initialize configuration using global variables
+        function initializeConfig() {
+            console.log('🔧 Initializing overlay with global variable configuration');
+
+            // Set counter labels and default values from config
+            document.getElementById('counter1-label').textContent = GLOBAL_VARIABLE_CONFIG.counter1.defaultLabel;
+            document.getElementById('counter-counter1').textContent = String(GLOBAL_VARIABLE_CONFIG.counter1.defaultValue);
+
+            document.getElementById('counter2-label').textContent = GLOBAL_VARIABLE_CONFIG.counter2.defaultLabel;
+            document.getElementById('counter-counter2').textContent = String(GLOBAL_VARIABLE_CONFIG.counter2.defaultValue);
+
+            document.getElementById('counter3-label').textContent = GLOBAL_VARIABLE_CONFIG.counter3.defaultLabel;
+            document.getElementById('counter-counter3').textContent = String(GLOBAL_VARIABLE_CONFIG.counter3.defaultValue);
+
+            document.getElementById('counter4-label').textContent = GLOBAL_VARIABLE_CONFIG.counter4.defaultLabel;
+            document.getElementById('counter-counter4').textContent = String(GLOBAL_VARIABLE_CONFIG.counter4.defaultValue);
+
+            // Set default visibility for all counters
+            setCounterVisibility('counter1', GLOBAL_VARIABLE_CONFIG.counter1.defaultVisible);
+            setCounterVisibility('counter2', GLOBAL_VARIABLE_CONFIG.counter2.defaultVisible);
+            setCounterVisibility('counter3', GLOBAL_VARIABLE_CONFIG.counter3.defaultVisible);
+            setCounterVisibility('counter4', GLOBAL_VARIABLE_CONFIG.counter4.defaultVisible);
+
+            // Set broadcaster defaults
+            document.getElementById('profile-name').textContent = GLOBAL_VARIABLE_CONFIG.broadcaster.defaultDisplayName;
+            document.getElementById('profile-link').textContent = GLOBAL_VARIABLE_CONFIG.broadcaster.defaultTwitchUrl;
+            document.getElementById('profile-fallback').textContent = GLOBAL_VARIABLE_CONFIG.broadcaster.defaultDisplayName.charAt(0).toUpperCase();
+
+            console.log('📊 Stats initialized with defaults:', {
+                counter1: `${GLOBAL_VARIABLE_CONFIG.counter1.defaultLabel}: ${GLOBAL_VARIABLE_CONFIG.counter1.defaultValue}`,
+                counter2: `${GLOBAL_VARIABLE_CONFIG.counter2.defaultLabel}: ${GLOBAL_VARIABLE_CONFIG.counter2.defaultValue}`,
+                counter3: `${GLOBAL_VARIABLE_CONFIG.counter3.defaultLabel}: ${GLOBAL_VARIABLE_CONFIG.counter3.defaultValue}`,
+                counter4: `${GLOBAL_VARIABLE_CONFIG.counter4.defaultLabel}: ${GLOBAL_VARIABLE_CONFIG.counter4.defaultValue}`,
+                broadcaster: `${GLOBAL_VARIABLE_CONFIG.broadcaster.defaultDisplayName} (${GLOBAL_VARIABLE_CONFIG.broadcaster.defaultTwitchUrl})`,
+                goals: `Type-based goal system supporting: ${GLOBAL_VARIABLE_CONFIG.goals.supportedTypes.join(', ')}`
+            });
+
+            console.log('⏳ Will request current variable values after WebSocket connection...');
+        }
+
+        // Request current values of all configured variables from Streamer.bot
+        async function requestCurrentVariableValues() {
+            console.log('🔧 requestCurrentVariableValues called');
+            console.log('🔍 Checking Streamer.bot client status:', {
+                clientExists: !!window.streamerbotClient,
+                isConnected: window.streamerbotClient ? window.streamerbotClient.isConnected : 'N/A'
+            });
+
+            const basicVariables = [
+                // Counter 1 variables
+                GLOBAL_VARIABLE_CONFIG.counter1.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter1.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter1.toggleVariable,
+                // Counter 2 variables
+                GLOBAL_VARIABLE_CONFIG.counter2.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter2.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter2.toggleVariable,
+                // Counter 3 variables
+                GLOBAL_VARIABLE_CONFIG.counter3.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter3.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter3.toggleVariable,
+                // Counter 4 variables
+                GLOBAL_VARIABLE_CONFIG.counter4.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter4.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter4.toggleVariable,
+                // Broadcaster variables (NEW)
+                GLOBAL_VARIABLE_CONFIG.broadcaster.displayNameVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.usernameVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.userIdVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.twitchUrlVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.profileImageTriggerVariable,
+                // Active goal types variable
+                GLOBAL_VARIABLE_CONFIG.goals.activeTypesVariable
+            ];
+
+            console.log('📥 Requesting current values for basic variables:', basicVariables);
+            console.log('🎯 Will request goal-specific variables after receiving activeGoalTypes');
+
+            // Direct WebSocket-only data loading - no storage dependency
+
+            // PHASE 2: Request fresh values from Streamer.bot via official client
+            if (window.streamerbotClient && window.streamerbotClient.isConnected) {
+                console.log('✅ Streamer.bot client is connected, proceeding with variable requests');
+            } else {
+                console.warn('⚠️ Streamer.bot client not ready:', {
+                    clientExists: !!window.streamerbotClient,
+                    isConnected: window.streamerbotClient ? window.streamerbotClient.isConnected : false
+                });
+                console.log('⏰ Will retry in 2 seconds...');
+                setTimeout(() => {
+                    requestCurrentVariableValues();
+                }, 2000);
+                return;
+            }
+
+            if (window.streamerbotClient && window.streamerbotClient.isConnected) {
+                console.log(`🔄 Processing ${basicVariables.length} variables sequentially...`);
+
+                // Process variables sequentially to avoid overwhelming Streamer.bot
+                for (let i = 0; i < basicVariables.length; i++) {
+                    const variable = basicVariables[i];
+                    console.log(`📤 [${i+1}/${basicVariables.length}] Requesting via official client: ${variable}`);
+
+                    try {
+                        const response = await window.streamerbotClient.getGlobal(variable);
+                        const value = response.variable;
+                        console.log(`📥 [${i+1}/${basicVariables.length}] Got current value for ${variable} =`, value, `(type: ${typeof value})`);
+
+                        // Special handling for activeGoalTypes
+                        if (variable === GLOBAL_VARIABLE_CONFIG.goals.activeTypesVariable) {
+                            console.log('🎯 Received activeGoalTypes:', value);
+                            requestGoalVariables(value);
+                        } else if (variable === GLOBAL_VARIABLE_CONFIG.broadcaster.profileImageTriggerVariable) {
+                            console.log('📺 Profile image trigger for username:', value);
+                            if (value && value.trim() !== '') {
+                                loadBroadcasterProfileImage(value.trim());
+                            }
+                        } else {
+                            updateCounterFromGlobalVariable(variable, value);
+                        }
+
+                        // Small delay between requests to avoid overwhelming Streamer.bot
+                        if (i < basicVariables.length - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                    } catch (error) {
+                        console.warn(`⚠️ [${i+1}/${basicVariables.length}] Failed to get ${variable} via official client:`, error);
+                    }
+                }
+
+                console.log('✅ Finished processing all global variable requests');
+            } else {
+                console.warn('⚠️ Official @streamerbot/client not connected - cannot request fresh variables');
+            }
+
+            // Existing goal variable logic...
+        }
+
+        // Request goal variables for active goal types
+        function requestGoalVariables(activeTypes) {
+            console.log('🎯 requestGoalVariables called with activeTypes:', activeTypes);
+
+            if (!window.streamerbotClient || !window.streamerbotClient.isConnected) {
+                console.error('🔄 Official @streamerbot/client not ready for goal variable requests');
+                return;
+            }
+
+            if (!activeTypes || activeTypes.trim() === '') {
+                console.log('📭 No active goal types to request variables for - clearing goals');
+                renderGoals([]); // Clear goals display
+                return;
+            }
+
+            const goalVariables = [];
+            const types = activeTypes.split(',').map(t => t.trim()).filter(t => t);
+
+            console.log('🧩 Parsed goal types:', types);
+
+            // Clear previous goal data before requesting new data
+            goalDataByType = {};
+            console.log('🗑️ Cleared previous goalDataByType');
+
+            types.forEach(type => {
+                if (type) {
+                    console.log(`📡 Requesting variables for goal type: ${type}`);
+                    ['Type', 'Current', 'Target', 'Description', 'Id'].forEach(async (prop) => {
+                        const varName = `goal${type}${prop}`;
+                        goalVariables.push(varName);
+
+                        console.log(`  📤 Requesting ${varName} via official client`);
+                        try {
+                            const response = await window.streamerbotClient.getGlobal(varName);
+                            const value = response.variable;
+                            console.log(`🎯 Received goal ${type} ${prop}:`, value);
+                            updateTypeBasedGoalVariable(type, prop, value);
+                        } catch (error) {
+                            console.warn(`⚠️ Failed to get ${varName} via official client:`, error);
+                        }
+                    });
+                }
+            });
+
+            console.log('🎯 Total goal variables requested:', goalVariables.length);
+        }
+
+        // Helper function to set counter visibility
+        function setCounterVisibility(counterKey, visible) {
+            const counterBoxElement = document.getElementById(`${counterKey}-box`);
+
+            if (counterBoxElement) {
+                const isVisible = parseBooleanValue(visible);
+                counterBoxElement.style.display = isVisible ? 'block' : 'none';
+
+                const defaultLabel = GLOBAL_VARIABLE_CONFIG[counterKey].defaultLabel;
+                console.log(`🔍 Set ${defaultLabel} visibility: ${isVisible ? 'VISIBLE' : 'HIDDEN'} (received: ${visible})`);
+
+                // Rebuild carousel when counter visibility changes
+                setTimeout(() => {
+                    if (CarouselManager && typeof CarouselManager.rebuild === 'function') {
+                        CarouselManager.rebuild();
+                    }
+                }, 100);
+            } else {
+                console.error(`❌ Counter box not found: ${counterKey}-box`);
+            }
+        }
+
+        // Parse boolean values from various Streamer.bot sources
+        function parseBooleanValue(value) {
+            if (typeof value === 'boolean') return value;
+            if (typeof value === 'string') {
+                const lowerValue = value.toLowerCase().trim();
+                return lowerValue === 'true' || lowerValue === '1';
+            }
+            if (typeof value === 'number') return value !== 0;
+            return value != null ? Boolean(value) : true; // Default visible
+        }
+
+        // Update counter values and labels from Streamer.bot global variables
+        function updateCounterFromGlobalVariable(variableName, value) {
+            console.log('📊 Global variable update:', variableName, '=', value);
+
+            // Extract actual value if it's an object from official client
+            let extractedValue = value;
+            if (value && typeof value === 'object' && value.hasOwnProperty('value')) {
+                extractedValue = value.value;
+                console.log('🔧 Extracted value from object:', extractedValue, '(was object:', value, ')');
+            }
+
+            console.log('🔍 Checking against configured variables:', {
+                'counter1.valueVariable': GLOBAL_VARIABLE_CONFIG.counter1.valueVariable,
+                'counter1.labelVariable': GLOBAL_VARIABLE_CONFIG.counter1.labelVariable,
+                'counter2.valueVariable': GLOBAL_VARIABLE_CONFIG.counter2.valueVariable,
+                'counter2.labelVariable': GLOBAL_VARIABLE_CONFIG.counter2.labelVariable,
+                'counter3.valueVariable': GLOBAL_VARIABLE_CONFIG.counter3.valueVariable,
+                'counter3.labelVariable': GLOBAL_VARIABLE_CONFIG.counter3.labelVariable,
+                'counter4.valueVariable': GLOBAL_VARIABLE_CONFIG.counter4.valueVariable,
+                'counter4.labelVariable': GLOBAL_VARIABLE_CONFIG.counter4.labelVariable
+            });
+
+            // Check counter1 value
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter1.valueVariable) {
+                // Enhanced undefined handling - includes "undefined" string
+                let displayValue;
+                if (extractedValue === undefined || extractedValue === null || extractedValue === '' || extractedValue === 'undefined') {
+                    displayValue = '0';
+                    console.log(`⚠️ Received ${extractedValue} for counter1, displaying 0 instead`);
+                } else {
+                    displayValue = String(extractedValue);
+                }
+                document.getElementById('counter-counter1').textContent = displayValue;
+                console.log(`✅ Updated ${GLOBAL_VARIABLE_CONFIG.counter1.defaultLabel} value to "${displayValue}" (received: ${extractedValue}, type: ${typeof extractedValue})`);
+            }
+
+            // Check counter1 label
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter1.labelVariable) {
+                console.log('🏷️ Updating counter1 label element...');
+                const labelElement = document.getElementById('counter1-label');
+                console.log('🏷️ Label element found:', labelElement);
+                if (labelElement) {
+                    labelElement.textContent = extractedValue || GLOBAL_VARIABLE_CONFIG.counter1.defaultLabel;
+                    console.log(`✅ Updated counter1 label to "${extractedValue}"`);
+                } else {
+                    console.error('❌ Could not find counter1-label element');
+                }
+            }
+
+            // Check counter1 toggle
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter1.toggleVariable) {
+                setCounterVisibility('counter1', extractedValue);
+                return;
+            }
+
+            // Check counter2 value
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter2.valueVariable) {
+                // Enhanced undefined handling - includes "undefined" string
+                let displayValue;
+                if (extractedValue === undefined || extractedValue === null || extractedValue === '' || extractedValue === 'undefined') {
+                    displayValue = '0';
+                    console.log(`⚠️ Received ${extractedValue} for counter2, displaying 0 instead`);
+                } else {
+                    displayValue = String(extractedValue);
+                }
+                document.getElementById('counter-counter2').textContent = displayValue;
+                console.log(`✅ Updated ${GLOBAL_VARIABLE_CONFIG.counter2.defaultLabel} value to "${displayValue}" (received: ${extractedValue}, type: ${typeof extractedValue})`);
+            }
+
+            // Check counter2 label
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter2.labelVariable) {
+                console.log('🏷️ Updating counter2 label element...');
+                const labelElement = document.getElementById('counter2-label');
+                console.log('🏷️ Label element found:', labelElement);
+                if (labelElement) {
+                    labelElement.textContent = extractedValue || GLOBAL_VARIABLE_CONFIG.counter2.defaultLabel;
+                    console.log(`✅ Updated counter2 label to "${extractedValue}"`);
+                } else {
+                    console.error('❌ Could not find counter2-label element');
+                }
+            }
+
+            // Check counter2 toggle
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter2.toggleVariable) {
+                setCounterVisibility('counter2', extractedValue);
+                return;
+            }
+
+            // Check counter3 value
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter3.valueVariable) {
+                // Enhanced undefined handling - includes "undefined" string
+                let displayValue;
+                if (extractedValue === undefined || extractedValue === null || extractedValue === '' || extractedValue === 'undefined') {
+                    displayValue = '0';
+                    console.log(`⚠️ Received ${extractedValue} for counter3, displaying 0 instead`);
+                } else {
+                    displayValue = String(extractedValue);
+                }
+                document.getElementById('counter-counter3').textContent = displayValue;
+                console.log(`✅ Updated ${GLOBAL_VARIABLE_CONFIG.counter3.defaultLabel} value to "${displayValue}" (received: ${extractedValue}, type: ${typeof extractedValue})`);
+            }
+
+            // Check counter3 label
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter3.labelVariable) {
+                console.log('🏷️ Updating counter3 label element...');
+                const labelElement = document.getElementById('counter3-label');
+                console.log('🏷️ Label element found:', labelElement);
+                if (labelElement) {
+                    labelElement.textContent = extractedValue || GLOBAL_VARIABLE_CONFIG.counter3.defaultLabel;
+                    console.log(`✅ Updated counter3 label to "${extractedValue}"`);
+                } else {
+                    console.error('❌ Could not find counter3-label element');
+                }
+            }
+
+            // Check counter3 toggle
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter3.toggleVariable) {
+                setCounterVisibility('counter3', extractedValue);
+                return;
+            }
+
+            // Check counter4 value
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter4.valueVariable) {
+                // Enhanced undefined handling - includes "undefined" string
+                let displayValue;
+                if (extractedValue === undefined || extractedValue === null || extractedValue === '' || extractedValue === 'undefined') {
+                    displayValue = '0';
+                    console.log(`⚠️ Received ${extractedValue} for counter4, displaying 0 instead`);
+                } else {
+                    displayValue = String(extractedValue);
+                }
+                document.getElementById('counter-counter4').textContent = displayValue;
+                console.log(`✅ Updated ${GLOBAL_VARIABLE_CONFIG.counter4.defaultLabel} value to "${displayValue}" (received: ${extractedValue}, type: ${typeof extractedValue})`);
+            }
+
+            // Check counter4 label
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter4.labelVariable) {
+                console.log('🏷️ Updating counter4 label element...');
+                const labelElement = document.getElementById('counter4-label');
+                console.log('🏷️ Label element found:', labelElement);
+                if (labelElement) {
+                    labelElement.textContent = extractedValue || GLOBAL_VARIABLE_CONFIG.counter4.defaultLabel;
+                    console.log(`✅ Updated counter4 label to "${extractedValue}"`);
+                } else {
+                    console.error('❌ Could not find counter4-label element');
+                }
+            }
+
+            // Check counter4 toggle
+            if (variableName === GLOBAL_VARIABLE_CONFIG.counter4.toggleVariable) {
+                setCounterVisibility('counter4', extractedValue);
+                return;
+            }
+
+            // Check broadcaster variables (NEW)
+            if (variableName === GLOBAL_VARIABLE_CONFIG.broadcaster.displayNameVariable) {
+                updateBroadcasterDisplayName(extractedValue || GLOBAL_VARIABLE_CONFIG.broadcaster.defaultDisplayName);
+                return;
+            }
+
+            if (variableName === GLOBAL_VARIABLE_CONFIG.broadcaster.usernameVariable) {
+                updateBroadcasterUsername(extractedValue || GLOBAL_VARIABLE_CONFIG.broadcaster.defaultUsername);
+                return;
+            }
+
+            if (variableName === GLOBAL_VARIABLE_CONFIG.broadcaster.twitchUrlVariable) {
+                updateBroadcasterTwitchUrl(extractedValue || GLOBAL_VARIABLE_CONFIG.broadcaster.defaultTwitchUrl);
+                return;
+            }
+
+            if (variableName === GLOBAL_VARIABLE_CONFIG.broadcaster.profileImageTriggerVariable) {
+                // Trigger DecAPI call to load profile image
+                console.log('📺 Profile image trigger received for username:', extractedValue);
+                if (extractedValue && extractedValue.trim() !== '') {
+                    loadBroadcasterProfileImage(extractedValue.trim());
+                }
+                return;
+            }
+
+            // Check for activeGoalTypes variable (NEW type-based system)
+            if (variableName === GLOBAL_VARIABLE_CONFIG.goals.activeTypesVariable) {
+                console.log('🎯 Active goal types updated:', extractedValue);
+                // When active goal types change, request variables for those types
+                requestGoalVariables(extractedValue);
+                return;
+            }
+
+            // Check for type-based goal variables (goalFollowerCurrent, goalSubscriptionType, etc.)
+            const goalTypeVariableMatch = variableName.match(/^goal([A-Z][a-zA-Z]*)(Type|Current|Target|Description|Id)$/);
+            if (goalTypeVariableMatch) {
+                const goalType = goalTypeVariableMatch[1];
+                const property = goalTypeVariableMatch[2];
+                console.log(`🎯 Goal ${goalType} ${property} updated:`, variableName, '=', extractedValue);
+                updateTypeBasedGoalVariable(goalType, property, extractedValue);
+                return;
+            }
+
+            // Log if no matches found
+            const knownCounterVariables = [
+                GLOBAL_VARIABLE_CONFIG.counter1.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter1.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter1.toggleVariable,
+                GLOBAL_VARIABLE_CONFIG.counter2.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter2.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter2.toggleVariable,
+                GLOBAL_VARIABLE_CONFIG.counter3.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter3.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter3.toggleVariable,
+                GLOBAL_VARIABLE_CONFIG.counter4.valueVariable,
+                GLOBAL_VARIABLE_CONFIG.counter4.labelVariable,
+                GLOBAL_VARIABLE_CONFIG.counter4.toggleVariable,
+                // Broadcaster variables
+                GLOBAL_VARIABLE_CONFIG.broadcaster.displayNameVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.usernameVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.userIdVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.twitchUrlVariable,
+                GLOBAL_VARIABLE_CONFIG.broadcaster.profileImageTriggerVariable,
+                // Goal variables
+                GLOBAL_VARIABLE_CONFIG.goals.activeTypesVariable
+            ];
+
+            // Check if it's a known variable
+            const isTypeBasedGoalVariable = /^goal[A-Z][a-zA-Z]*(Type|Current|Target|Description|Id)$/.test(variableName);
+            const isKnownVariable = knownCounterVariables.includes(variableName) || isTypeBasedGoalVariable;
+
+            if (!isKnownVariable) {
+                console.log('⚠️ Variable not in configuration:', variableName);
+            }
+
+            // Sync changes to carousel displays
+            if (CarouselManager && typeof CarouselManager.syncData === 'function') {
+                CarouselManager.syncData(variableName, extractedValue);
+            }
+
+        }
+
+
+        // Store goal data by type for processing
+        let goalDataByType = {};
+
+        // Update type-based goal variables and render when complete
+        function updateTypeBasedGoalVariable(goalType, property, value) {
+            console.log(`🔄 updateTypeBasedGoalVariable: ${goalType}.${property} = "${value}"`);
+
+            // Initialize goal data object for this type if needed
+            if (!goalDataByType[goalType]) {
+                goalDataByType[goalType] = {};
+                console.log(`🆕 Initialized new goal data for type: ${goalType}`);
+            }
+
+            // Update the specific property
+            goalDataByType[goalType][property] = value;
+
+            console.log(`📋 Goal ${goalType} current data:`, goalDataByType[goalType]);
+
+            // Check if we have all required properties for this goal type
+            const requiredProps = ['Type', 'Current', 'Target', 'Description'];
+            const hasAllProps = requiredProps.every(prop => goalDataByType[goalType].hasOwnProperty(prop));
+            const missingProps = requiredProps.filter(prop => !goalDataByType[goalType].hasOwnProperty(prop));
+
+            console.log(`🔍 Goal ${goalType} completeness check:`);
+            console.log(`  ✅ Has properties: ${Object.keys(goalDataByType[goalType]).join(', ')}`);
+            console.log(`  ${hasAllProps ? '✅' : '❌'} Complete: ${hasAllProps}`);
+            if (!hasAllProps) {
+                console.log(`  📋 Missing: ${missingProps.join(', ')}`);
+            }
+
+            if (hasAllProps) {
+                console.log(`🚀 Goal ${goalType} is complete! Triggering renderTypeBasedGoals()`);
+                renderTypeBasedGoals();
+            }
+        }
+
+        // Render goals from type-based data structure
+        function renderTypeBasedGoals() {
+            const goalsArray = [];
+
+            // Convert type-based data to array format for existing render function
+            Object.keys(goalDataByType).forEach(type => {
+                const goalData = goalDataByType[type];
+
+                // Only include goals that have all required properties (allow empty description)
+                if (goalData.Type && goalData.Current !== undefined && goalData.Target !== undefined && goalData.Description !== undefined) {
+                    const description = goalData.Description.trim() || `${goalData.Type.charAt(0).toUpperCase() + goalData.Type.slice(1)} Goal`;
+
+                    goalsArray.push({
+                        current_amount: parseInt(goalData.Current) || 0,
+                        target_amount: parseInt(goalData.Target) || 100,
+                        description: description,
+                        type: goalData.Type || type.toLowerCase(),
+                        id: goalData.Id || '',
+                        normalizedType: type // Keep track of normalized type for identification
+                    });
+
+                    console.log(`🎯 Adding ${type} goal:`, goalData, '→ Description:', description);
+                } else {
+                    console.log(`❌ Skipping ${type} goal - missing required properties:`, goalData);
+                    console.log(`  Type: ${goalData.Type !== undefined ? '✅' : '❌'}`);
+                    console.log(`  Current: ${goalData.Current !== undefined ? '✅' : '❌'}`);
+                    console.log(`  Target: ${goalData.Target !== undefined ? '✅' : '❌'}`);
+                    console.log(`  Description: ${goalData.Description !== undefined ? '✅' : '❌'}`);
+                }
+            });
+
+            console.log('🎨 Rendering goals array:', goalsArray);
+            renderGoals(goalsArray);
+        }
+
+        // Legacy function - no longer used with type-based system
+        // Kept for backward compatibility but redirects to type-based system
+        function updateMultipleGoalsFromGlobalVariables() {
+            console.log('🔄 Legacy function called - redirecting to type-based goal system');
+
+            // Request current active goal types to refresh the display via official client
+            if (window.streamerbotClient && window.streamerbotClient.isConnected) {
+                (async () => {
+                    try {
+                        const response = await window.streamerbotClient.getGlobal(GLOBAL_VARIABLE_CONFIG.goals.activeTypesVariable);
+                        const value = response.variable;
+                        console.log('🔄 Refreshed activeGoalTypes:', value);
+
+                        if (value === 'activeGoalTypes') {
+                            requestGoalVariables(value);
+                        } else {
+                            updateCounterFromGlobalVariable('activeGoalTypes', value);
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ Failed to refresh activeGoalTypes via official client:', error);
+                    }
+                })();
+            }
+        }
+
+        // Goals are now handled directly via JavaScript API calls with tokens from Streamer.bot
+
+        function updateGoalDisplay(goal) {
+            console.log('🎯 Updating goal display:', goal);
+
+            // Update the goal section in the overlay
+            const goalDescription = goal.description || GLOBAL_VARIABLE_CONFIG.goals.defaultDescription;
+            const goalCurrent = goal.current_amount || GLOBAL_VARIABLE_CONFIG.goals.defaultCurrent;
+            const goalTarget = goal.target_amount || GLOBAL_VARIABLE_CONFIG.goals.defaultTarget;
+            const goalType = goal.type || GLOBAL_VARIABLE_CONFIG.goals.defaultType;
+
+            // Use the existing goals rendering function
+            renderGoals([{
+                current_amount: goalCurrent,
+                target_amount: goalTarget,
+                description: goalDescription,
+                type: goalType
+            }]);
+
+            console.log(`✅ Goal updated: ${goalDescription} (${goalCurrent}/${goalTarget})`);
+        }
+
+        // GOALS FROM C# SCRIPT:
+        // Goals are now handled by a C# script in Streamer.bot that:
+        // 1. Fetches goals from Twitch API (with proper OAuth)
+        // 2. Updates Streamer.bot global variables:
+        //    - goalCurrent: Current progress amount
+        //    - goalTarget: Target goal amount
+        //    - goalDescription: Goal description text
+        //    - goalType: Goal type (follower, subscription, etc.)
+        // 3. This overlay reads those global variables automatically
+
+        function requestGoalsUpdate() {
+            console.log('🎯 Goals handled by C# script - no manual update needed');
+            console.log('💡 C# script should update: goalCurrent, goalTarget, goalDescription, goalType');
+        }
+
+        // Goals are now handled by C# script - no direct API calls needed
+
+        function setDefaultGoal(reason) {
+            console.log(`🎯 Setting default goal: ${reason}`);
+            const goalText = reason === 'OAuth Required'
+                ? 'OAuth Setup Required'
+                : reason;
+
+            updateGoalDisplay({
+                type: GLOBAL_VARIABLE_CONFIG.goals.defaultType,
+                description: goalText,
+                current_amount: GLOBAL_VARIABLE_CONFIG.goals.defaultCurrent,
+                target_amount: GLOBAL_VARIABLE_CONFIG.goals.defaultTarget
+            });
+        }
+
+
+        // Using official @streamerbot/client for connection (no manual WebSocket needed)
+
+        // Debug mode detection - urlParams and debugMode already available from overlay-common.js
+
+        function connectWebSocket() {
+            // Use global Streamer.bot client from streamerbot-integration.js
+            if (window.streamerbotClient) {
+                console.log('🔄 Using existing global Streamer.bot client (no duplicate initialization)');
+
+                // Set up example.html specific connection events if not already connected
+                if (!window.streamerbotClient.isConnected) {
+                    // Add connection status handlers specific to example.html
+                    window.streamerbotClient.on('WebsocketClient.Open', () => {
+                        console.log('✅ Example.html connected to Streamer.bot via global client');
+                        updateConnectionStatus(true);
+
+                        // Request current variable values after connection
+                        console.log('⏰ Scheduling global variable requests in 2 seconds...');
+                        setTimeout(() => {
+                            console.log('🚀 Executing scheduled global variable requests');
+                            requestCurrentVariableValues();
+                        }, 2000);
+                    });
+
+                    window.streamerbotClient.on('WebsocketClient.Close', () => {
+                        console.log('❌ Example.html Streamer.bot connection closed');
+                        updateConnectionStatus(false);
+                    });
+                }
+                return;
+            }
+
+            // Fallback: Global client not available yet
+            console.log('⏳ Global Streamer.bot client not ready, will be initialized by streamerbot-integration.js');
+
+            // Check again after a short delay
+            setTimeout(() => {
+                if (window.streamerbotClient) {
+                    console.log('✅ Global Streamer.bot client now available');
+                    connectWebSocket(); // Retry connection
+                } else {
+                    console.warn('⚠️ Global Streamer.bot client still not available after delay');
+                }
+            }, 500);
+        }
+
+        function handleOverlayEvent(data) {
+            console.log('🎯 Received overlay event:', data);
+
+            // Handle different event types
+            if (data.type) {
+                switch (data.type) {
+                    case 'follow':
+                        addActivity('follow', data.user || 'Unknown', 'followed the channel! Welcome!');
+                        streamerData.followers++;
+                        break;
+
+                    case 'subscribe':
+                        const tier = data.tier || 'Prime';
+                        const subMessage = data.isGift ? 'received a gift sub!' : `subscribed with ${tier}! Thank you!`;
+                        addActivity('sub', data.user || 'Unknown', subMessage);
+                        break;
+
+                    case 'cheer':
+                        const amount = data.amount || 0;
+                        const cheerMsg = data.message ? ` - "${data.message}"` : '';
+                        addActivity('cheer', data.user || 'Unknown', `cheered ${amount} bits!${cheerMsg}`);
+                        break;
+
+                    case 'raid':
+                        const viewers = data.viewers || 0;
+                        addActivity('raid', data.user || 'Unknown', `raided with ${viewers} viewers! Welcome raiders!`);
+                        break;
+
+                    case 'donation':
+                        const donAmount = data.amount || 0;
+                        const donMsg = data.message ? ` - "${data.message}"` : '';
+                        addActivity('donation', data.user || 'Unknown', `donated $${donAmount}!${donMsg}`);
+                        break;
+
+                    case 'stream_online':
+                        streamerData.isLive = true;
+                        addActivity('stream', 'Stream', 'started! Welcome everyone! 🎮');
+                        break;
+
+                    case 'stream_offline':
+                        streamerData.isLive = false;
+                        addActivity('stream', 'Stream', 'ended. Thanks for watching!');
+                        break;
+
+                    default:
+                        console.log('🔍 Unhandled event type:', data.type, data);
+                        break;
+                }
+            }
+
+            // Handle counter updates
+            if (data.counter && data.value !== undefined) {
+                updateCounter(data.counter, data.value);
+            }
+
+            // Handle goal updates
+            if (data.goalCurrent !== undefined && data.goalTarget !== undefined) {
+                const goalType = data.goalType || 'follower';
+                const goalLabel = data.goalLabel || 'Goal';
+                renderGoals([{
+                    current_amount: data.goalCurrent,
+                    target_amount: data.goalTarget,
+                    description: goalLabel,
+                    type: goalType
+                }]);
+            }
+        }
+
+        function handleStreamerBotEvent(data) {
+            // Enhanced debug logging for event data structure
+            console.log('🔍 Event received in handleStreamerBotEvent:', {
+                fullEvent: data,
+                eventType: data.event?.type,
+                eventSource: data.event?.source,
+                arguments: data.data?.arguments,
+                argumentKeys: data.data?.arguments ? Object.keys(data.data.arguments) : 'none'
+            });
+
+            const args = data.data.arguments;
+            const trigger = args.triggerName;
+            const platform = args.eventSource;
+            const user = args.user || args.userName || args.display || 'Unknown';
+
+            console.log('🎯 Streamer.bot event:', trigger, 'from', platform, 'by', user);
+            console.log('📋 Full event data:', args);
+
+            // Check if this is an action completion event (no trigger)
+            if (!trigger) {
+                console.log('📋 Action completion event (no trigger), skipping event processing');
+                return;
+            }
+
+            // Map trigger to standard type
+            const type = mapTriggerToType(trigger);
+            const eventInfo = extractEventInfo(trigger, args);
+
+            // Handle specific triggers first
+            if (trigger === 'Global Variable Updated') {
+                // Handle global variable updates from Raw.Action events
+                const globalName = args['global.name'];
+                const globalNewValue = args['global.newValue'];
+                const globalOldValue = args['global.oldValue'];
+
+                console.log('🔄 Processing global variable update from Raw.Action:', {
+                    name: globalName,
+                    oldValue: globalOldValue,
+                    newValue: globalNewValue
+                });
+
+                if (globalName) {
+                    updateCounterFromGlobalVariable(globalName, globalNewValue);
+                }
+                return;
+            }
+
+            // Handle different event types for activity feed
+            switch(type) {
+                case 'follow':
+                    addActivity('follow', user, 'followed the channel! Welcome!');
+                    streamerData.followers++;
+                    break;
+
+                case 'subscribe':
+                    const tier = eventInfo.tier || 'Prime';
+                    const months = eventInfo.months || 1;
+                    const subscribeMessage = eventInfo.isGift ?
+                        'received a gift sub!' :
+                        `subscribed with ${tier} for ${months} months!`;
+                    addActivity('sub', user, subscribeMessage);
+                    break;
+
+                case 'cheer':
+                    const bits = eventInfo.bits || 0;
+                    const cheerMsg = eventInfo.message ? ` - "${eventInfo.message}"` : '';
+                    addActivity('cheer', user, `cheered ${bits} bits!${cheerMsg}`);
+                    break;
+
+                case 'raid':
+                    const viewers = eventInfo.viewers || 0;
+                    addActivity('raid', user, `raided with ${viewers} viewers! Welcome raiders!`);
+                    break;
+
+                case 'donation':
+                    const amount = eventInfo.amount || 0;
+                    const donMsg = eventInfo.message ? ` - "${eventInfo.message}"` : '';
+                    addActivity('donation', user, `donated $${amount}!${donMsg}`);
+                    break;
+
+                case 'goal_begin':
+                    console.log('🎯 Goal Begin event received - raw args:', args);
+                    console.log('🎯 Goal Begin event - processed eventInfo:', eventInfo);
+                    handleGoalBegin(args);  // Pass raw args instead of processed eventInfo
+                    break;
+
+                case 'goal_progress':
+                    console.log('📈 Goal Progress event received - raw args:', args);
+                    console.log('📈 Goal Progress event - processed eventInfo:', eventInfo);
+                    handleGoalProgress(args);  // Pass raw args instead of processed eventInfo
+                    break;
+
+                case 'goal_end':
+                    console.log('🏁 Goal End event received - raw args:', args);
+                    console.log('🏁 Goal End event - processed eventInfo:', eventInfo);
+                    handleGoalEnd(args);  // Pass raw args instead of processed eventInfo
+                    break;
+
+
+                case 'heart_rate_pulse':
+                    console.log('💓 Heart rate pulse received:', args.heartRate + ' BPM');
+                    updateHeartRate(args.heartRate, args.measuredAt);
+                    break;
+
+                default:
+                    console.log('🔍 Unhandled event type:', type, trigger, eventInfo);
+                    break;
+            }
+        }
+
+        function handleGlobalVariableUpdate(data) {
+            console.log('🔍 Raw global variable update data:', data);
+
+            // Handle different possible data structures
+            let variableName, value, oldValue;
+
+            if (data.data && data.data.arguments) {
+                // Structure: data.data.arguments
+                const args = data.data.arguments;
+                variableName = args.variable || args.variableName || args.name;
+                value = args.value || args.newValue;
+                oldValue = args.oldValue;
+            } else if (data.data) {
+                // Structure: data.data directly (the actual Streamer.bot structure)
+                variableName = data.data.name || data.data.variable || data.data.variableName;
+                value = data.data.newValue || data.data.value;
+                oldValue = data.data.oldValue;
+            } else if (data.variable || data.name) {
+                // Structure: data directly
+                variableName = data.variable || data.variableName || data.name;
+                value = data.value || data.newValue;
+                oldValue = data.oldValue;
+            } else {
+                console.error('❌ Unknown global variable update structure:', data);
+                return;
+            }
+
+            console.log('📊 Global variable update received:', {
+                variable: variableName,
+                oldValue: oldValue,
+                newValue: value
+            });
+
+            // Only proceed if we have a variable name
+            if (variableName) {
+                updateCounterFromGlobalVariable(variableName, value);
+            } else {
+                console.error('❌ No variable name found in global variable update');
+            }
+        }
+
+        // Map trigger names to standard types (same as universal overlay)
+        function mapTriggerToType(trigger) {
+            // Safety check for undefined/null triggers
+            if (!trigger || typeof trigger !== 'string') {
+                return 'unknown';
+            }
+
+            const typeMap = {
+                'Follow': 'follow',
+                'Subscribe': 'subscribe',
+                'Subscription': 'subscribe',
+                'Cheer': 'cheer',
+                'Raid': 'raid',
+                'Host': 'host',
+                'Donation': 'donation',
+                'Sub Gift': 'gift_sub',
+                'Bits': 'cheer',
+                'Super Chat': 'donation',
+                'Member': 'membership'
+            };
+            return typeMap[trigger] || trigger.toLowerCase().replace(/\s+/g, '_');
+        }
+
+        function extractEventInfo(trigger, args) {
+            const info = {};
+
+            switch(trigger) {
+                case 'Follow':
+                    break;
+
+                case 'Subscribe':
+                case 'Subscription':
+                    info.tier = args.subscriptionTier || args.tier;
+                    info.months = args.monthsSubscribed || args.months;
+                    info.isGift = args.isGift;
+                    break;
+
+                case 'Cheer':
+                case 'Bits':
+                    info.bits = args.bits;
+                    info.message = args.message;
+                    break;
+
+                case 'Raid':
+                    info.viewers = args.viewers || args.raidViewers;
+                    break;
+
+
+                case 'Donation':
+                case 'Super Chat':
+                    info.amount = args.amount;
+                    info.message = args.message;
+                    break;
+
+                case 'Host':
+                    info.viewers = args.viewers;
+                    break;
+            }
+
+            return info;
+        }
+
+        function updateConnectionStatus(connected) {
+            // Connection status indicator removed - function disabled
+            // const dot = document.getElementById('status-dot');
+            // const text = document.getElementById('status-text');
+            // if (connected) {
+            //     dot.classList.add('connected');
+            //     text.textContent = 'Connected';
+            // } else {
+            //     dot.classList.remove('connected');
+            //     text.textContent = 'Disconnected';
+            // }
+        }
+
+        function handleBroadcasterInfo(data) {
+            const twitch = data.platforms?.twitch;
+            if (twitch) {
+                const displayName = twitch.broadcastUserName || twitch.broadcastUser;
+                const userId = twitch.broadcastUserId;
+
+                if (displayName && userId) {
+                    document.getElementById('profile-name').textContent = displayName;
+                    document.getElementById('profile-link').textContent = `twitch.tv/${displayName.toLowerCase()}`;
+                    document.getElementById('profile-fallback').textContent = displayName.charAt(0).toUpperCase();
+
+                    // Fetch profile image using Twitch API
+                    fetchTwitchProfileImage(displayName, userId);
+                }
+            }
+        }
+
+        async function fetchTwitchProfileImage(username, userId) {
+            console.log('Using DecAPI to fetch profile image for:', username);
+            tryDecAPIFallback(username);
+        }
+
+        function tryDecAPIFallback(username) {
+            console.log('Trying DecAPI fallback for:', username);
+
+            // Use the working pattern from compact-overlay.html
+            fetch(`https://decapi.me/twitch/avatar/${username}`)
+                .then(response => response.text())
+                .then(url => {
+                    url = url.trim();
+                    console.log('DecAPI returned URL:', url);
+
+                    if (url && url.startsWith('http')) {
+                        const img = document.getElementById('profile-image');
+                        const fallback = document.getElementById('profile-fallback');
+
+                        img.onload = () => {
+                            console.log('Profile image loaded from DecAPI URL');
+                            img.style.display = 'block';
+                            fallback.style.display = 'none';
+                        };
+
+                        img.onerror = () => {
+                            console.error('Profile image failed to load, showing fallback');
+                            img.style.display = 'none';
+                            fallback.style.display = 'block';
+                        };
+
+                        img.src = url;
+                    } else {
+                        console.error('DecAPI returned invalid URL:', url);
+                        const img = document.getElementById('profile-image');
+                        const fallback = document.getElementById('profile-fallback');
+                        img.style.display = 'none';
+                        fallback.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('DecAPI fetch failed:', error);
+                    const img = document.getElementById('profile-image');
+                    const fallback = document.getElementById('profile-fallback');
+                    img.style.display = 'none';
+                    fallback.style.display = 'block';
+                });
+        }
+
+        // NEW: Broadcaster info update functions
+        function updateBroadcasterDisplayName(displayName) {
+            console.log('📺 Updating broadcaster display name:', displayName);
+            document.getElementById('profile-name').textContent = displayName;
+            document.getElementById('profile-fallback').textContent = displayName.charAt(0).toUpperCase();
+        }
+
+        function updateBroadcasterTwitchUrl(twitchUrl) {
+            console.log('📺 Updating broadcaster Twitch URL:', twitchUrl);
+            document.getElementById('profile-link').textContent = twitchUrl;
+        }
+
+        function loadBroadcasterProfileImage(username) {
+            console.log('📺 Loading broadcaster profile image for username:', username);
+
+            if (!username || username.trim() === '') {
+                console.error('❌ No username provided for profile image loading');
+                const img = document.getElementById('profile-image');
+                const fallback = document.getElementById('profile-fallback');
+                img.style.display = 'none';
+                fallback.style.display = 'block';
+                return;
+            }
+
+            console.log('🌐 Making DecAPI request to:', `https://decapi.me/twitch/avatar/${username}`);
+
+            // Use DecAPI to get the actual profile image URL
+            fetch(`https://decapi.me/twitch/avatar/${username}`)
+                .then(response => {
+                    console.log('📺 DecAPI response status:', response.status, response.statusText);
+                    return response.text();
+                })
+                .then(url => {
+                    url = url.trim();
+                    console.log('📺 DecAPI raw response:', url);
+
+                    if (url && url.startsWith('http') && !url.toLowerCase().includes('error') && !url.toLowerCase().includes('user not found')) {
+                        const img = document.getElementById('profile-image');
+                        const fallback = document.getElementById('profile-fallback');
+
+                        console.log('🖼️ Attempting to load image from URL:', url);
+
+                        // Add a timeout to catch slow-loading images
+                        const timeout = setTimeout(() => {
+                            console.warn('⏰ Profile image loading timeout, showing fallback');
+                            img.style.display = 'none';
+                            fallback.style.display = 'block';
+                        }, 10000); // 10 second timeout
+
+                        img.onload = () => {
+                            clearTimeout(timeout);
+                            console.log('✅ Broadcaster profile image loaded successfully');
+                            img.style.display = 'block';
+                            fallback.style.display = 'none';
+                        };
+
+                        img.onerror = () => {
+                            clearTimeout(timeout);
+                            console.error('❌ Broadcaster profile image failed to load from URL:', url);
+                            img.style.display = 'none';
+                            fallback.style.display = 'block';
+                        };
+
+                        img.src = url;
+                    } else {
+                        console.log('⚠️ DecAPI returned invalid/error response:', url);
+                        const img = document.getElementById('profile-image');
+                        const fallback = document.getElementById('profile-fallback');
+                        img.style.display = 'none';
+                        fallback.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ DecAPI fetch failed:', error);
+                    const img = document.getElementById('profile-image');
+                    const fallback = document.getElementById('profile-fallback');
+                    img.style.display = 'none';
+                    fallback.style.display = 'block';
+                });
+        }
+
+        // Test function for debugging - call from browser console
+        window.testProfileImage = function(username) {
+            console.log('🧪 Testing profile image load for username:', username || 'current broadcaster');
+            if (username) {
+                loadBroadcasterProfileImage(username);
+            } else {
+                // Try to get current broadcaster username from DOM
+                const linkElement = document.getElementById('profile-link');
+                if (linkElement && linkElement.textContent.includes('twitch.tv/')) {
+                    const currentUsername = linkElement.textContent.replace('twitch.tv/', '');
+                    console.log('🔍 Found current username from DOM:', currentUsername);
+                    loadBroadcasterProfileImage(currentUsername);
+                } else {
+                    console.log('⚠️ No username found, please provide one: testProfileImage("yourusername")');
+                }
+            }
+        };
+
+        // DEBUG: Goal troubleshooting functions
+        window.debugGoals = function() {
+            console.log('🔍 GOAL DEBUG: Current goal data state:');
+            console.log('goalDataByType:', goalDataByType);
+
+            // Check if we have activeGoalTypes via official client
+            if (window.streamerbotClient && window.streamerbotClient.isConnected) {
+                (async () => {
+                    try {
+                        console.log('📡 Requesting current activeGoalTypes variable via official client...');
+                        const response = await window.streamerbotClient.getGlobal("activeGoalTypes");
+                        const activeGoalTypesValue = response.variable;
+                        console.log('🎯 DEBUG: activeGoalTypes =', activeGoalTypesValue);
+                        if (activeGoalTypesValue && activeGoalTypesValue.trim() !== '') {
+                            console.log('🎯 DEBUG: Requesting variables for types:', activeGoalTypesValue.split(','));
+                        } else {
+                            console.log('🎯 DEBUG: No active goal types found');
+                        }
+
+                        // Also check for all possible goal type variables
+                        const goalTypes = ['Follower', 'Subscription', 'Bit', 'Donation', 'Raid', 'Host', 'Viewer'];
+                        for (const type of goalTypes) {
+                            for (const prop of ['Type', 'Current', 'Target', 'Description', 'Id']) {
+                                const varName = `goal${type}${prop}`;
+                                try {
+                                    const response = await window.streamerbotClient.getGlobal(varName);
+                                    const value = response.variable;
+                                    console.log(`🐛 DEBUG RESULT: ${varName} =`, value);
+                                } catch (error) {
+                                    console.warn(`⚠️ Failed to get ${varName}:`, error);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('❌ Failed to debug goals via official client:', error);
+                    }
+                })();
+            } else {
+                console.error('❌ Official @streamerbot/client not connected');
+            }
+        };
+
+        window.debugVariables = function() {
+            console.log('🔍 VARIABLE DEBUG: Requesting all broadcaster and goal variables via official client...');
+            if (window.streamerbotClient && window.streamerbotClient.isConnected) {
+                (async () => {
+                    try {
+                        // Request all broadcaster variables
+                        const broadcasterVars = [
+                            'broadcasterDisplayName',
+                            'broadcasterUsername',
+                            'broadcasterTwitchUrl',
+                            'broadcasterProfileImageTrigger'
+                        ];
+
+                        for (const varName of broadcasterVars) {
+                            try {
+                                const response = await window.streamerbotClient.getGlobal(varName);
+                                const value = response.variable;
+                                console.log(`🐛 DEBUG RESULT: ${varName} =`, value);
+                            } catch (error) {
+                                console.warn(`⚠️ Failed to get ${varName}:`, error);
+                            }
+                        }
+
+                        // Request activeGoalTypes
+                        try {
+                            const response = await window.streamerbotClient.getGlobal("activeGoalTypes");
+                            const activeGoalTypesValue = response.variable;
+                            console.log('🐛 DEBUG RESULT: activeGoalTypes =', activeGoalTypesValue);
+                        } catch (error) {
+                            console.warn('⚠️ Failed to get activeGoalTypes:', error);
+                        }
+                    } catch (error) {
+                        console.error('❌ Failed to debug variables via official client:', error);
+                    }
+                })();
+            } else {
+                console.error('❌ Official @streamerbot/client not connected');
+            }
+        };
+
+        window.testGoalRender = function() {
+            console.log('🧪 Testing goal render with mock data...');
+
+            // Create mock goal data
+            goalDataByType = {
+                "Follower": {
+                    Type: "follower",
+                    Current: "45",
+                    Target: "100",
+                    Description: "Test Follower Goal",
+                    Id: "test123"
+                }
+            };
+
+            console.log('Mock goal data set:', goalDataByType);
+            renderTypeBasedGoals();
+        };
+
+        // Auto-trigger profile image load when broadcaster username is available
+        function updateBroadcasterUsername(username) {
+            console.log('📺 Updating broadcaster username:', username);
+            // Update the Twitch URL
+            document.getElementById('profile-link').textContent = `twitch.tv/${username}`;
+
+            // Also trigger profile image loading here as a fallback
+            console.log('🔄 Auto-triggering profile image load from username update');
+            loadBroadcasterProfileImage(username);
+        }
+
+
+        function handleEvent(event, eventData) {
+            const eventType = `${event.source}.${event.type}`;
+            console.log('Event type:', eventType);
+
+            switch (eventType) {
+                case 'General.Custom':
+                    console.log('General.Custom event data:', eventData);
+
+                    // Check for Custom events in the original eventData FIRST
+                    if (eventData.event && eventData.event.source === 'Custom') {
+                        if (eventData.event.type === 'StreamStart') {
+                            console.log('Stream started event detected');
+                            addActivity('stream', 'Stream', 'started! Welcome everyone! 🎮');
+                        }
+                    }
+
+                    // Handle nested data structures and JSON strings
+                    let customData = eventData.data ? eventData.data : eventData;
+
+                    // If data is a JSON string, parse it
+                    if (typeof customData === 'string') {
+                        try {
+                            customData = JSON.parse(customData);
+                            console.log('Parsed JSON string:', customData);
+                        } catch (e) {
+                            console.log('Data is not JSON:', customData);
+                        }
+                    }
+
+                    // Check for nested data again after parsing
+                    if (customData.data && typeof customData.data === 'object') {
+                        customData = customData.data;
+                    }
+
+                    console.log('Final customData:', customData);
+
+                    // Debug info from Streamer.bot
+                    if (customData.debug) {
+                        console.log('=== STREAMER.BOT DEBUG INFO ===');
+                        console.log(customData.debug);
+                        console.log('=== END DEBUG INFO ===');
+                    }
+
+                    // Profile image from Streamer.bot
+                    if (customData.profileImage && customData.username) {
+                        console.log('Received profile image URL:', customData.profileImage);
+                        const img = document.getElementById('profile-image');
+                        const fallback = document.getElementById('profile-fallback');
+
+                        img.onload = () => {
+                            console.log('Profile image loaded from Streamer.bot');
+                            img.style.display = 'block';
+                            fallback.style.display = 'none';
+                        };
+
+                        img.onerror = () => {
+                            console.log('Profile image from Streamer.bot failed to load');
+                            // Try DecAPI as fallback
+                            tryDecAPIFallback(customData.username);
+                        };
+
+                        img.src = customData.profileImage;
+                    }
+
+                    // Dynamic goals array from Twitch API (full refresh)
+                    if (customData.goals) {
+                        console.log('Found goals array:', customData.goals);
+                        if (typeof customData.goals === 'string') {
+                            try {
+                                customData.goals = JSON.parse(customData.goals);
+                            } catch (e) {}
+                        }
+                        if (Array.isArray(customData.goals)) {
+                            console.log('Rendering all goals:', customData.goals);
+                            renderGoals(customData.goals);
+                        }
+                    }
+
+                    // Single goal update (from targeted refresh)
+                    if (customData.goal && typeof customData.goal === 'object') {
+                        console.log('Found single goal:', customData.goal);
+                        updateSingleGoal(customData.goal);
+                    }
+
+                    // Legacy single goal support (subGoalCurrent/subGoalTarget)
+                    if (customData.subGoalCurrent !== undefined || customData.goalCurrent !== undefined) {
+                        const current = customData.subGoalCurrent ?? customData.goalCurrent ?? 0;
+                        const target = customData.subGoalTarget ?? customData.goalTarget ?? 100;
+                        const label = customData.goalLabel ?? 'Sub Goal';
+                        const type = customData.goalType ?? 'subscription';
+                        console.log('Legacy goal:', current, '/', target);
+                        renderGoals([{ current_amount: current, target_amount: target, description: label, type: type }]);
+                    }
+
+                    // Counter update
+                    if (customData.counter) {
+                        updateCounter(customData.counter, customData.value);
+                    }
+
+
+                    // Activity update from Streamer.bot
+                    if (customData.type === 'activity_update' && customData.activities) {
+                        console.log('Processing activity update from Streamer.bot:', customData.activities);
+                        handleActivityUpdate(customData);
+                    }
+
+
+                    // Game change
+                    if (customData.gameTitle) {
+                        console.log('Game changed to:', customData.gameTitle);
+                    }
+                    break;
+
+                case 'Twitch.Follow':
+                    console.log('Twitch.Follow eventData:', eventData);
+                    const followUser = eventData.user?.login || eventData.user?.name || eventData.user_name || eventData.userName || eventData.displayName || 'Unknown User';
+                    console.log('Follow user extracted:', followUser);
+                    addActivity('follow', followUser, 'just followed!');
+                    break;
+
+                case 'Twitch.Sub':
+                case 'Twitch.ReSub':
+                    console.log('Twitch.Sub eventData:', eventData);
+                    const subUser = eventData.user?.login || eventData.user?.name || eventData.user_name || eventData.userName || eventData.displayName || 'Unknown User';
+                    const subTier = eventData.sub_tier ? Math.floor(parseInt(eventData.sub_tier) / 1000) : (eventData.tier ? Math.floor(eventData.tier / 1000) : 1);
+                    console.log('Sub user extracted:', subUser, 'Tier:', subTier);
+                    addActivity('sub', subUser, `subscribed (Tier ${subTier})!`);
+                    break;
+
+                case 'Twitch.GiftSub':
+                    console.log('Twitch.GiftSub eventData:', eventData);
+                    const giftUser = eventData.user?.login || eventData.user?.name || eventData.user_name || eventData.userName || eventData.displayName || 'Unknown User';
+                    const giftCount = eventData.gifts || eventData.totalGifts || 1;
+                    console.log('Gift user extracted:', giftUser, 'Count:', giftCount);
+                    addActivity('sub', giftUser, `gifted ${giftCount} sub(s)!`);
+                    break;
+
+                case 'Twitch.Raid':
+                    console.log('Twitch.Raid eventData:', eventData);
+                    const raidUser = eventData.user?.login || eventData.user?.name || eventData.from_broadcaster_user_name || eventData.userName || eventData.displayName || 'Unknown User';
+                    const viewers = eventData.viewers || eventData.viewerCount || 0;
+                    console.log('Raid user extracted:', raidUser, 'Viewers:', viewers);
+                    addActivity('raid', raidUser, `raided with ${viewers} viewers!`);
+                    break;
+
+                case 'Twitch.Cheer':
+                    console.log('Twitch.Cheer eventData:', eventData);
+                    const bitsUser = eventData.user?.login || eventData.user?.name || eventData.user_name || eventData.userName || eventData.displayName || 'Unknown User';
+                    const bits = eventData.bits || eventData.amount || 0;
+                    console.log('Bits user extracted:', bitsUser, 'Amount:', bits);
+                    addActivity('bits', bitsUser, `cheered ${bits} bits!`);
+                    break;
+
+                case 'Custom.StreamStart':
+                    console.log('Custom.StreamStart eventData:', eventData);
+                    addActivity('stream', 'Stream', 'started! Welcome everyone! 🎮');
+                    break;
+            }
+        }
+
+        function renderGoals(goals) {
+            console.log('🎨 renderGoals called with:', goals);
+            const container = document.getElementById('goals-container');
+            container.innerHTML = '';
+
+            if (!goals || goals.length === 0) {
+                console.log('⚠️ No goals to render - showing "No active goals" message');
+                console.log('🔍 Debug info:');
+                console.log('  - goals parameter:', goals);
+                console.log('  - goalDataByType:', goalDataByType);
+                container.innerHTML = '<div class="no-goals">No active goals</div>';
+                return;
+            }
+
+            console.log(`✅ Rendering ${goals.length} goals`);
+
+            // Store for single updates
+            currentGoals = goals;
+
+            goals.forEach((goal, index) => {
+                const current = goal.current_amount || 0;
+                const target = goal.target_amount || 100;
+                const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+
+                // Handle empty strings and detect bits goals by target amount
+                let type = goal.type;
+                if (!type || type === '') {
+                    // Detect bits goal by common target amounts (100, 500, 1000, 5000, 10000)
+                    if (goal.target_amount && (goal.target_amount % 100 === 0) && goal.target_amount >= 100 && goal.target_amount <= 50000) {
+                        type = 'cheer';
+                        console.log('Detected bits goal by target amount:', goal.target_amount);
+                    } else {
+                        type = 'custom';
+                    }
+                }
+
+                const label = goal.description || formatGoalType(type);
+
+                console.log('Raw goal object:', goal);
+                console.log('Goal data:', {
+                    originalType: goal.type,
+                    finalType: type,
+                    description: goal.description,
+                    finalLabel: label
+                });
+
+                const goalEl = document.createElement('div');
+                goalEl.className = 'goal-item';
+                goalEl.innerHTML = `
+                    <div class="goal-label">
+                        <span class="goal-type ${type}">${formatGoalType(type)}</span>
+                        <span>${percent}%</span>
+                    </div>
+                    <div class="goal-bar">
+                        <div class="goal-fill ${type}" style="width: ${percent}%;"></div>
+                        <span class="goal-text">${current} / ${target}</span>
+                    </div>
+                `;
+                container.appendChild(goalEl);
+            });
+
+            // Rebuild carousel when goals change
+            setTimeout(() => {
+                if (CarouselManager && typeof CarouselManager.rebuild === 'function') {
+                    CarouselManager.rebuild();
+                }
+            }, 100);
+        }
+
+        function formatGoalType(type) {
+            const typeNames = {
+                // Twitch API standard types
+                'follower': 'Followers',
+                'follow': 'Followers',
+                'subscription': 'Subs',
+                'subscribe': 'Subs',
+                'subscriber': 'Subs',
+                'subscription_count': 'Sub Count',
+                'new_subscription': 'New Subs',
+                'new_subscription_count': 'New Sub Count',
+
+                // Bits goal variations (common Twitch API names)
+                'cheer': 'Bits',
+                'bit': 'Bits',
+                'bits': 'Bits',
+                'cheering': 'Bits',
+                'cheered': 'Bits',
+                'cheers': 'Bits',
+
+                // Additional possible types
+                'donation': 'Donations',
+                'raid': 'Raids',
+                'host': 'Hosts',
+                'viewer': 'Viewers',
+                'stream_time': 'Stream Time',
+                'custom': 'Custom Goal',
+
+                // Error handling types (from enhanced C# parsing)
+                'unknown': 'Unknown Type',
+                'parse_error': 'Parse Error'
+            };
+            return typeNames[type] || type.charAt(0).toUpperCase() + type.slice(1);
+        }
+
+        // Store current goals for single updates
+        let currentGoals = [];
+
+        function updateSingleGoal(goal) {
+            const type = goal.type || 'follower';
+
+            // Find and update existing goal of this type
+            let found = false;
+            for (let i = 0; i < currentGoals.length; i++) {
+                if (currentGoals[i].type === type ||
+                    (type.includes('subscription') && currentGoals[i].type.includes('subscription'))) {
+                    currentGoals[i] = goal;
+                    found = true;
+                    break;
+                }
+            }
+
+            // If not found, add it
+            if (!found) {
+                currentGoals.push(goal);
+            }
+
+            // Re-render all goals
+            renderGoals(currentGoals);
+        }
+
+        function updateCounter(name, value) {
+            const element = document.getElementById(`counter-${name.toLowerCase()}`);
+            if (element) {
+                element.textContent = value;
+                // Add pulse animation
+                element.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+
+
+        function addActivity(type, username, message) {
+            const feed = document.getElementById('activity-feed');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Create activity item
+            const item = document.createElement('div');
+            item.className = `activity-item ${type}`;
+            item.innerHTML = `
+                <svg class="activity-icon"><use href="#icon-${type}"></use></svg>
+                <span class="activity-text"><strong>${username}</strong> ${message}</span>
+                <span class="activity-time">${timeStr}</span>
+            `;
+
+            // Add to beginning
+            feed.insertBefore(item, feed.firstChild);
+
+            // Keep only MAX_ACTIVITY_ITEMS
+            while (feed.children.length > MAX_ACTIVITY_ITEMS) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // ============================================================
+        // VITALS MONITOR MANAGEMENT
+        // ============================================================
+
+        // Vitals Monitor Management
+        let lastHeartRateUpdate = 0;
+        let heartRateTimeout = null;
+        const HEART_RATE_TIMEOUT = 15000; // 15 seconds no data = inactive
+
+        // Heart Rate Monitor Initialization
+        function initializeHeartRateMonitor() {
+            const monitor = document.querySelector('.heart-rate-monitor');
+            const heartRateContainer = document.querySelector('.heart-rate-container');
+
+            if (!monitor || !heartRateContainer) return;
+
+            // Start with default animation speed
+            monitor.style.setProperty('--animation-duration', '2.5s');
+            heartRateContainer.classList.add('active');
+
+            console.log('💓 CSS Heart rate monitor initialized - continuous animation started');
+        }
+
+        function updateHeartRateAnimation(heartRate, waitForCycle = false) {
+            const monitor = document.querySelector('.heart-rate-monitor');
+            if (!monitor) return;
+
+            // Calculate new animation duration: 60 BPM = 2.5s baseline
+            const newDuration = Math.max(0.5, Math.min(5.0, 60 / heartRate * 2.5));
+
+            if (waitForCycle) {
+                // Option 1: Wait for current animation cycle to finish
+                const currentDuration = parseFloat(getComputedStyle(monitor).getPropertyValue('--animation-duration')) || 2.5;
+
+                // Temporarily pause animations to sync them
+                const fadeIn = monitor.querySelector('.fade-in');
+                const fadeOut = monitor.querySelector('.fade-out');
+
+                if (fadeIn && fadeOut) {
+                    // Pause animations
+                    fadeIn.style.animationPlayState = 'paused';
+                    fadeOut.style.animationPlayState = 'paused';
+
+                    // Wait for next cycle start, then apply new duration
+                    setTimeout(() => {
+                        monitor.style.setProperty('--animation-duration', `${newDuration}s`);
+                        fadeIn.style.animationPlayState = 'running';
+                        fadeOut.style.animationPlayState = 'running';
+                    }, currentDuration * 1000);
+                }
+
+                console.log(`💓 Animation speed will update to ${heartRate} BPM = ${newDuration.toFixed(1)}s cycle (waiting for current cycle)`);
+            } else {
+                // Option 2: Dynamic real-time speed change with smooth transition
+                // Briefly pause to resync animations at the same position
+                const fadeIn = monitor.querySelector('.fade-in');
+                const fadeOut = monitor.querySelector('.fade-out');
+
+                if (fadeIn && fadeOut) {
+                    // Get current animation state
+                    fadeIn.style.animationPlayState = 'paused';
+                    fadeOut.style.animationPlayState = 'paused';
+
+                    // Apply new duration immediately
+                    monitor.style.setProperty('--animation-duration', `${newDuration}s`);
+
+                    // Resume animations after a tiny delay to ensure sync
+                    setTimeout(() => {
+                        fadeIn.style.animationPlayState = 'running';
+                        fadeOut.style.animationPlayState = 'running';
+                    }, 10);
+                }
+
+                console.log(`💓 Animation speed updated: ${heartRate} BPM = ${newDuration.toFixed(1)}s cycle (real-time transition)`);
+            }
+        }
+
+        function updateHeartRate(heartRate, measuredAt) {
+            const heartRateValue = document.getElementById('heart-rate-value');
+            const heartRateStatus = document.getElementById('heart-rate-status');
+            const heartRateContainer = document.querySelector('.heart-rate-container');
+
+            if (!heartRateValue || !heartRateStatus || !heartRateContainer) return;
+
+            // Update display values
+            heartRateValue.textContent = heartRate;
+            heartRateStatus.textContent = 'Live';
+
+            // Update animation speed with smooth real-time transition
+            updateHeartRateAnimation(heartRate, false); // false = real-time, true = wait for cycle
+
+            // Mark as active
+            heartRateContainer.classList.remove('inactive');
+            heartRateContainer.classList.add('active');
+
+            // Update timestamp and reset timeout
+            lastHeartRateUpdate = Date.now();
+
+            if (heartRateTimeout) {
+                clearTimeout(heartRateTimeout);
+            }
+
+            heartRateTimeout = setTimeout(() => {
+                setHeartRateInactive();
+            }, HEART_RATE_TIMEOUT);
+
+            console.log(`💓 Heart rate updated: ${heartRate} BPM - animation speed adjusted`);
+        }
+
+
+        function setHeartRateInactive() {
+            const heartRateStatus = document.getElementById('heart-rate-status');
+            const heartRateContainer = document.querySelector('.heart-rate-container');
+
+            if (heartRateStatus) {
+                heartRateStatus.textContent = 'Waiting for data...';
+            }
+
+            if (heartRateContainer) {
+                heartRateContainer.classList.remove('active');
+                heartRateContainer.classList.add('inactive');
+            }
+
+            console.log('💤 Heart rate monitor inactive - animation paused');
+        }
+
+
+
+        // ============================================================
+        // STREAMER.BOT DATA HANDLERS
+        // ============================================================
+
+
+        function handleActivityUpdate(data) {
+            if (!data.activities || !Array.isArray(data.activities)) {
+                console.log('Invalid activity update data:', data);
+                return;
+            }
+
+            console.log('Processing activities from Streamer.bot:', data.activities.length, 'activities');
+            const feed = document.getElementById('activity-feed');
+
+            // Clear existing activities
+            feed.innerHTML = '';
+
+            // Add each activity from Streamer.bot
+            data.activities.forEach(activity => {
+                if (activity.type && activity.username) {
+                    const item = document.createElement('div');
+                    item.className = `activity-item ${activity.type}`;
+
+                    // Determine icon based on type
+                    let iconType = activity.type;
+                    if (activity.type === 'sub' || activity.type === 'subscription') iconType = 'sub';
+                    if (activity.type === 'follow') iconType = 'follow';
+                    if (activity.type === 'raid') iconType = 'raid';
+                    if (activity.type === 'bits') iconType = 'bits';
+
+                    item.innerHTML = `
+                        <svg class="activity-icon"><use href="#icon-${iconType}"></use></svg>
+                        <span class="activity-text"><strong>${activity.username}</strong> ${activity.details}</span>
+                        <span class="activity-time">${activity.timestamp}</span>
+                    `;
+
+                    feed.appendChild(item);
+                }
+            });
+        }
+
+        // ============================================================
+        // DIRECT GOAL EVENT HANDLING (bypasses problematic C# variables)
+        // ============================================================
+
+        // JavaScript-based goal storage (replaces buggy C# global variables)
+        let activeGoals = new Map(); // goalId -> goalData
+
+        // Normalize goal types for consistent display
+        function normalizeGoalType(goalType) {
+            if (!goalType) return 'unknown';
+
+            const type = goalType.toLowerCase().trim();
+            switch (type) {
+                case 'follow':
+                case 'follower':
+                case 'follows':
+                    return 'follower';
+
+                case 'subscribe':
+                case 'subscription':
+                case 'subscriber':
+                case 'sub':
+                case 'subs':
+                case 'new_subscription':
+                case 'new_subscriber':
+                    return 'subscription';
+
+                case 'bit':
+                case 'bits':
+                case 'cheer':
+                case 'cheers':
+                case 'cheering':
+                case 'new_bit':
+                case 'new_bits':
+                    return 'bit';
+
+                case 'donation':
+                case 'donate':
+                case 'tip':
+                    return 'donation';
+
+                case 'raid':
+                case 'raids':
+                    return 'raid';
+
+                case 'host':
+                case 'hosts':
+                    return 'host';
+
+                case 'viewer':
+                case 'viewers':
+                    return 'viewer';
+
+                default:
+                    return type.replace(/[_\s]/g, '');
+            }
+        }
+
+        // Handle Goal Begin events directly from WebSocket
+        function handleGoalBegin(eventData) {
+            console.log('🎯 Processing Goal Begin event:', eventData);
+
+            try {
+                // Extract goal data from the event
+                const goalId = eventData['goal.id'];
+                const goalType = eventData['goal.type'];
+                const goalDescription = eventData['goal.description'] || '';
+                const currentAmount = parseInt(eventData['goal.currentAmount']) || 0;
+                const targetAmount = parseInt(eventData['goal.targetAmount']) || 100;
+
+                console.log('🔍 Extracted goal data:', {
+                    id: goalId,
+                    type: goalType,
+                    description: goalDescription,
+                    current: currentAmount,
+                    target: targetAmount
+                });
+
+                if (!goalId || !goalType) {
+                    console.error('❌ Missing required goal data:', { goalId, goalType });
+                    return;
+                }
+
+                const goalData = {
+                    id: goalId,
+                    type: normalizeGoalType(goalType),
+                    description: goalDescription || `${goalType.charAt(0).toUpperCase() + goalType.slice(1)} Goal`,
+                    current: currentAmount,
+                    target: targetAmount,
+                    startedAt: eventData['goal.startedAt'] || new Date().toISOString()
+                };
+
+                console.log('📝 Adding goal to activeGoals:', goalData);
+                activeGoals.set(goalData.id, goalData);
+
+                // Render all active goals
+                renderActiveGoals();
+
+                console.log('✅ Goal Begin processing complete');
+
+            } catch (error) {
+                console.error('❌ Error processing Goal Begin event:', error);
+                console.error('❌ Event data was:', eventData);
+            }
+        }
+
+        // Handle Goal Progress events
+        function handleGoalProgress(eventData) {
+            console.log('📈 Processing Goal Progress event:', eventData);
+
+            try {
+                const goalId = eventData['goal.id'];
+                const currentAmount = parseInt(eventData['goal.currentAmount']) || 0;
+
+                console.log('🔍 Extracted progress data:', { goalId, currentAmount });
+
+                if (!goalId) {
+                    console.error('❌ Missing goal ID in progress event');
+                    return;
+                }
+
+                if (activeGoals.has(goalId)) {
+                    const goalData = activeGoals.get(goalId);
+                    goalData.current = currentAmount;
+
+                    console.log(`📊 Updated goal ${goalId} progress:`, goalData);
+                    activeGoals.set(goalId, goalData);
+
+                    // Re-render goals with updated progress
+                    renderActiveGoals();
+
+                    console.log('✅ Goal Progress processing complete');
+                } else {
+                    console.warn('⚠️ Received progress for unknown goal:', goalId);
+                    console.warn('🔍 Active goals:', Array.from(activeGoals.keys()));
+                }
+            } catch (error) {
+                console.error('❌ Error processing Goal Progress event:', error);
+                console.error('❌ Event data was:', eventData);
+            }
+        }
+
+        // Handle Goal End events
+        function handleGoalEnd(eventData) {
+            console.log('🏁 Processing Goal End event:', eventData);
+
+            try {
+                const goalId = eventData['goal.id'];
+
+                console.log('🔍 Extracted end data:', { goalId });
+
+                if (!goalId) {
+                    console.error('❌ Missing goal ID in end event');
+                    return;
+                }
+
+                if (activeGoals.has(goalId)) {
+                    console.log(`✅ Removing completed goal: ${goalId}`);
+                    activeGoals.delete(goalId);
+
+                    // Re-render goals without the completed one
+                    renderActiveGoals();
+
+                    console.log('✅ Goal End processing complete');
+                } else {
+                    console.warn('⚠️ Received end event for unknown goal:', goalId);
+                    console.warn('🔍 Active goals:', Array.from(activeGoals.keys()));
+                }
+            } catch (error) {
+                console.error('❌ Error processing Goal End event:', error);
+                console.error('❌ Event data was:', eventData);
+            }
+        }
+
+        // Render all active goals from JavaScript storage
+        function renderActiveGoals() {
+            const goalsArray = Array.from(activeGoals.values()).map(goal => ({
+                current_amount: goal.current,
+                target_amount: goal.target,
+                description: goal.description || `${goal.type.charAt(0).toUpperCase() + goal.type.slice(1)} Goal`,
+                type: goal.type,
+                id: goal.id,
+                progress: Math.round((goal.current / goal.target) * 100)
+            }));
+
+            console.log('🎨 Rendering active goals directly from events:', goalsArray);
+            console.log(`📊 Total active goals: ${goalsArray.length}`);
+
+            // Use existing renderGoals function
+            renderGoals(goalsArray);
+        }
+
+        // Debug function to check active goals
+        window.debugActiveGoals = function() {
+            console.log('🔍 Debug: Active goals from JavaScript storage:', activeGoals);
+            console.log('📊 Active goals array:', Array.from(activeGoals.values()));
+        };
+
+        // Debug function to test counter values including zero
+        window.testCounterValues = function() {
+            console.log('🧪 Testing counter values with zero...');
+
+            // Get all counter elements
+            const counter1Element = document.getElementById('counter-counter1');
+            const counter2Element = document.getElementById('counter-counter2');
+            const counter3Element = document.getElementById('counter-counter3');
+            const counter4Element = document.getElementById('counter-counter4');
+
+            console.log('📊 Current counter values:');
+            console.log(`  Counter1: "${counter1Element.textContent}"`);
+            console.log(`  Counter2: "${counter2Element.textContent}"`);
+            console.log(`  Counter3: "${counter3Element.textContent}"`);
+            console.log(`  Counter4: "${counter4Element.textContent}"`);
+
+            // Test setting zero values
+            counter1Element.textContent = '0';
+            counter2Element.textContent = '0';
+            counter3Element.textContent = '0';
+            counter4Element.textContent = '0';
+
+            console.log('✅ Set all counters to "0" - check overlay display');
+        };
+
+
+        // ============================================================
+
+        // Pure CSS Scroll-Snap Carousel Manager
+        const CarouselManager = {
+            state: {
+                currentSlide: 0,
+                totalSlides: 0,
+                slides: [],
+                autoplayTimer: null,
+                intervalDuration: 5000,
+                isPaused: false,
+                indicatorSyncTimer: null,
+                animationStartTime: null
+            },
+
+            init() {
+                console.log('🎠 Initializing pure CSS carousel...');
+                this.buildSlides();           // Generate dynamic slide content
+                this.createHTML();            // Create slide elements
+                this.setupIndicators();       // Setup manual navigation
+                this.startAutoplay();         // Start CSS animation auto-rotation
+                this.setupEventListeners();   // Setup hover controls only
+                this.hideOriginalGoalsContainer();
+                console.log(`🎠 Pure CSS carousel initialized with ${this.state.totalSlides} slides - NO SCROLLING!`);
+            },
+
+            buildSlides() {
+                this.state.slides = [];
+
+                // Add visible counter slides
+                ['counter1', 'counter2', 'counter3', 'counter4'].forEach(counterId => {
+                    const element = document.getElementById(`${counterId}-box`);
+                    if (element && element.style.display !== 'none') {
+                        this.state.slides.push({
+                            type: 'counter',
+                            id: counterId,
+                            element: element
+                        });
+                    }
+                });
+
+                // Add goal slides (from current goals data)
+                if (window.goalDataByType) {
+                    Object.keys(window.goalDataByType).forEach(goalType => {
+                        const goalData = window.goalDataByType[goalType];
+                        if (this.isGoalComplete(goalData)) {
+                            this.state.slides.push({
+                                type: 'goal',
+                                id: goalType,
+                                data: goalData
+                            });
+                        }
+                    });
+                }
+
+                this.state.totalSlides = this.state.slides.length;
+                console.log(`📊 Built slide inventory: ${this.state.slides.length} slides`);
+            },
+
+            createHTML() {
+                const carouselTrack = document.getElementById('carousel-track');
+
+                // Clear existing content
+                carouselTrack.innerHTML = '';
+
+                // Create slides with unique IDs
+                this.state.slides.forEach((slide, index) => {
+                    const slideElement = this.createSlideElement(slide, index);
+                    carouselTrack.appendChild(slideElement);
+                });
+
+                // Add duplicate of first slide at the end for infinite scroll
+                if (this.state.slides.length > 1) {
+                    const firstSlideClone = this.createSlideElement(this.state.slides[0], this.state.totalSlides);
+                    firstSlideClone.classList.add('infinite-clone');
+                    carouselTrack.appendChild(firstSlideClone);
+                }
+
+                console.log(`📊 Created ${this.state.totalSlides} slides + infinite scroll clone`);
+            },
+
+
+            createSlideElement(slide, index) {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `carousel-slide ${slide.type}-slide`;
+                slideDiv.id = `slide-${index}`;
+                slideDiv.setAttribute('data-slide-index', index);
+
+                if (slide.type === 'counter') {
+                    slideDiv.innerHTML = `
+                        <div class="single-counter-display">
+                            <div class="counter-value-large"
+                                 id="carousel-${slide.id}-value"
+                                 data-counter-id="${slide.id}"
+                                 data-counter-type="value">0</div>
+                            <div class="counter-label-large"
+                                 id="carousel-${slide.id}-label"
+                                 data-counter-id="${slide.id}"
+                                 data-counter-type="label">${slide.id}</div>
+                        </div>
+                    `;
+
+                    // Copy current values from original counter
+                    const originalValue = document.getElementById(`counter-${slide.id}`);
+                    const originalLabel = document.getElementById(`${slide.id}-label`);
+                    if (originalValue) {
+                        slideDiv.querySelector(`#carousel-${slide.id}-value`).textContent = originalValue.textContent;
+                    }
+                    if (originalLabel) {
+                        slideDiv.querySelector(`#carousel-${slide.id}-label`).textContent = originalLabel.textContent;
+                    }
+                }
+                else if (slide.type === 'goal') {
+                    const current = parseInt(slide.data.Current) || 0;
+                    const target = parseInt(slide.data.Target) || 100;
+                    const percentage = Math.min(100, Math.round((current / target) * 100));
+                    const goalType = slide.data.Type || slide.id.toLowerCase();
+
+                    slideDiv.innerHTML = `
+                        <div class="single-goal-display">
+                            <div class="goal-header">
+                                <span class="goal-type-large ${goalType}">${this.formatGoalTypeForDisplay(slide.id)}</span>
+                                <span class="goal-percentage">${percentage}%</span>
+                            </div>
+                            <div class="goal-bar-large">
+                                <div class="goal-fill ${goalType}" style="width: ${percentage}%;"></div>
+                                <span class="goal-text-large">${current} / ${target}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return slideDiv;
+            },
+
+            goToSlide(index) {
+                const track = document.querySelector('.carousel-track');
+                if (!track) return;
+
+                // Stop auto-rotation and indicator sync for manual navigation
+                track.classList.remove('auto-rotate');
+                this.stopIndicatorSync();
+                clearInterval(this.state.autoplayTimer);
+                this.state.autoplayTimer = null;
+
+                // Remove all manual slide classes and apply the target one
+                track.className = track.className.replace(/manual-slide-\d+/g, '');
+                track.classList.add(`manual-slide-${index}`);
+
+                // Update state and indicators
+                this.state.currentSlide = index;
+                this.updateIndicators(index);
+                console.log(`🎠 Switched to slide ${index} via pure CSS transform`);
+
+                // Resume auto-rotation after 10 seconds of manual navigation
+                setTimeout(() => {
+                    if (!this.state.autoplayTimer) {
+                        track.classList.remove(/manual-slide-\d+/g);
+                        this.startAutoplay();
+                    }
+                }, 10000);
+            },
+
+            startAutoplay() {
+                if (this.state.totalSlides <= 1) {
+                    console.log('🎠 Single slide - auto-rotation disabled');
+                    return;
+                }
+
+                // Generate dynamic CSS animation based on slide count
+                this.generateDynamicCSS();
+
+                const track = document.querySelector('.carousel-track');
+                if (track) {
+                    // Remove manual slide classes
+                    track.className = track.className.replace(/manual-slide-\d+/g, '');
+
+                    // Set duration: 5 seconds per slide
+                    const totalDuration = this.state.totalSlides * 5;
+                    track.style.setProperty('--carousel-duration', `${totalDuration}s`);
+                    track.classList.add('auto-rotate');
+
+                    // Start indicator sync with CSS animation
+                    this.startIndicatorSync();
+                }
+
+                console.log(`🎠 Infinite scroll auto-rotation started: ${this.state.totalSlides} slides, 5s per slide`);
+            },
+
+            generateDynamicCSS() {
+                const slideCount = this.state.totalSlides;
+                if (slideCount <= 1) return;
+
+                // Infinite scroll: include the clone slide in animation
+                const totalSlides = slideCount + 1; // +1 for clone
+                const slideDuration = 100 / totalSlides; // Total percentage per slide
+                const holdPercentage = 0.9; // 90% hold time (4.5s of 5s)
+
+                let keyframes = '@keyframes carousel-auto-rotate {\n';
+
+                // Generate snap animation keyframes with hold + transition pattern
+                for (let i = 0; i < totalSlides; i++) {
+                    const slideStart = i * slideDuration;
+                    const slideEnd = slideStart + slideDuration;
+                    const transitionStart = slideStart + (slideDuration * holdPercentage);
+
+                    const translateX = `-${i * 100}%`;
+                    const nextTranslateX = i === totalSlides - 1 ? `-${slideCount * 100}%` : `-${(i + 1) * 100}%`;
+
+                    // Hold position keyframes (slide stays still for 90% of its time)
+                    keyframes += `  ${slideStart.toFixed(2)}% { transform: translateX(${translateX}); }\n`;
+                    keyframes += `  ${transitionStart.toFixed(2)}% { transform: translateX(${translateX}); }\n`;
+
+                    // Transition keyframe (quick snap to next slide)
+                    if (i < totalSlides - 1) {
+                        keyframes += `  ${slideEnd.toFixed(2)}% { transform: translateX(${nextTranslateX}); }\n`;
+                    } else {
+                        // Handle the final transition back to first slide (seamless loop)
+                        keyframes += `  100% { transform: translateX(${nextTranslateX}); }\n`;
+                    }
+                }
+
+                keyframes += '}';
+
+                // Inject CSS into document
+                const existingStyle = document.getElementById('dynamic-carousel-css');
+                if (existingStyle) existingStyle.remove();
+
+                const style = document.createElement('style');
+                style.id = 'dynamic-carousel-css';
+                style.textContent = keyframes;
+                document.head.appendChild(style);
+
+                console.log(`🎨 Generated snap animation for ${slideCount} slides + clone (90% hold, 10% transition)`);
+            },
+
+            startIndicatorSync() {
+                // Clear any existing sync timer
+                if (this.state.indicatorSyncTimer) {
+                    clearInterval(this.state.indicatorSyncTimer);
+                }
+
+                // Sync indicators with snap animation timing
+                this.state.indicatorSyncTimer = setInterval(() => {
+                    if (!this.state.isPaused) {
+                        const slideDuration = 5000; // 5 seconds per slide
+                        const holdDuration = 4500; // 4.5 seconds hold time (90% of slide duration)
+                        const totalCycleDuration = (this.state.totalSlides + 1) * slideDuration; // +1 for clone
+
+                        const currentTime = Date.now();
+                        if (!this.state.animationStartTime) {
+                            this.state.animationStartTime = currentTime;
+                        }
+
+                        const elapsed = (currentTime - this.state.animationStartTime) % totalCycleDuration;
+                        const currentSlideIndex = Math.floor(elapsed / slideDuration);
+                        const slidePosition = elapsed % slideDuration;
+
+                        // Only update indicator during hold period (not during transitions)
+                        if (slidePosition <= holdDuration) {
+                            // Handle infinite scroll: if we're on the clone, show indicator for first slide
+                            let actualIndex = currentSlideIndex;
+                            if (actualIndex >= this.state.totalSlides) {
+                                actualIndex = 0;
+                            }
+
+                            if (actualIndex !== this.state.currentSlide) {
+                                this.state.currentSlide = actualIndex;
+                                this.updateIndicators(actualIndex);
+                            }
+                        }
+                    }
+                }, 100); // Check every 100ms
+            },
+
+            stopIndicatorSync() {
+                if (this.state.indicatorSyncTimer) {
+                    clearInterval(this.state.indicatorSyncTimer);
+                    this.state.indicatorSyncTimer = null;
+                }
+                this.state.animationStartTime = null;
+            },
+
+            updateIndicators(activeIndex) {
+                const indicators = document.querySelectorAll('.indicator');
+                indicators.forEach((indicator, index) => {
+                    indicator.classList.toggle('active', index === activeIndex);
+                });
+            },
+
+            setupIndicators() {
+                const indicatorContainer = document.getElementById('carousel-indicators');
+                indicatorContainer.innerHTML = '';
+
+                // Create indicators for each slide
+                for (let i = 0; i < this.state.totalSlides; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'indicator';
+                    indicator.setAttribute('data-slide', i);
+                    if (i === 0) indicator.classList.add('active');
+
+                    indicator.addEventListener('click', () => {
+                        this.goToSlide(i);
+                        // Pause auto-rotation briefly after manual interaction
+                        this.state.isPaused = true;
+                        setTimeout(() => {
+                            this.state.isPaused = false;
+                        }, 3000);
+                    });
+
+                    indicatorContainer.appendChild(indicator);
+                }
+
+                console.log(`📊 Created ${this.state.totalSlides} indicators`);
+            },
+
+            setupEventListeners() {
+                const carousel = document.querySelector('.carousel-container');
+
+                if (carousel) {
+                    carousel.addEventListener('mouseenter', () => {
+                        this.state.isPaused = true;
+                        const track = document.querySelector('.carousel-track');
+                        track?.classList.add('paused');
+                    });
+
+                    carousel.addEventListener('mouseleave', () => {
+                        this.state.isPaused = false;
+                        const track = document.querySelector('.carousel-track');
+                        track?.classList.remove('paused');
+                    });
+                }
+
+                console.log('🎠 Pure CSS hover controls set up');
+            },
+
+
+            hideOriginalGoalsContainer() {
+                const originalGoalsContainer = document.getElementById('goals-container');
+                if (originalGoalsContainer) {
+                    originalGoalsContainer.style.display = 'none';
+                    console.log('🎯 Original goals container hidden');
+                }
+            },
+
+            // Helper functions
+            isGoalComplete(goalData) {
+                return goalData &&
+                       goalData.Type &&
+                       goalData.Current !== undefined &&
+                       goalData.Target !== undefined;
+            },
+
+            formatGoalTypeForDisplay(goalType) {
+                const typeMap = {
+                    'Follower': 'Followers',
+                    'Subscription': 'Subs',
+                    'Bit': 'Bits',
+                    'Donation': 'Donations',
+                    'Raid': 'Raids',
+                    'Host': 'Hosts',
+                    'Viewer': 'Viewers'
+                };
+                return typeMap[goalType] || goalType;
+            },
+
+            syncData(variableName, value) {
+                // Update carousel counter displays when main counters update
+                ['counter1', 'counter2', 'counter3', 'counter4'].forEach(counterId => {
+                    const config = GLOBAL_VARIABLE_CONFIG[counterId];
+
+                    if (!config) return;
+
+                    if (variableName === config.valueVariable) {
+                        // Update ALL carousel value elements (original + clone)
+                        const carouselValues = document.querySelectorAll(`[data-counter-id="${counterId}"][data-counter-type="value"]`);
+                        carouselValues.forEach(element => {
+                            const displayValue = value === undefined || value === null || value === 'undefined' ? '0' : String(value);
+                            element.textContent = displayValue;
+                        });
+                    }
+
+                    if (variableName === config.labelVariable) {
+                        // Update ALL carousel label elements (original + clone)
+                        const carouselLabels = document.querySelectorAll(`[data-counter-id="${counterId}"][data-counter-type="label"]`);
+                        carouselLabels.forEach(element => {
+                            element.textContent = value || config.defaultLabel;
+                        });
+                    }
+                });
+
+                // Ensure clones are synchronized as fallback
+                this.syncClonesWithOriginals();
+            },
+
+            syncClonesWithOriginals() {
+                // Fallback synchronization for infinite clones
+                const clones = document.querySelectorAll('.infinite-clone');
+
+                clones.forEach(clone => {
+                    const originalSlide = document.querySelector('[data-slide-index="0"]'); // First slide
+
+                    if (originalSlide) {
+                        // Sync counter values
+                        const originalValues = originalSlide.querySelectorAll('[data-counter-type="value"]');
+                        const cloneValues = clone.querySelectorAll('[data-counter-type="value"]');
+
+                        originalValues.forEach((original, index) => {
+                            if (cloneValues[index]) {
+                                cloneValues[index].textContent = original.textContent;
+                            }
+                        });
+
+                        // Sync counter labels
+                        const originalLabels = originalSlide.querySelectorAll('[data-counter-type="label"]');
+                        const cloneLabels = clone.querySelectorAll('[data-counter-type="label"]');
+
+                        originalLabels.forEach((original, index) => {
+                            if (cloneLabels[index]) {
+                                cloneLabels[index].textContent = original.textContent;
+                            }
+                        });
+                    }
+                });
+            },
+
+            rebuild() {
+                // Rebuild when content changes (counter visibility, goals)
+                console.log('🔄 Rebuilding carousel due to content changes...');
+                if (this.state.autoplayTimer) {
+                    clearInterval(this.state.autoplayTimer);
+                }
+                this.buildSlides();
+                this.createHTML();
+                this.setupIndicators();
+                this.state.currentSlide = 0;
+                this.startAutoplay();
+            }
+        };
+
+
+        // Simplified debug functions (replace complex debug system)
+        window.debugCarousel = function() {
+            console.log('🎠 CarouselManager State:', CarouselManager.state);
+        };
+
+        // Debug function for carousel clone synchronization
+        window.debugCarouselSync = function() {
+            console.log('=== Carousel Clone Sync Debug ===');
+
+            // Check original elements
+            const originals = document.querySelectorAll('[data-slide-index="0"] [data-counter-type="value"]');
+            console.log('Original values:', Array.from(originals).map(el => ({
+                counterId: el.dataset.counterId,
+                value: el.textContent
+            })));
+
+            // Check clone elements
+            const clones = document.querySelectorAll('.infinite-clone [data-counter-type="value"]');
+            console.log('Clone values:', Array.from(clones).map(el => ({
+                counterId: el.dataset.counterId,
+                value: el.textContent
+            })));
+
+            // Check for mismatches
+            originals.forEach((original, index) => {
+                const clone = clones[index];
+                if (clone && original.textContent !== clone.textContent) {
+                    console.warn(`Mismatch found: ${original.dataset.counterId} - Original: ${original.textContent}, Clone: ${clone.textContent}`);
+                }
+            });
+        };
+
+        // Debug functions for snap animation
+        window.debugSnapTiming = function() {
+            const track = document.querySelector('.carousel-track');
+            const style = getComputedStyle(track);
+            console.log('🎨 Animation Properties:');
+            console.log('- Duration:', style.animationDuration);
+            console.log('- Timing function:', style.animationTimingFunction);
+            console.log('- Current transform:', style.transform);
+
+            // Watch for keyframe transitions
+            let lastTransform = style.transform;
+            const watchInterval = setInterval(() => {
+                const currentTransform = getComputedStyle(track).transform;
+                if (currentTransform !== lastTransform) {
+                    console.log('🚀 Snap transition detected:', currentTransform);
+                    lastTransform = currentTransform;
+                }
+            }, 100);
+
+            // Stop watching after 30 seconds
+            setTimeout(() => {
+                clearInterval(watchInterval);
+                console.log('⏹️ Snap timing debug stopped');
+            }, 30000);
+
+            console.log('👀 Watching for snap transitions for 30 seconds...');
+        };
+
+        window.testSnapAnimation = function() {
+            console.log('🧪 Testing snap animation...');
+            CarouselManager.state.animationStartTime = Date.now(); // Reset timing
+            window.debugSnapTiming();
+        };
+
+        window.testSlideNavigation = function(index) {
+            CarouselManager.goToSlide(index);
+        };
+
+        window.toggleAutoplay = function() {
+            if (CarouselManager.state.autoplayTimer) {
+                clearInterval(CarouselManager.state.autoplayTimer);
+                CarouselManager.state.autoplayTimer = null;
+                console.log('⏸️ Autoplay stopped');
+            } else {
+                CarouselManager.startAutoplay();
+                console.log('▶️ Autoplay started');
+            }
+        };
+
+        // Initialize
+        async function init() {
+            initializeConfig();
+
+            // Initialize heart rate monitor
+            initializeHeartRateMonitor();
+
+            // Initialize carousel system
+            setTimeout(() => {
+                CarouselManager.init();
+            }, 1000); // Give time for DOM and other systems to initialize
+
+            // Connect to Streamer.bot for events and global variables
+            // (Global variables will be requested after connection is established)
+            connectWebSocket();
+
+        }
+
+        // Export functions to global scope for external access
+        window.updateCounterFromGlobalVariable = updateCounterFromGlobalVariable;
+        window.loadBroadcasterProfileImage = loadBroadcasterProfileImage;
+        window.requestGoalVariables = requestGoalVariables;
+        window.handleStreamerBotEvent = handleStreamerBotEvent;
+
+        console.log('✅ Functions exported to global scope:', {
+            updateCounterFromGlobalVariable: typeof window.updateCounterFromGlobalVariable,
+            loadBroadcasterProfileImage: typeof window.loadBroadcasterProfileImage,
+            requestGoalVariables: typeof window.requestGoalVariables,
+            handleStreamerBotEvent: typeof window.handleStreamerBotEvent
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>

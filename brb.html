@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme 3 - Be Right Back</title>
+
+    <!--
+    ============================================================
+    THEME 3 - BE RIGHT BACK SCENE
+    ============================================================
+
+    Full-screen overlay for short breaks during stream.
+
+    OBS SETUP:
+    1. Create new Scene: "BRB"
+    2. Add Browser Source: 1920x1080
+    3. Point to this HTML file
+    4. Switch to this scene during breaks
+
+    FEATURES:
+    - Animated background matching Theme 3 aesthetic
+    - No countdown timer (for indefinite breaks)
+    - Encouraging messaging for viewers
+    - Social media links to keep engagement
+    ============================================================
+    -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #ff3366;
+            --accent: #a855f7;
+            --bg-dark: #0a0a0a;
+            --bg-panel: rgba(13, 13, 13, 0.9);
+            --border-color: rgba(0, 212, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .brb-screen {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background grid */
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(var(--border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            /* animation: grid-move 20s linear infinite; */ /* Disabled - static background */
+        }
+
+        /* @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        } */ /* Disabled - static background */
+
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: float-up 12s linear infinite;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Main content */
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .logo-area {
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--bg-dark);
+            margin: 0 auto 20px;
+            box-shadow:
+                0 0 60px rgba(255, 51, 102, 0.3),
+                0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: logo-pulse 4s ease-in-out infinite;
+            overflow: hidden;
+        }
+
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        .profile-fallback {
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--bg-dark);
+        }
+
+        @keyframes logo-pulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 60px rgba(255, 51, 102, 0.3),
+                    0 20px 40px rgba(0, 0, 0, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow:
+                    0 0 80px rgba(255, 51, 102, 0.5),
+                    0 20px 40px rgba(0, 0, 0, 0.3);
+                transform: scale(1.05);
+            }
+        }
+
+        .streamer-name {
+            font-family: var(--font-display);
+            font-size: 56px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .main-message {
+            font-family: var(--font-display);
+            font-size: 144px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(255, 51, 102, 0.5);
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: text-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes text-glow {
+            0%, 100% { text-shadow: 0 0 40px rgba(255, 51, 102, 0.5); }
+            50% { text-shadow: 0 0 60px rgba(255, 51, 102, 0.8); }
+        }
+
+        .sub-message {
+            font-family: var(--font-body);
+            font-size: 48px;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        .break-info {
+            font-family: var(--font-body);
+            font-size: 40px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .break-info .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Chat reminder box */
+        .chat-reminder {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 40px 60px;
+            margin: 40px 0 120px 0;
+            font-family: var(--font-body);
+            font-size: 36px;
+            color: var(--text-secondary);
+            animation: gentle-glow 5s ease-in-out infinite;
+        }
+
+        @keyframes gentle-glow {
+            0%, 100% { border-color: var(--border-color); }
+            50% { border-color: rgba(0, 212, 255, 0.6); }
+        }
+
+        /* Social links */
+        .social-links {
+            position: absolute;
+            bottom: 60px;
+            display: flex;
+            gap: 40px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 36px;
+            letter-spacing: 1px;
+            font-family: var(--font-body);
+            font-weight: 500;
+        }
+
+        .social-link__icon {
+            font-size: 48px;
+        }
+
+        /* Corner decorations with break-themed animation */
+        .corner-decor {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 3px solid var(--secondary);
+            opacity: 0.4;
+            animation: corner-breathe 6s ease-in-out infinite;
+        }
+
+        @keyframes corner-breathe {
+            0%, 100% {
+                border-color: var(--secondary);
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                border-color: var(--accent);
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .corner-decor--tl {
+            top: 40px;
+            left: 40px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-decor--tr {
+            top: 40px;
+            right: 40px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-decor--bl {
+            bottom: 40px;
+            left: 40px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-decor--br {
+            bottom: 40px;
+            right: 40px;
+            border-left: none;
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="brb-screen">
+        <!-- Animated background -->
+        <div class="bg-grid"></div>
+        <div class="particles" id="particles"></div>
+
+        <!-- Corner decorations -->
+        <div class="corner-decor corner-decor--tl"></div>
+        <div class="corner-decor corner-decor--tr"></div>
+        <div class="corner-decor corner-decor--bl"></div>
+        <div class="corner-decor corner-decor--br"></div>
+
+        <!-- Main content -->
+        <div class="content">
+            <div class="logo-area">
+                <div class="logo">
+                    <img class="profile-image" id="profile-image" src="" alt="" style="display: none;">
+                    <span class="profile-fallback" id="profile-fallback">C</span>
+                </div>
+                <div class="streamer-name">ceniack</div>
+            </div>
+
+            <h1 class="main-message">BE RIGHT BACK</h1>
+            <p class="sub-message">🛠️ Taking a quick break...</p>
+
+            <div class="break-info">
+                Stream will resume shortly!<br>
+                Thanks for your <span class="highlight">patience</span> ⚡
+            </div>
+
+            <div class="chat-reminder">
+                💬 Keep the chat alive while I'm away!<br>
+                Talk to each other, share memes, or drop some game suggestions 🎮
+            </div>
+        </div>
+
+        <!-- Website link -->
+        <div class="social-links">
+            <div class="social-link">
+                <span class="social-link__icon">🌐</span>
+                <span>ceniack.com</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particle system with break-themed colors
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 25;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // Randomize position and timing
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 12 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 8) + 's';
+
+                // Randomize size slightly
+                const size = 2 + Math.random() * 4;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+
+                // Use warmer colors for break screen
+                const colors = ['#ff3366', '#a855f7', '#00d4ff'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Load profile picture
+        function loadProfilePicture() {
+            const username = 'ceniack'; // Your Twitch username
+            console.log('Loading profile picture for:', username);
+
+            fetch(`https://decapi.me/twitch/avatar/${username}`)
+                .then(response => response.text())
+                .then(url => {
+                    url = url.trim();
+                    console.log('DecAPI returned URL:', url);
+
+                    if (url && url.startsWith('http')) {
+                        const img = document.getElementById('profile-image');
+                        const fallback = document.getElementById('profile-fallback');
+
+                        img.onload = () => {
+                            console.log('Profile image loaded successfully');
+                            img.style.display = 'block';
+                            fallback.style.display = 'none';
+                        };
+
+                        img.onerror = () => {
+                            console.error('Profile image failed to load');
+                            img.style.display = 'none';
+                            fallback.style.display = 'block';
+                        };
+
+                        img.src = url;
+                    } else {
+                        console.error('DecAPI returned invalid URL:', url);
+                        document.getElementById('profile-fallback').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('DecAPI fetch failed:', error);
+                    document.getElementById('profile-fallback').style.display = 'block';
+                });
+        }
+
+        // Load profile picture on page load
+        loadProfilePicture();
+    </script>
+</body>
+</html>

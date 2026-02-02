@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Rate Monitor - Standalone Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .component-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #007acc 0%, #005a9e 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 122, 204, 0.4);
+        }
+
+        .status-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .demo-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+        }
+
+        .demo-info h4 {
+            margin: 0 0 10px 0;
+            color: #ffc107;
+        }
+
+        iframe {
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>💓 Heart Rate Monitor Component</h1>
+            <p>Standalone demonstration of the heart rate monitor overlay component</p>
+        </div>
+
+        <div class="demo-grid">
+            <div class="controls-panel">
+                <h3>🎮 Test Controls</h3>
+
+                <h4>Heart Rate Simulation</h4>
+                <button onclick="simulateHeartRate(60)">Resting (60 BPM)</button>
+                <button onclick="simulateHeartRate(75)">Normal (75 BPM)</button>
+                <button onclick="simulateHeartRate(90)">Active (90 BPM)</button>
+                <button onclick="simulateHeartRate(120)">Exercise (120 BPM)</button>
+                <button onclick="simulateHeartRate(150)">High Intensity (150 BPM)</button>
+
+                <h4>Animation Tests</h4>
+                <button onclick="runTestSequence()">Run Test Sequence</button>
+                <button onclick="randomHeartRate()">Random BPM</button>
+                <button onclick="startContinuousDemo()">Start Continuous Demo</button>
+                <button onclick="stopContinuousDemo()">Stop Demo</button>
+
+                <h4>Debug Functions</h4>
+                <button onclick="showDebugInfo()">Show Debug Info</button>
+                <button onclick="resetComponent()">Reset Component</button>
+
+                <div class="status-panel" id="status-panel">
+                    Component Status: Loading...
+                </div>
+
+                <div class="demo-info">
+                    <h4>ℹ️ Demo Information</h4>
+                    <p>This demonstrates the standalone heart rate monitor component. It works independently of the main overlay and can connect to Streamer.bot or run in test mode.</p>
+                    <p><strong>Features:</strong></p>
+                    <ul>
+                        <li>Real-time BPM display</li>
+                        <li>Animated ECG waveform</li>
+                        <li>Dynamic animation speed</li>
+                        <li>Active/inactive states</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="component-display">
+                <iframe src="heartrate-monitor.html"
+                        width="350"
+                        height="250"
+                        style="border: none;"
+                        allow="autoplay"
+                        id="heartrate-frame">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let demoInterval = null;
+        let componentLoaded = false;
+
+        // Heart rate simulation functions
+        function simulateHeartRate(bpm) {
+            const frame = document.getElementById('heartrate-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.testHeartRate(bpm);
+                    updateStatus(`Simulated ${bpm} BPM`);
+                } catch (error) {
+                    updateStatus('Error: Component not ready');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function runTestSequence() {
+            const frame = document.getElementById('heartrate-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.testHeartRateSequence();
+                    updateStatus('Running test sequence...');
+                } catch (error) {
+                    updateStatus('Error: Test sequence failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function randomHeartRate() {
+            const bpm = Math.floor(Math.random() * 100) + 50; // 50-150 BPM
+            simulateHeartRate(bpm);
+        }
+
+        function startContinuousDemo() {
+            if (demoInterval) clearInterval(demoInterval);
+
+            updateStatus('Starting continuous demo...');
+            let currentBpm = 70;
+            let direction = 1;
+
+            demoInterval = setInterval(() => {
+                currentBpm += (Math.random() - 0.5) * 10 + direction;
+                currentBpm = Math.max(50, Math.min(180, currentBpm));
+
+                if (currentBpm > 160 || currentBpm < 60) {
+                    direction *= -1;
+                }
+
+                simulateHeartRate(Math.round(currentBpm));
+            }, 2000);
+        }
+
+        function stopContinuousDemo() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+                updateStatus('Continuous demo stopped');
+            }
+        }
+
+        function showDebugInfo() {
+            const frame = document.getElementById('heartrate-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.debugHeartRate();
+                    updateStatus('Debug info logged to console');
+                } catch (error) {
+                    updateStatus('Error: Debug function failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function resetComponent() {
+            const frame = document.getElementById('heartrate-frame');
+            frame.src = frame.src; // Reload iframe
+            componentLoaded = false;
+            updateStatus('Reloading component...');
+        }
+
+        function updateStatus(message) {
+            const panel = document.getElementById('status-panel');
+            const timestamp = new Date().toLocaleTimeString();
+            panel.textContent = `[${timestamp}] ${message}`;
+        }
+
+        // Wait for iframe to load
+        document.getElementById('heartrate-frame').addEventListener('load', function() {
+            componentLoaded = true;
+            updateStatus('Component loaded successfully!');
+
+            // Start with a demo heart rate after a short delay
+            setTimeout(() => {
+                simulateHeartRate(75);
+            }, 1000);
+        });
+
+        // Initial status
+        updateStatus('Initializing component...');
+    </script>
+</body>
+</html>

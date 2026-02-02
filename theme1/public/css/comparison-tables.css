@@ -1,0 +1,676 @@
+/**
+ * Comparison Tables CSS
+ *
+ * Specialized styling for platform comparison tables and strategic planning interfaces.
+ * Extends the theme1.css color palette and overlay-common.css utilities.
+ */
+
+/* ========================================
+   Variables and Base Styling
+   ======================================== */
+
+:root {
+    /* Table-specific color palette extending theme1 */
+    --table-bg-primary: rgba(255, 255, 255, 0.05);
+    --table-bg-secondary: rgba(255, 255, 255, 0.08);
+    --table-border: rgba(255, 255, 255, 0.1);
+    --table-hover: rgba(255, 255, 255, 0.05);
+
+    /* Coverage status colors */
+    --coverage-full: linear-gradient(45deg, #00ff88, #00c851);
+    --coverage-partial: linear-gradient(45deg, #ffbb33, #ff8800);
+    --coverage-none: linear-gradient(45deg, #ff4444, #cc0000);
+    --coverage-webhook: linear-gradient(45deg, #64b5f6, #1976d2);
+
+    /* Priority colors */
+    --priority-high: #ff6b6b;
+    --priority-medium: #ffbb33;
+    --priority-low: #64b5f6;
+
+    /* Complexity colors */
+    --complexity-easy: #00ff88;
+    --complexity-medium: #ffbb33;
+    --complexity-complex: #ff6b6b;
+
+    /* Platform tier colors */
+    --tier-1: linear-gradient(45deg, #ff6b6b, #ffd93d);
+    --tier-2: linear-gradient(45deg, #4ecdc4, #44a08d);
+    --tier-3: linear-gradient(45deg, #667eea, #764ba2);
+}
+
+/* ========================================
+   Table Container and Structure
+   ======================================== */
+
+.comparison-table-container {
+    background: var(--table-bg-primary);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    border: 1px solid var(--table-border);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    margin: 20px 0;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* ========================================
+   Table Header Styling
+   ======================================== */
+
+.comparison-table th {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 15px 10px;
+    text-align: center;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    border-bottom: 2px solid var(--table-border);
+}
+
+.comparison-table th:hover {
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+}
+
+.comparison-table th.sortable::after {
+    content: ' ↕';
+    font-size: 12px;
+    opacity: 0.6;
+    margin-left: 5px;
+}
+
+.comparison-table th.sort-asc::after {
+    content: ' ↑';
+    color: var(--accent);
+    opacity: 1;
+}
+
+.comparison-table th.sort-desc::after {
+    content: ' ↓';
+    color: var(--accent);
+    opacity: 1;
+}
+
+.platform-header {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    min-width: 80px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    font-weight: 600;
+    position: relative;
+}
+
+/* ========================================
+   Table Body and Row Styling
+   ======================================== */
+
+.comparison-table td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--table-border);
+    transition: background 0.2s ease;
+}
+
+.comparison-table tr:hover td {
+    background: var(--table-hover);
+}
+
+.comparison-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.category-row {
+    background: var(--table-bg-secondary);
+    border-top: 2px solid var(--table-border);
+}
+
+.category-label {
+    font-weight: 600;
+    text-align: left;
+    padding-left: 20px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.event-row {
+    opacity: 0.9;
+    font-size: 13px;
+}
+
+.event-row td {
+    padding: 8px 10px;
+}
+
+/* ========================================
+   Tier and Badge Indicators
+   ======================================== */
+
+.tier-indicator {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.tier-1 {
+    background: var(--tier-1);
+    color: #000;
+}
+
+.tier-2 {
+    background: var(--tier-2);
+    color: #fff;
+}
+
+.tier-3 {
+    background: var(--tier-3);
+    color: #fff;
+}
+
+/* ========================================
+   Coverage Status Indicators
+   ======================================== */
+
+.coverage-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    margin: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.coverage-full {
+    background: var(--coverage-full);
+    color: #000;
+}
+
+.coverage-partial {
+    background: var(--coverage-partial);
+    color: #000;
+}
+
+.coverage-none {
+    background: var(--coverage-none);
+    color: #fff;
+}
+
+.coverage-webhook {
+    background: var(--coverage-webhook);
+    color: #fff;
+}
+
+.event-count {
+    font-size: 12px;
+    opacity: 0.8;
+    display: block;
+    margin-top: 2px;
+}
+
+/* ========================================
+   Priority and Complexity Indicators
+   ======================================== */
+
+.priority-high {
+    border-left: 4px solid var(--priority-high);
+}
+
+.priority-medium {
+    border-left: 4px solid var(--priority-medium);
+}
+
+.priority-low {
+    border-left: 4px solid var(--priority-low);
+}
+
+.complexity-indicator {
+    font-size: 16px;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.complexity-easy {
+    color: var(--complexity-easy);
+}
+
+.complexity-medium {
+    color: var(--complexity-medium);
+}
+
+.complexity-complex {
+    color: var(--complexity-complex);
+}
+
+/* ========================================
+   Controls and Interface Elements
+   ======================================== */
+
+.table-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--table-bg-primary);
+    border-radius: 10px;
+    border: 1px solid var(--table-border);
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-group label {
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.filter-select, .search-input {
+    padding: 8px 12px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.filter-select:focus, .search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.filter-select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+.export-btn {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* ========================================
+   Event Tags and Labels
+   ======================================== */
+
+.event-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.event-tag {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 4px 12px;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.event-tag:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.event-tag.high-priority {
+    background: linear-gradient(45deg, #ff6b6b, #ff8a80);
+    color: #000;
+}
+
+.event-tag.medium-priority {
+    background: linear-gradient(45deg, #ffbb33, #ffc947);
+    color: #000;
+}
+
+.event-tag.low-priority {
+    background: linear-gradient(45deg, #64b5f6, #81c784);
+    color: #000;
+}
+
+/* ========================================
+   Legend and Information Elements
+   ======================================== */
+
+.table-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--table-bg-primary);
+    border-radius: 10px;
+    color: #fff;
+    border: 1px solid var(--table-border);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.legend-symbol {
+    min-width: 20px;
+    text-align: center;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .comparison-table {
+        font-size: 12px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 8px 6px;
+    }
+
+    .platform-header {
+        min-width: 60px;
+    }
+
+    .tier-indicator {
+        font-size: 9px;
+        padding: 1px 6px;
+    }
+
+    .event-count {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .control-group {
+        width: 100%;
+        max-width: 300px;
+        justify-content: space-between;
+    }
+
+    .comparison-table {
+        font-size: 11px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 6px 4px;
+    }
+
+    .platform-header {
+        min-width: 50px;
+        font-size: 12px;
+    }
+
+    .event-list {
+        justify-content: flex-start;
+    }
+
+    .event-tag {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    .table-legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .comparison-table-container {
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+
+    .comparison-table {
+        font-size: 10px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 4px 2px;
+    }
+
+    .category-label {
+        padding-left: 10px;
+    }
+
+    .tier-indicator {
+        display: none; /* Hide tier indicators on very small screens */
+    }
+
+    .coverage-indicator {
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+
+    .event-count {
+        font-size: 9px;
+    }
+}
+
+/* ========================================
+   Utility Classes for Tables
+   ======================================== */
+
+.table-centered {
+    text-align: center;
+}
+
+.table-left {
+    text-align: left;
+}
+
+.table-right {
+    text-align: right;
+}
+
+.table-nowrap {
+    white-space: nowrap;
+}
+
+.table-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 0;
+}
+
+.table-highlight {
+    background: rgba(102, 126, 234, 0.2) !important;
+    border: 1px solid var(--primary) !important;
+}
+
+.table-muted {
+    opacity: 0.6;
+}
+
+.table-bold {
+    font-weight: 600;
+}
+
+/* ========================================
+   Animation Classes
+   ======================================== */
+
+.table-fade-in {
+    animation: tableFadeIn 0.5s ease;
+}
+
+.table-slide-down {
+    animation: tableSlideDown 0.3s ease;
+}
+
+.table-bounce-in {
+    animation: tableBounceIn 0.6s ease;
+}
+
+@keyframes tableFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes tableSlideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes tableBounceIn {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+
+@media print {
+    .comparison-table-container {
+        background: white;
+        color: black;
+        box-shadow: none;
+    }
+
+    .comparison-table th {
+        background: #f5f5f5 !important;
+        color: black !important;
+    }
+
+    .comparison-table td {
+        color: black;
+    }
+
+    .table-controls,
+    .export-btn {
+        display: none;
+    }
+
+    .coverage-indicator {
+        border: 1px solid #ccc;
+        color: black !important;
+        background: white !important;
+    }
+
+    .event-tag {
+        border: 1px solid #ccc;
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* ========================================
+   Dark Theme Overrides
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --table-bg-primary: rgba(255, 255, 255, 0.08);
+        --table-bg-secondary: rgba(255, 255, 255, 0.12);
+        --table-hover: rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* ========================================
+   High Contrast Mode Support
+   ======================================== */
+
+@media (prefers-contrast: high) {
+    .comparison-table th,
+    .comparison-table td {
+        border: 2px solid #fff;
+    }
+
+    .coverage-indicator,
+    .event-tag,
+    .tier-indicator {
+        border: 2px solid #fff;
+        font-weight: bold;
+    }
+
+    .table-border {
+        --table-border: rgba(255, 255, 255, 0.5);
+    }
+}
+
+/* ========================================
+   Reduced Motion Support
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .comparison-table th,
+    .comparison-table td,
+    .filter-select,
+    .search-input,
+    .export-btn,
+    .event-tag {
+        transition: none;
+    }
+
+    .table-fade-in,
+    .table-slide-down,
+    .table-bounce-in {
+        animation: none;
+    }
+}

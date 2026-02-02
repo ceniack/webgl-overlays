@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Break Message Component</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Break Message Molecule Component */
+        :root {
+            /* BRB color scheme */
+            --brb-primary: #00d4ff;
+            --brb-secondary: #ff3366;
+            --brb-accent: #a855f7;
+            --brb-text-primary: #ffffff;
+            --brb-text-secondary: rgba(255, 255, 255, 0.7);
+            --brb-text-muted: rgba(255, 255, 255, 0.4);
+
+            /* Fonts */
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: var(--font-body);
+            color: var(--brb-text-primary);
+        }
+
+        .break-message-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .main-message {
+            font-family: var(--font-display);
+            font-size: 144px;
+            font-weight: 700;
+            color: var(--brb-text-primary);
+            letter-spacing: 8px;
+            margin: 0;
+            text-shadow: 0 0 40px rgba(255, 51, 102, 0.5);
+            background: linear-gradient(135deg, var(--brb-secondary), var(--brb-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: text-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes text-glow {
+            0%, 100% {
+                text-shadow: 0 0 40px rgba(255, 51, 102, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 60px rgba(255, 51, 102, 0.8);
+            }
+        }
+
+        .sub-message {
+            font-family: var(--font-body);
+            font-size: 48px;
+            color: var(--brb-text-secondary);
+            letter-spacing: 2px;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .break-info {
+            font-family: var(--font-body);
+            font-size: 40px;
+            color: var(--brb-text-muted);
+            letter-spacing: 1px;
+            margin: 0;
+            line-height: 1.5;
+            max-width: 800px;
+        }
+
+        .break-info .highlight {
+            color: var(--brb-primary);
+            font-weight: 600;
+        }
+
+        /* Custom message styling */
+        .custom-message {
+            font-family: var(--font-body);
+            font-size: 36px;
+            color: var(--brb-text-secondary);
+            letter-spacing: 1px;
+            margin: 10px 0;
+            line-height: 1.4;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .main-message {
+                font-size: 120px;
+                letter-spacing: 6px;
+            }
+
+            .sub-message {
+                font-size: 42px;
+            }
+
+            .break-info {
+                font-size: 36px;
+                max-width: 700px;
+            }
+
+            .custom-message {
+                font-size: 32px;
+                max-width: 750px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .main-message {
+                font-size: 96px;
+                letter-spacing: 4px;
+            }
+
+            .sub-message {
+                font-size: 36px;
+            }
+
+            .break-info {
+                font-size: 30px;
+                max-width: 600px;
+            }
+
+            .custom-message {
+                font-size: 28px;
+                max-width: 600px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-message {
+                font-size: 72px;
+                letter-spacing: 3px;
+            }
+
+            .sub-message {
+                font-size: 30px;
+            }
+
+            .break-info {
+                font-size: 24px;
+                max-width: 500px;
+            }
+
+            .custom-message {
+                font-size: 22px;
+                max-width: 500px;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+
+        .slide-up {
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="break-message-container">
+        <h1 class="main-message" id="mainMessage">BE RIGHT BACK</h1>
+        <p class="sub-message" id="subMessage">🛠️ Taking a quick break...</p>
+        <div class="break-info" id="breakInfo">
+            Stream will resume shortly!<br>
+            Thanks for your <span class="highlight">patience</span> ⚡
+        </div>
+        <div class="custom-message" id="customMessage" style="display: none;"></div>
+    </div>
+
+    <script>
+        /**
+         * Break Message Molecule Component
+         *
+         * URL Parameters:
+         *   main_message - Main BRB message (default: "BE RIGHT BACK")
+         *   sub_message - Sub message with emoji (default: "🛠️ Taking a quick break...")
+         *   break_info - Break information text
+         *   custom_message - Additional custom message
+         *   animate - Enable animations (default: true)
+         */
+
+        // Parse URL parameters
+        function parseUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                mainMessage: urlParams.get('main_message') || 'BE RIGHT BACK',
+                subMessage: urlParams.get('sub_message') || '🛠️ Taking a quick break...',
+                breakInfo: urlParams.get('break_info') || null,
+                customMessage: urlParams.get('custom_message') || null,
+                animate: urlParams.get('animate') !== 'false'
+            };
+        }
+
+        // Update message content
+        function updateMessages(params) {
+            const mainMessageEl = document.getElementById('mainMessage');
+            const subMessageEl = document.getElementById('subMessage');
+            const breakInfoEl = document.getElementById('breakInfo');
+            const customMessageEl = document.getElementById('customMessage');
+
+            // Update main message
+            mainMessageEl.textContent = params.mainMessage;
+
+            // Update sub message
+            subMessageEl.textContent = params.subMessage;
+
+            // Update break info if provided
+            if (params.breakInfo) {
+                breakInfoEl.innerHTML = params.breakInfo;
+            }
+
+            // Show custom message if provided
+            if (params.customMessage) {
+                customMessageEl.textContent = params.customMessage;
+                customMessageEl.style.display = 'block';
+            } else {
+                customMessageEl.style.display = 'none';
+            }
+
+            // Add animations if enabled
+            if (params.animate) {
+                mainMessageEl.classList.add('fade-in');
+                subMessageEl.classList.add('slide-up');
+                breakInfoEl.classList.add('slide-up');
+                if (params.customMessage) {
+                    customMessageEl.classList.add('slide-up');
+                }
+            }
+        }
+
+        // Initialize the break message
+        function init() {
+            console.log('💬 Initializing break message molecule...');
+
+            const params = parseUrlParams();
+            updateMessages(params);
+
+            console.log('✅ Break message molecule initialized');
+
+            // Listen for parent window messages to update content
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'updateBreakMessage') {
+                    console.log('Updating break message:', event.data);
+                    updateMessages(event.data);
+                }
+            });
+        }
+
+        // Initialize when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

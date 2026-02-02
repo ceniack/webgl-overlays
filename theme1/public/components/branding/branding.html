@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadcaster Branding - Stream Overlay</title>
+    <link rel="stylesheet" href="branding.css">
+</head>
+<body>
+    <div class="branding-component">
+        <div class="section branding-section">
+            <div class="section-header">
+                <span class="live-indicator"></span>
+                Live Now
+            </div>
+            <div class="section-content">
+                <div class="profile-area">
+                    <div class="profile-image-container">
+                        <img class="profile-image" id="profile-image" src="" alt="" style="display: none;">
+                        <span class="profile-fallback" id="profile-fallback">?</span>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name" id="profile-name">STREAMER</div>
+                        <div class="profile-link" id="profile-link">twitch.tv/streamer</div>
+                    </div>
+                </div>
+                <div class="goals-container" id="goals-container">
+                    <div class="no-goals">Loading goals...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required JavaScript libraries -->
+    <script src="../../js/streamerbot-client.js"></script>
+    <script src="branding.js"></script>
+</body>
+</html>

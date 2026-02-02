@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player Component</title>
+
+    <!-- Link to common styles -->
+    <link rel="stylesheet" href="/css/overlay-common.css">
+    <link rel="stylesheet" href="/css/theme1.css">
+
+    <style>
+        /* Video Player Organism Styles */
+        :root {
+            --video-font-size: 16px;
+            --video-font-family: var(--font-body);
+        }
+
+        body {
+            font-family: var(--video-font-family);
+            font-size: var(--video-font-size);
+            background: transparent;
+            color: var(--brb-text-primary);
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        /* Background image (optional) */
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        /* Video player */
+        .clip-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+            border-radius: 12px;
+        }
+
+        /* Clip info overlay */
+        .clip-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--brb-bg-panel);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--brb-border);
+            border-radius: 12px;
+            z-index: 10;
+            color: var(--brb-text-primary);
+            animation: fadeOut 1s ease-out 5s forwards;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .clip-title {
+            font-family: var(--font-display);
+            font-size: calc(var(--video-font-size) * 1.4);
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--brb-primary);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        .clip-game {
+            font-size: calc(var(--video-font-size) * 1.1);
+            color: var(--brb-accent);
+            margin-bottom: 4px;
+            font-weight: 500;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        .clip-creator {
+            font-size: var(--video-font-size);
+            color: var(--brb-text-secondary);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Loading indicator */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--brb-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: calc(var(--video-font-size) * 1.2);
+            color: var(--brb-text-primary);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            font-family: var(--font-display);
+        }
+
+        /* Error message */
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 30px;
+            background: rgba(255, 51, 102, 0.2);
+            border: 2px solid var(--brb-secondary);
+            border-radius: 12px;
+            z-index: 20;
+            backdrop-filter: blur(15px);
+        }
+
+        .error-text {
+            font-size: calc(var(--video-font-size) * 1.2);
+            color: var(--brb-secondary);
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            font-family: var(--font-display);
+        }
+
+        /* Hide loading when not needed */
+        .loading.hidden {
+            display: none;
+        }
+
+        /* Responsive sizing */
+        @media (max-width: 800px) {
+            :root {
+                --video-font-size: 14px;
+            }
+
+            .clip-info {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 10px 15px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            :root {
+                --video-font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <!-- Background image (optional) -->
+        <img id="backgroundImage" class="background-image" src="" alt="" style="display: none;">
+
+        <!-- Video player -->
+        <video id="clipPlayer" class="clip-player" autoplay playsinline></video>
+
+        <!-- Clip info overlay -->
+        <div id="clipInfo" class="clip-info" style="display: none;">
+            <div id="clipTitle" class="clip-title"></div>
+            <div id="clipGame" class="clip-game"></div>
+            <div id="clipCreator" class="clip-creator"></div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading clip...</div>
+        </div>
+
+        <!-- Error message -->
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <div class="error-text"></div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Video Player Organism Component
+         * Adapted from the original brb-player with theme integration
+         *
+         * URL Parameters:
+         *   video         - Clip slug or embed URL
+         *   thumbnail_url - Direct thumbnail URL to extract video from
+         *   image         - Background/fallback image URL
+         *   noloop        - Disable looping (flag, loops by default)
+         */
+
+        // Twitch GraphQL API configuration
+        const TWITCH_GQL_URL = 'https://gql.twitch.tv/gql';
+        const TWITCH_CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
+
+        // DOM elements
+        const videoPlayer = document.getElementById('clipPlayer');
+        const clipInfo = document.getElementById('clipInfo');
+        const clipTitle = document.getElementById('clipTitle');
+        const clipGame = document.getElementById('clipGame');
+        const clipCreator = document.getElementById('clipCreator');
+        const loadingEl = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const backgroundImage = document.getElementById('backgroundImage');
+
+        // Parse URL parameters
+        function parseUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Extract clip slug from various formats
+            const clipDirect = urlParams.get('clip');
+            const videoRaw = urlParams.get('video');
+            const video = extractClipSlug(clipDirect) || extractClipSlug(videoRaw);
+
+            return {
+                video: video,
+                thumbnailUrl: urlParams.get('thumbnail_url'),
+                image: urlParams.get('image'),
+                noloop: urlParams.has('noloop')
+            };
+        }
+
+        // Extract clip slug from various URL formats
+        function extractClipSlug(videoParam) {
+            if (!videoParam) return null;
+
+            let slug = videoParam;
+
+            if (slug.includes('clip=')) {
+                const match = slug.match(/clip=([^&]+)/);
+                slug = match ? match[1] : null;
+            } else if (slug.includes('clips.twitch.tv/')) {
+                const match = slug.match(/clips\.twitch\.tv\/([^/?]+)/);
+                slug = match ? match[1] : null;
+            }
+
+            if (slug && slug.includes('/clip/')) {
+                const match = slug.match(/\/clip\/([^/?&]+)/);
+                slug = match ? match[1] : slug;
+            }
+
+            return slug;
+        }
+
+        // Get video access token for a clip
+        async function getClipAccessToken(slug) {
+            const query = {
+                operationName: 'VideoAccessToken_Clip',
+                variables: { slug: slug },
+                query: `query VideoAccessToken_Clip($slug: ID!) {
+                    clip(slug: $slug) {
+                        id
+                        slug
+                        title
+                        thumbnailURL
+                        durationSeconds
+                        broadcaster {
+                            id
+                            displayName
+                            login
+                        }
+                        game {
+                            id
+                            name
+                        }
+                        curator {
+                            id
+                            displayName
+                            login
+                        }
+                        videoQualities {
+                            quality
+                            sourceURL
+                        }
+                        playbackAccessToken(params: {platform: "web", playerType: "site"}) {
+                            signature
+                            value
+                        }
+                    }
+                }`
+            };
+
+            const response = await fetch(TWITCH_GQL_URL, {
+                method: 'POST',
+                headers: {
+                    'Client-ID': TWITCH_CLIENT_ID,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(query)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to get access token: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.errors) {
+                throw new Error(data.errors[0]?.message || 'GraphQL error');
+            }
+
+            return data.data?.clip;
+        }
+
+        // Get playable video URL from clip data
+        function getVideoUrl(clip) {
+            let baseUrl = null;
+
+            if (clip.videoQualities && clip.videoQualities.length > 0) {
+                baseUrl = clip.videoQualities[0].sourceURL;
+            }
+
+            if (!baseUrl && clip.thumbnailURL) {
+                const videoUrl = clip.thumbnailURL.replace(/-preview-\d+x\d+\.jpg$/, '.mp4');
+                if (videoUrl !== clip.thumbnailURL) {
+                    baseUrl = videoUrl;
+                }
+            }
+
+            if (!baseUrl) return null;
+
+            if (clip.playbackAccessToken) {
+                const sig = clip.playbackAccessToken.signature;
+                const token = clip.playbackAccessToken.value;
+                return `${baseUrl}?sig=${sig}&token=${encodeURI(token)}`;
+            }
+
+            return baseUrl;
+        }
+
+        // Get video URL from thumbnail URL parameter
+        function getVideoUrlFromThumbnail(thumbnailUrl) {
+            return thumbnailUrl.replace(/-preview-\d+x\d+\.jpg$/, '.mp4');
+        }
+
+        // Show error message
+        function showError(message) {
+            loadingEl.classList.add('hidden');
+            errorMessage.querySelector('.error-text').textContent = message;
+            errorMessage.style.display = 'block';
+            console.error('Video Player Error:', message);
+        }
+
+        // Hide loading indicator
+        function hideLoading() {
+            loadingEl.classList.add('hidden');
+        }
+
+        // Update clip info display
+        function updateClipInfo(clip) {
+            if (!clip) {
+                clipInfo.style.display = 'none';
+                return;
+            }
+
+            clipTitle.textContent = clip.title || 'Untitled Clip';
+            clipGame.textContent = clip.game?.name || '';
+            clipCreator.textContent = clip.curator?.displayName ?
+                `Clipped by ${clip.curator.displayName}` : '';
+            clipInfo.style.display = 'block';
+        }
+
+        // Try to play video, handling autoplay restrictions
+        async function tryPlay() {
+            try {
+                await videoPlayer.play();
+                hideLoading();
+                return true;
+            } catch (error) {
+                if (error.name === 'NotAllowedError') {
+                    console.log('Autoplay blocked by browser policy. Click to play with audio.');
+                    hideLoading();
+                    document.body.addEventListener('click', async () => {
+                        try {
+                            await videoPlayer.play();
+                        } catch (e) {
+                            console.error('Play on click failed:', e);
+                        }
+                    }, { once: true });
+                    return true;
+                }
+                throw error;
+            }
+        }
+
+        // Play clip from thumbnail URL
+        async function playFromThumbnail(thumbnailUrl) {
+            try {
+                const videoUrl = getVideoUrlFromThumbnail(thumbnailUrl);
+                videoPlayer.src = videoUrl;
+                clipInfo.style.display = 'none';
+                await tryPlay();
+            } catch (error) {
+                console.error('Error playing from thumbnail:', error);
+                showError('Failed to play clip');
+            }
+        }
+
+        // Play specific clip by slug
+        async function playClipBySlug(slug) {
+            try {
+                const clipData = await getClipAccessToken(slug);
+
+                if (!clipData) {
+                    showError('Clip not found');
+                    return;
+                }
+
+                const videoUrl = getVideoUrl(clipData);
+
+                if (!videoUrl) {
+                    showError('Could not load clip video');
+                    return;
+                }
+
+                videoPlayer.src = videoUrl;
+                videoPlayer.load();
+                videoPlayer.pause();
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                updateClipInfo(clipData);
+                await tryPlay();
+            } catch (error) {
+                console.error('Error playing clip by slug:', error);
+                showError('Failed to load clip');
+            }
+        }
+
+        // Initialize the video player
+        async function init() {
+            console.log('🎬 Initializing video player organism...');
+
+            const params = parseUrlParams();
+            const shouldLoop = !params.noloop;
+
+            // Set up video events
+            videoPlayer.addEventListener('ended', () => {
+                const reachedEnd = videoPlayer.duration - videoPlayer.currentTime < 1;
+                console.log(`Video ended: currentTime=${videoPlayer.currentTime}, duration=${videoPlayer.duration}`);
+                if (shouldLoop && reachedEnd) {
+                    videoPlayer.currentTime = 0;
+                    videoPlayer.play();
+                }
+            });
+
+            videoPlayer.addEventListener('error', (e) => {
+                console.error('Video error:', e);
+                showError('Failed to play clip');
+            });
+
+            // Set background image if provided
+            if (params.image) {
+                backgroundImage.src = params.image;
+                backgroundImage.style.display = 'block';
+            }
+
+            // Determine what to play
+            if (params.video) {
+                await playClipBySlug(params.video);
+            } else if (params.thumbnailUrl) {
+                await playFromThumbnail(params.thumbnailUrl);
+            } else {
+                showError('No clip specified. Use ?video=clipslug or ?thumbnail_url=...');
+            }
+
+            console.log('✅ Video player organism initialized');
+        }
+
+        // Start the video player
+        init().catch(error => {
+            console.error('Failed to initialize video player:', error);
+            showError('Failed to initialize video player');
+        });
+    </script>
+</body>
+</html>

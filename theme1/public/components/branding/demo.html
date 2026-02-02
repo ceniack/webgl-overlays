@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadcaster Branding - Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .component-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #007acc 0%, #005a9e 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 122, 204, 0.4);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .status-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .demo-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+        }
+
+        .demo-info h4 {
+            margin: 0 0 10px 0;
+            color: #ffc107;
+        }
+
+        iframe {
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        h4 {
+            color: #00d4ff;
+            margin: 20px 0 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>📺 Broadcaster Branding Component</h1>
+            <p>Standalone demonstration of the broadcaster profile and branding overlay component</p>
+        </div>
+
+        <div class="demo-grid">
+            <div class="controls-panel">
+                <h3>🎮 Test Controls</h3>
+
+                <h4>Broadcaster Information</h4>
+                <input type="text" id="display-name" placeholder="Display Name (e.g., Ninja)" value="">
+                <input type="text" id="username" placeholder="Username (e.g., ninja)" value="">
+                <button onclick="updateBroadcasterInfo()">Update Broadcaster Info</button>
+
+                <h4>Profile Image Tests</h4>
+                <input type="text" id="test-username" placeholder="Username for profile test" value="shroud">
+                <button onclick="testProfileImage()">Load Profile Image</button>
+
+                <h4>Preset Tests</h4>
+                <button onclick="testPreset('ninja', 'Ninja')">Test: Ninja</button>
+                <button onclick="testPreset('shroud', 'shroud')">Test: Shroud</button>
+                <button onclick="testPreset('pokimane', 'Pokimane')">Test: Pokimane</button>
+                <button onclick="testPreset('xqc', 'xQc')">Test: xQc</button>
+                <button onclick="resetToDefault()">Reset to Default</button>
+
+                <h4>Debug Functions</h4>
+                <button onclick="showDebugInfo()">Show Debug Info</button>
+                <button onclick="testConnection()">Test Streamer.bot Connection</button>
+
+                <div class="status-panel" id="status-panel">
+                    Component Status: Loading...
+                </div>
+
+                <div class="demo-info">
+                    <h4>ℹ️ Demo Information</h4>
+                    <p>This demonstrates the standalone broadcaster branding component with profile image loading, name display, and Twitch URL.</p>
+                    <p><strong>Features:</strong></p>
+                    <ul>
+                        <li>Real-time broadcaster info updates</li>
+                        <li>Automatic profile image loading</li>
+                        <li>Fallback avatar display</li>
+                        <li>Live indicator animation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="component-display">
+                <iframe src="branding.html"
+                        width="500"
+                        height="300"
+                        style="border: none;"
+                        allow="autoplay"
+                        id="branding-frame">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let componentLoaded = false;
+
+        // Test functions
+        function updateBroadcasterInfo() {
+            const displayName = document.getElementById('display-name').value || 'TestStreamer';
+            const username = document.getElementById('username').value || 'testuser';
+
+            const frame = document.getElementById('branding-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.testBroadcasterData(displayName, username);
+                    updateStatus(`Updated: ${displayName} (@${username})`);
+                } catch (error) {
+                    updateStatus('Error: Component not ready');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function testProfileImage() {
+            const username = document.getElementById('test-username').value || 'shroud';
+
+            const frame = document.getElementById('branding-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.testProfileImage(username);
+                    updateStatus(`Testing profile image for: ${username}`);
+                } catch (error) {
+                    updateStatus('Error: Profile image test failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function testPreset(username, displayName) {
+            // Update input fields
+            document.getElementById('display-name').value = displayName;
+            document.getElementById('username').value = username;
+            document.getElementById('test-username').value = username;
+
+            // Apply changes
+            updateBroadcasterInfo();
+        }
+
+        function resetToDefault() {
+            document.getElementById('display-name').value = '';
+            document.getElementById('username').value = '';
+            document.getElementById('test-username').value = 'shroud';
+
+            const frame = document.getElementById('branding-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.testBroadcasterData('STREAMER', 'streamer');
+                    updateStatus('Reset to defaults');
+                } catch (error) {
+                    updateStatus('Error: Reset failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function showDebugInfo() {
+            const frame = document.getElementById('branding-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.debugBranding();
+                    updateStatus('Debug info logged to console');
+                } catch (error) {
+                    updateStatus('Error: Debug function failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function testConnection() {
+            updateStatus('Testing Streamer.bot connection...');
+
+            // Simple WebSocket test
+            const ws = new WebSocket('ws://127.0.0.1:8080/');
+
+            const timeout = setTimeout(() => {
+                ws.close();
+                updateStatus('Connection test: Timeout (Streamer.bot not running)');
+            }, 3000);
+
+            ws.onopen = () => {
+                clearTimeout(timeout);
+                ws.close();
+                updateStatus('Connection test: ✅ Streamer.bot accessible');
+            };
+
+            ws.onerror = () => {
+                clearTimeout(timeout);
+                updateStatus('Connection test: ❌ Streamer.bot not accessible');
+            };
+        }
+
+        function updateStatus(message) {
+            const panel = document.getElementById('status-panel');
+            const timestamp = new Date().toLocaleTimeString();
+            panel.textContent = `[${timestamp}] ${message}`;
+        }
+
+        // Wait for iframe to load
+        document.getElementById('branding-frame').addEventListener('load', function() {
+            componentLoaded = true;
+            updateStatus('Component loaded successfully!');
+
+            // Start with a test after a short delay
+            setTimeout(() => {
+                testPreset('testuser', 'TestStreamer');
+            }, 1000);
+        });
+
+        // Initial status
+        updateStatus('Initializing component...');
+    </script>
+</body>
+</html>

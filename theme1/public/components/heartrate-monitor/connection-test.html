@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Connection Tester</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1a1a; color: white; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: rgba(0, 255, 0, 0.2); border: 1px solid #00ff00; }
+        .error { background: rgba(255, 0, 0, 0.2); border: 1px solid #ff0000; }
+        .info { background: rgba(0, 200, 255, 0.2); border: 1px solid #00c8ff; }
+        button { background: #007acc; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Connection Tester</h1>
+
+    <div>
+        <label>WebSocket URL: </label>
+        <input type="text" id="wsUrl" value="ws://127.0.0.1:8080/" style="width: 300px;">
+        <button onclick="testConnection()">Test Connection</button>
+        <button onclick="testWithEndpoints()">Test Multiple Endpoints</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function testConnection() {
+            const url = document.getElementById('wsUrl').value;
+            log(`Testing connection to: ${url}`, 'info');
+
+            const ws = new WebSocket(url);
+
+            const timeout = setTimeout(() => {
+                log(`❌ Connection timeout after 5 seconds`, 'error');
+                ws.close();
+            }, 5000);
+
+            ws.onopen = function(event) {
+                clearTimeout(timeout);
+                log(`✅ WebSocket connected successfully!`, 'success');
+                log(`ReadyState: ${ws.readyState} (OPEN)`, 'success');
+
+                // Try to send a ping
+                try {
+                    ws.send('{"request":"GetInfo"}');
+                    log(`📤 Sent GetInfo request`, 'info');
+                } catch(e) {
+                    log(`❌ Error sending message: ${e.message}`, 'error');
+                }
+
+                // Close after testing
+                setTimeout(() => {
+                    ws.close();
+                    log(`🔌 Connection closed for testing`, 'info');
+                }, 2000);
+            };
+
+            ws.onmessage = function(event) {
+                log(`📥 Received message: ${event.data}`, 'success');
+            };
+
+            ws.onerror = function(event) {
+                clearTimeout(timeout);
+                log(`❌ WebSocket error occurred`, 'error');
+                log(`Error details: ${JSON.stringify(event)}`, 'error');
+            };
+
+            ws.onclose = function(event) {
+                clearTimeout(timeout);
+                log(`🔌 WebSocket closed - Code: ${event.code}, Reason: ${event.reason || 'No reason'}, WasClean: ${event.wasClean}`,
+                    event.wasClean ? 'info' : 'error');
+            };
+        }
+
+        function testWithEndpoints() {
+            const baseUrls = [
+                'ws://127.0.0.1:8080/',
+                'ws://127.0.0.1:8080/ws',
+                'ws://127.0.0.1:8080/websocket',
+                'ws://localhost:8080/',
+                'ws://localhost:8080/ws',
+                'ws://127.0.0.1:8081/',
+                'ws://127.0.0.1:7474/',
+            ];
+
+            log(`🧪 Testing ${baseUrls.length} different WebSocket URLs...`, 'info');
+
+            baseUrls.forEach((url, index) => {
+                setTimeout(() => {
+                    log(`Testing ${index + 1}/${baseUrls.length}: ${url}`, 'info');
+                    testSingleUrl(url);
+                }, index * 1000);
+            });
+        }
+
+        function testSingleUrl(url) {
+            const ws = new WebSocket(url);
+
+            const timeout = setTimeout(() => {
+                log(`❌ ${url} - Timeout`, 'error');
+                ws.close();
+            }, 3000);
+
+            ws.onopen = function() {
+                clearTimeout(timeout);
+                log(`✅ ${url} - Connected!`, 'success');
+                ws.close();
+            };
+
+            ws.onerror = function() {
+                clearTimeout(timeout);
+                log(`❌ ${url} - Connection failed`, 'error');
+            };
+
+            ws.onclose = function(event) {
+                if (event.wasClean) {
+                    // Already logged success
+                } else {
+                    log(`❌ ${url} - Closed unexpectedly (Code: ${event.code})`, 'error');
+                }
+            };
+        }
+
+        // Test immediately when page loads
+        window.addEventListener('load', function() {
+            log('🚀 WebSocket Connection Tester loaded', 'info');
+            log('Click "Test Connection" to test the default URL or "Test Multiple Endpoints" to try various configurations', 'info');
+        });
+    </script>
+</body>
+</html>

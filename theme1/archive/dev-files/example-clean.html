@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Stream Overlay Bar</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Enhanced Common Styles -->
+    <link rel="stylesheet" href="/css/overlay-common.css">
+    <link rel="stylesheet" href="/css/theme1.css">
+
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="/components/sections/BroadcasterInfo/BroadcasterInfo.css">
+    <link rel="stylesheet" href="/components/sections/CounterCarousel/CounterCarousel.css">
+    <link rel="stylesheet" href="/components/sections/HealthMonitor/HealthMonitor.css">
+
+    <style>
+        /* Clean template - maintains original structure */
+        :root {
+            --primary: var(--brb-primary);
+            --secondary: var(--brb-secondary);
+            --accent: var(--brb-accent);
+            --bg-dark: var(--brb-bg-dark);
+            --bg-panel: var(--brb-bg-panel);
+            --border-color: var(--brb-border);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 257px;
+            background: transparent;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .overlay-bar {
+            position: relative;
+            width: 1920px;
+            height: 257px;
+            display: flex;
+            background: var(--bg-panel);
+        }
+
+        /* Animated gradient border on top */
+        .overlay-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg,
+                var(--secondary) 0%,
+                var(--primary) 25%,
+                var(--accent) 50%,
+                var(--primary) 75%,
+                var(--secondary) 100%);
+            background-size: 200% 100%;
+            animation: gradientFlow 4s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* Section styling - original structure */
+        .section {
+            height: 100%;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .section:last-child {
+            border-right: none;
+        }
+
+        .section-header {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 12px 15px 8px;
+            border-bottom: 1px solid var(--border-color);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-content {
+            flex: 1;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        /* Camera section */
+        .camera-section {
+            width: 200px;
+            background: transparent;
+        }
+
+        /* Branding section */
+        .branding-section {
+            width: 400px;
+        }
+
+        /* Counters section */
+        .counters-section {
+            width: 600px;
+        }
+
+        /* Heart rate section */
+        .heart-rate-section {
+            width: 720px;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay-bar">
+        <!-- Camera Cutout Section -->
+        <div class="section camera-section">
+            <!-- Transparent area for webcam -->
+        </div>
+
+        <!-- Branding Section -->
+        <div class="section branding-section">
+            <div class="section-header">
+                <span class="live-indicator"></span>
+                Live Now
+            </div>
+            <div class="section-content">
+                <div class="profile-area">
+                    <div class="profile-image-container">
+                        <img class="profile-image" id="profile-image" src="" alt="" style="display: none;">
+                        <span class="profile-fallback" id="profile-fallback">?</span>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name" id="profile-name">STREAMER</div>
+                        <div class="profile-link" id="profile-link">twitch.tv/streamer</div>
+                    </div>
+                </div>
+                <div class="goals-container" id="goals-container">
+                    <div class="no-goals">Loading goals...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Counters Section -->
+        <div class="section counters-section">
+            <div class="section-header">
+                Stats
+                <div class="carousel-indicators" id="carousel-indicators">
+                    <!-- Dynamic indicators generated per visible content -->
+                </div>
+            </div>
+            <div class="section-content carousel-container" id="stats-carousel-container">
+                <!-- Hidden anchor navigation -->
+                <div class="carousel-nav" aria-hidden="true" id="carousel-nav">
+                    <!-- Dynamic anchor links generated by JS -->
+                </div>
+
+                <!-- Scrollable carousel track -->
+                <div class="carousel-track" id="carousel-track">
+                    <!-- Dynamic slides with unique IDs generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Original counter elements (hidden, for data source) -->
+        <div style="display: none;" id="original-counters">
+            <div class="counter-box" id="counter1-box">
+                <div class="counter-value" id="counter-counter1">0</div>
+                <div class="counter-label" id="counter1-label">Counter 1</div>
+            </div>
+            <div class="counter-box" id="counter2-box">
+                <div class="counter-value" id="counter-counter2">0</div>
+                <div class="counter-label" id="counter2-label">Counter 2</div>
+            </div>
+            <div class="counter-box" id="counter3-box">
+                <div class="counter-value" id="counter-counter3">0</div>
+                <div class="counter-label" id="counter3-label">Counter 3</div>
+            </div>
+            <div class="counter-box" id="counter4-box">
+                <div class="counter-value" id="counter-counter4">0</div>
+                <div class="counter-label" id="counter4-label">Counter 4</div>
+            </div>
+        </div>
+
+        <!-- Heart Rate Monitor Section -->
+        <div class="section heart-rate-section">
+            <div class="section-header">Vitals</div>
+            <div class="section-content">
+                <div id="heart-rate-monitor" class="heart-rate-container">
+                    <!-- Heart Rate Line Graph -->
+                    <div class="heart-rate-graph">
+                        <div class="heart-rate-monitor">
+                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                                 width="200px" height="60px" viewBox="0 0 200 60">
+                                <polyline fill="none" stroke="var(--primary)" stroke-width="2"
+                                          stroke-miterlimit="10"
+                                          points="0,37 21,37 25,34 29,37 33,37 37,37 42,39 46,37 50,15 54,44 58,37 62,37 71,33 79,37 83,37 104,37 108,34 112,37 117,37 121,37 125,39 129,37 133,15 137,44 142,37 146,37 154,33 162,37 167,37 200,37"/>
+                            </svg>
+                            <div class="fade-in"></div>
+                            <div class="fade-out"></div>
+                        </div>
+                    </div>
+
+                    <!-- BPM Display -->
+                    <div class="heart-rate-display">
+                        <div class="heart-rate-value" id="heart-rate-value">--</div>
+                        <div class="heart-rate-label">BPM</div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="heart-rate-status" id="heart-rate-status">Waiting for data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Components -->
+    <script src="/js/streamerbot-client.js"></script>
+    <script src="/js/overlay-common.js"></script>
+    <script src="/js/streamerbot-integration.js"></script>
+
+    <!-- Component Scripts -->
+    <script src="/components/sections/BroadcasterInfo/BroadcasterInfo.js"></script>
+    <script src="/components/sections/CounterCarousel/CounterCarousel.js"></script>
+    <script src="/components/sections/HealthMonitor/HealthMonitor.js"></script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter Displays with Carousel - Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .component-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #007acc 0%, #005a9e 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 122, 204, 0.4);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #ff3366 0%, #cc0033 100%);
+        }
+
+        button.success {
+            background: linear-gradient(135deg, #00cc66 0%, #009944 100%);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .counter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .status-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .demo-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+        }
+
+        .demo-info h4 {
+            margin: 0 0 10px 0;
+            color: #ffc107;
+        }
+
+        iframe {
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        h4 {
+            color: #00d4ff;
+            margin: 20px 0 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 5px;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .slide-nav {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .slide-nav button {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 12px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>🔢 Counter Displays with Carousel</h1>
+            <p>Standalone demonstration of the counter displays and carousel slider overlay component</p>
+        </div>
+
+        <div class="demo-grid">
+            <div class="controls-panel">
+                <h3>🎮 Counter Controls</h3>
+
+                <h4>Counter Values</h4>
+                <div class="counter-grid">
+                    <input type="number" id="counter1-value" placeholder="Counter 1" value="42">
+                    <input type="number" id="counter2-value" placeholder="Counter 2" value="108">
+                    <input type="number" id="counter3-value" placeholder="Counter 3" value="256">
+                    <input type="number" id="counter4-value" placeholder="Counter 4" value="512">
+                </div>
+                <button onclick="updateCounterValues()">Update Values</button>
+
+                <h4>Counter Labels</h4>
+                <div class="counter-grid">
+                    <input type="text" id="counter1-label" placeholder="Label 1" value="Followers">
+                    <input type="text" id="counter2-label" placeholder="Label 2" value="Subscribers">
+                    <input type="text" id="counter3-label" placeholder="Label 3" value="Bits">
+                    <input type="text" id="counter4-label" placeholder="Label 4" value="Raids">
+                </div>
+                <button onclick="updateCounterLabels()">Update Labels</button>
+
+                <h4>Counter Visibility</h4>
+                <button onclick="toggleCounterVisibility('counter1')" class="success" id="vis-counter1">Hide Counter 1</button>
+                <button onclick="toggleCounterVisibility('counter2')" class="success" id="vis-counter2">Hide Counter 2</button>
+                <button onclick="toggleCounterVisibility('counter3')" class="success" id="vis-counter3">Hide Counter 3</button>
+                <button onclick="toggleCounterVisibility('counter4')" class="success" id="vis-counter4">Hide Counter 4</button>
+
+                <h4>Carousel Navigation</h4>
+                <div class="slide-nav">
+                    <button onclick="goToSlide(0)">Slide 1</button>
+                    <button onclick="goToSlide(1)">Slide 2</button>
+                    <button onclick="goToSlide(2)">Slide 3</button>
+                    <button onclick="goToSlide(3)">Slide 4</button>
+                </div>
+                <button onclick="toggleAutoplay()" id="autoplay-btn">Pause Autoplay</button>
+
+                <h4>Test Presets</h4>
+                <div class="preset-grid">
+                    <button onclick="loadPreset('gaming')">Gaming Stream</button>
+                    <button onclick="loadPreset('music')">Music Stream</button>
+                    <button onclick="loadPreset('chatting')">Just Chatting</button>
+                    <button onclick="loadPreset('creative')">Art/Creative</button>
+                </div>
+
+                <h4>Random Tests</h4>
+                <button onclick="randomizeCounters()">Randomize Values</button>
+                <button onclick="animateCounters()">Animate Counters</button>
+                <button onclick="stressTest()">Stress Test</button>
+                <button onclick="resetToDefaults()" class="danger">Reset to Defaults</button>
+
+                <h4>Debug Functions</h4>
+                <button onclick="showDebugInfo()">Show Debug Info</button>
+                <button onclick="testConnection()">Test Streamer.bot</button>
+                <button onclick="rebuildCarousel()">Rebuild Carousel</button>
+
+                <div class="status-panel" id="status-panel">
+                    Component Status: Loading...
+                </div>
+
+                <div class="demo-info">
+                    <h4>ℹ️ Demo Information</h4>
+                    <p>This demonstrates the standalone counter displays with carousel functionality.</p>
+                    <p><strong>Features:</strong></p>
+                    <ul>
+                        <li>4 customizable counters</li>
+                        <li>Automatic carousel rotation</li>
+                        <li>Manual slide navigation</li>
+                        <li>Dynamic visibility control</li>
+                        <li>Real-time data synchronization</li>
+                        <li>Hover pause/resume</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="component-display">
+                <iframe src="counters.html"
+                        width="600"
+                        height="300"
+                        style="border: none;"
+                        allow="autoplay"
+                        id="counters-frame">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let componentLoaded = false;
+        let counterVisibility = {
+            counter1: true,
+            counter2: true,
+            counter3: true,
+            counter4: true
+        };
+
+        // Counter manipulation functions
+        function updateCounterValues() {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    for (let i = 1; i <= 4; i++) {
+                        const value = document.getElementById(`counter${i}-value`).value;
+                        if (value !== '') {
+                            frame.contentWindow.countersComponent.updateCounterValue(`counter${i}`, value);
+                        }
+                    }
+                    updateStatus('Updated counter values');
+                } catch (error) {
+                    updateStatus('Error: Component not ready');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function updateCounterLabels() {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    for (let i = 1; i <= 4; i++) {
+                        const label = document.getElementById(`counter${i}-label`).value;
+                        if (label !== '') {
+                            frame.contentWindow.countersComponent.updateCounterLabel(`counter${i}`, label);
+                        }
+                    }
+                    updateStatus('Updated counter labels');
+                } catch (error) {
+                    updateStatus('Error: Component not ready');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function toggleCounterVisibility(counterId) {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    counterVisibility[counterId] = !counterVisibility[counterId];
+                    frame.contentWindow.countersComponent.setCounterVisibility(counterId, counterVisibility[counterId]);
+
+                    // Update button
+                    const button = document.getElementById(`vis-${counterId}`);
+                    if (counterVisibility[counterId]) {
+                        button.textContent = `Hide ${counterId.replace('counter', 'Counter ')}`;
+                        button.className = 'success';
+                    } else {
+                        button.textContent = `Show ${counterId.replace('counter', 'Counter ')}`;
+                        button.className = 'danger';
+                    }
+
+                    updateStatus(`${counterId} visibility: ${counterVisibility[counterId]}`);
+                } catch (error) {
+                    updateStatus('Error: Visibility toggle failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function goToSlide(index) {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.testSlideNavigation(index);
+                    updateStatus(`Navigated to slide ${index + 1}`);
+                } catch (error) {
+                    updateStatus('Error: Slide navigation failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function toggleAutoplay() {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.toggleAutoplay();
+                    const button = document.getElementById('autoplay-btn');
+                    button.textContent = button.textContent === 'Pause Autoplay' ? 'Resume Autoplay' : 'Pause Autoplay';
+                    updateStatus('Autoplay toggled');
+                } catch (error) {
+                    updateStatus('Error: Autoplay toggle failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function loadPreset(type) {
+            const presets = {
+                gaming: {
+                    values: [1247, 589, 15420, 67],
+                    labels: ['Kills', 'Deaths', 'Score', 'Wins']
+                },
+                music: {
+                    values: [3421, 187, 42830, 23],
+                    labels: ['Listeners', 'Requests', 'Total Plays', 'Albums']
+                },
+                chatting: {
+                    values: [8945, 2341, 156780, 45],
+                    labels: ['Follows', 'Subs', 'Messages', 'Raids']
+                },
+                creative: {
+                    values: [567, 234, 8920, 12],
+                    labels: ['Views', 'Likes', 'Brushes', 'Hours']
+                }
+            };
+
+            const preset = presets[type];
+            if (preset) {
+                // Update input fields
+                for (let i = 0; i < 4; i++) {
+                    document.getElementById(`counter${i + 1}-value`).value = preset.values[i];
+                    document.getElementById(`counter${i + 1}-label`).value = preset.labels[i];
+                }
+
+                // Apply changes
+                updateCounterValues();
+                updateCounterLabels();
+                updateStatus(`Loaded ${type} preset`);
+            }
+        }
+
+        function randomizeCounters() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`counter${i}-value`).value = Math.floor(Math.random() * 10000);
+            }
+            updateCounterValues();
+            updateStatus('Randomized counter values');
+        }
+
+        function animateCounters() {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    let step = 0;
+                    const interval = setInterval(() => {
+                        for (let i = 1; i <= 4; i++) {
+                            const value = Math.floor(Math.sin(step / 10) * 1000 + 1000);
+                            frame.contentWindow.countersComponent.updateCounterValue(`counter${i}`, value + i * 100);
+                        }
+                        step++;
+                        if (step > 50) {
+                            clearInterval(interval);
+                            updateStatus('Animation completed');
+                        }
+                    }, 100);
+                    updateStatus('Starting counter animation...');
+                } catch (error) {
+                    updateStatus('Error: Animation failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function stressTest() {
+            updateStatus('Running stress test...');
+            let count = 0;
+            const stressInterval = setInterval(() => {
+                randomizeCounters();
+                count++;
+                if (count >= 20) {
+                    clearInterval(stressInterval);
+                    updateStatus('Stress test completed');
+                }
+            }, 200);
+        }
+
+        function resetToDefaults() {
+            // Reset input fields
+            document.getElementById('counter1-value').value = '0';
+            document.getElementById('counter2-value').value = '0';
+            document.getElementById('counter3-value').value = '0';
+            document.getElementById('counter4-value').value = '0';
+
+            document.getElementById('counter1-label').value = 'Counter 1';
+            document.getElementById('counter2-label').value = 'Counter 2';
+            document.getElementById('counter3-label').value = 'Counter 3';
+            document.getElementById('counter4-label').value = 'Counter 4';
+
+            // Apply changes
+            updateCounterValues();
+            updateCounterLabels();
+
+            // Reset visibility
+            Object.keys(counterVisibility).forEach(counterId => {
+                if (!counterVisibility[counterId]) {
+                    toggleCounterVisibility(counterId);
+                }
+            });
+
+            updateStatus('Reset to defaults');
+        }
+
+        function showDebugInfo() {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.debugCounters();
+                    frame.contentWindow.debugCarousel();
+                    updateStatus('Debug info logged to console');
+                } catch (error) {
+                    updateStatus('Error: Debug function failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function testConnection() {
+            updateStatus('Testing Streamer.bot connection...');
+
+            const ws = new WebSocket('ws://127.0.0.1:8080/');
+
+            const timeout = setTimeout(() => {
+                ws.close();
+                updateStatus('Connection test: ⏰ Timeout (Streamer.bot not running)');
+            }, 3000);
+
+            ws.onopen = () => {
+                clearTimeout(timeout);
+                ws.close();
+                updateStatus('Connection test: ✅ Streamer.bot accessible');
+            };
+
+            ws.onerror = () => {
+                clearTimeout(timeout);
+                updateStatus('Connection test: ❌ Streamer.bot not accessible');
+            };
+        }
+
+        function rebuildCarousel() {
+            const frame = document.getElementById('counters-frame');
+            if (frame && frame.contentWindow && componentLoaded) {
+                try {
+                    frame.contentWindow.countersComponent.CarouselManager.rebuild();
+                    updateStatus('Carousel rebuilt');
+                } catch (error) {
+                    updateStatus('Error: Rebuild failed');
+                }
+            } else {
+                updateStatus('Error: Component not loaded');
+            }
+        }
+
+        function updateStatus(message) {
+            const panel = document.getElementById('status-panel');
+            const timestamp = new Date().toLocaleTimeString();
+            const newEntry = `[${timestamp}] ${message}\n`;
+            panel.textContent = newEntry + panel.textContent;
+
+            // Keep only last 50 lines
+            const lines = panel.textContent.split('\n');
+            if (lines.length > 50) {
+                panel.textContent = lines.slice(0, 50).join('\n');
+            }
+        }
+
+        // Wait for iframe to load
+        document.getElementById('counters-frame').addEventListener('load', function() {
+            componentLoaded = true;
+            updateStatus('Component loaded successfully!');
+
+            // Start with demo data after a short delay
+            setTimeout(() => {
+                loadPreset('gaming');
+            }, 1000);
+        });
+
+        // Initial status
+        updateStatus('Initializing counters component...');
+    </script>
+</body>
+</html>

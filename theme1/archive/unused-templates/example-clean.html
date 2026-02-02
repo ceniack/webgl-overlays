@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Example - Compiled</title>
+
+    <!--
+    🎯 COMPILED TEMPLATE IDENTIFICATION
+    Template: example-clean.html (COMPILED VERSION)
+    Build System: Vite Component Compilation
+    Architecture: Zero iframe dependencies - All components inlined
+    Client: Single shared Streamer.bot connection
+    Generated: Automated build process
+    Purpose: Minimal clean overlay template
+    -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Enhanced Common Styles -->
+    <link rel="stylesheet" href="/css/overlay-common.css">
+    <link rel="stylesheet" href="/css/theme1.css">
+
+    <style>
+        /* Clean example template styles */
+        :root {
+            --primary: var(--brb-primary);
+            --secondary: var(--brb-secondary);
+            --accent: var(--brb-accent);
+            --bg-dark: var(--brb-bg-dark);
+            --bg-panel: var(--brb-bg-panel);
+            --border-color: var(--brb-border);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 257px;
+            background: transparent;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .clean-overlay-bar {
+            position: relative;
+            width: 1920px;
+            height: 257px;
+            display: flex;
+            background: var(--bg-panel);
+        }
+
+        /* Simple layout for clean version */
+        .clean-section {
+            flex: 1;
+            height: 100%;
+            background: transparent;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-family: var(--font-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="clean-overlay-bar">
+        <div class="clean-section">Clean Compiled Template</div>
+        <div class="clean-section">No Components</div>
+        <div class="clean-section">Pure HTML</div>
+    </div>
+
+    <script type="module" src="/js/main.js"></script>
+</body>
+</html>

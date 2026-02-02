@@ -1,0 +1,29 @@
+Platform,Category,Total Events,Follow Events,Chat Events,Subscribe Events,Donation Events,Stream Events,Coverage Status,Implementation Complexity,Priority Level,Notes
+Twitch,Streaming,137,15,25,18,12,12,Full,Easy,High,"Leading platform with comprehensive WebSocket support"
+YouTube,Streaming,29,8,12,8,6,3,Partial,Medium,High,"Major platform with growing live event support"
+Kick,Streaming,22,4,8,6,0,4,Partial,Easy,High,"Rapidly growing platform with competitive features"
+Trovo,Streaming,16,3,6,0,4,3,Partial,Medium,Medium,"Gaming-focused platform with unique virtual gifts"
+Elgato,Hardware,90,0,0,0,0,0,Full,Medium,Medium,"Stream Deck (45), Lighting (25), Capture (20) events"
+OBS Studio,Broadcasting,9,0,0,0,0,2,Full,Easy,Medium,"Scene switches (4), Recording (3), Streaming (2)"
+Meld Studio,Broadcasting,12,0,0,0,0,0,Full,Medium,Low,"Alternative broadcasting software"
+Streamlabs,Monetization,6,0,0,0,6,0,Full,Easy,High,"Direct donations and tips"
+Patreon,Monetization,5,0,0,0,5,0,Webhook,Complex,Medium,"Subscription-based creator monetization"
+Fourthwall,Monetization,13,0,0,0,13,0,Webhook,Complex,Medium,"Creator commerce platform (8 sales + 5 donations)"
+Ko-Fi,Monetization,4,0,0,0,4,0,Webhook,Medium,Medium,"Simple creator support platform"
+
+Event Categories Summary:
+Core Engagement,"Follow, Subscribe, Chat events - essential for viewer interaction"
+Monetization,"Donation, subscription, and revenue events"
+Community,"Raids, channel points, community building features"
+Hardware,"Stream Deck, lighting, capture device integrations"
+Broadcasting,"OBS scenes, recording, streaming software events"
+
+Implementation Priority:
+Phase 1 - Essential,"Twitch + YouTube: Follow, Subscribe, Chat, Donations (High Priority)"
+Phase 2 - Expanding,"Kick + Trovo: Platform-specific features (Medium Priority)"
+Phase 3 - Advanced,"Hardware integration and specialty platforms (Lower Priority)"
+
+Platform Tiers:
+Tier 1 - Essential,"Twitch, YouTube (highest event coverage)"
+Tier 2 - Growing,"Kick, Trovo (good potential)"
+Tier 3 - Specialized,"Hardware and niche integrations"

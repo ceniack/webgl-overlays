@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Rate Monitor - Debug Console</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+        }
+
+        .debug-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .debug-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .debug-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .debug-panel h3 {
+            margin: 0 0 10px 0;
+            color: #00d4ff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .debug-log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .component-frame {
+            width: 100%;
+            height: 200px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .status-info {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .status-success { color: #00ff00; }
+        .status-warning { color: #ffa500; }
+        .status-error { color: #ff4444; }
+
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            background: #005a9e;
+        }
+
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 5px;
+        }
+
+        .log-error { color: #ff4444; }
+        .log-warn { color: #ffa500; }
+        .log-info { color: #00d4ff; }
+        .log-success { color: #00ff00; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <div class="header">
+            <h1>💓 Heart Rate Monitor - Debug Console</h1>
+            <p>Real-time connection and component diagnostics</p>
+        </div>
+
+        <div class="debug-grid">
+            <div class="debug-panel">
+                <h3>🔌 Connection Diagnostics</h3>
+                <div class="status-info">
+                    <div id="connection-status">Status: Initializing...</div>
+                    <div id="client-info">Client: Not loaded</div>
+                    <div id="websocket-state">WebSocket: Not connected</div>
+                    <div id="last-error">Last Error: None</div>
+                </div>
+
+                <h3>📊 Live Debug Log</h3>
+                <div class="debug-log" id="debug-log">
+                    <div class="log-entry log-info">[INIT] Debug console starting...</div>
+                </div>
+
+                <button onclick="testConnection()">Test Connection</button>
+                <button onclick="clearLog()">Clear Log</button>
+                <button onclick="showGlobals()">Show Globals</button>
+                <button onclick="testWebSocket()">Test Raw WebSocket</button>
+            </div>
+
+            <div class="debug-panel">
+                <h3>💓 Component Status</h3>
+                <iframe src="heartrate-monitor.html" class="component-frame" id="component-frame"></iframe>
+
+                <h3>🧪 Test Controls</h3>
+                <button onclick="simulateHeartRate(60)">Test 60 BPM</button>
+                <button onclick="simulateHeartRate(90)">Test 90 BPM</button>
+                <button onclick="simulateHeartRate(120)">Test 120 BPM</button>
+                <button onclick="runSequence()">Run Sequence</button>
+
+                <h3>📈 Component Debug Output</h3>
+                <div class="debug-log" id="component-log">
+                    <div class="log-entry log-info">[COMPONENT] Waiting for component load...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalConsole = {};
+        let debugLog = document.getElementById('debug-log');
+        let componentLog = document.getElementById('component-log');
+        let logCount = 0;
+
+        // Capture console output
+        function setupConsoleCapture() {
+            originalConsole.log = console.log;
+            originalConsole.warn = console.warn;
+            originalConsole.error = console.error;
+            originalConsole.info = console.info;
+
+            console.log = (...args) => {
+                originalConsole.log(...args);
+                addLogEntry('info', args.join(' '));
+            };
+
+            console.warn = (...args) => {
+                originalConsole.warn(...args);
+                addLogEntry('warn', args.join(' '));
+            };
+
+            console.error = (...args) => {
+                originalConsole.error(...args);
+                addLogEntry('error', args.join(' '));
+            };
+
+            console.info = (...args) => {
+                originalConsole.info(...args);
+                addLogEntry('info', args.join(' '));
+            };
+        }
+
+        function addLogEntry(level, message) {
+            logCount++;
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${level}`;
+            entry.innerHTML = `[${timestamp}] ${message}`;
+
+            debugLog.appendChild(entry);
+            debugLog.scrollTop = debugLog.scrollHeight;
+
+            // Keep only last 100 entries
+            if (debugLog.children.length > 100) {
+                debugLog.removeChild(debugLog.firstChild);
+            }
+
+            // Update connection status
+            updateConnectionStatus();
+        }
+
+        function updateConnectionStatus() {
+            const connectionStatus = document.getElementById('connection-status');
+            const clientInfo = document.getElementById('client-info');
+            const websocketState = document.getElementById('websocket-state');
+            const lastError = document.getElementById('last-error');
+
+            // Check global availability
+            const hasStreamerbotClient = typeof StreamerbotClient !== 'undefined';
+            const hasStreamerbot = typeof Streamerbot !== 'undefined';
+
+            connectionStatus.textContent = hasStreamerbotClient || hasStreamerbot ?
+                'Status: Client library loaded' : 'Status: Client library not found';
+            connectionStatus.className = hasStreamerbotClient || hasStreamerbot ?
+                'status-success' : 'status-error';
+
+            clientInfo.textContent = `Client: StreamerbotClient=${typeof StreamerbotClient}, Streamerbot=${typeof Streamerbot}`;
+
+            // Try to get websocket state from component
+            try {
+                const frame = document.getElementById('component-frame');
+                if (frame && frame.contentWindow && frame.contentWindow.heartRateMonitor) {
+                    const monitor = frame.contentWindow.heartRateMonitor;
+                    websocketState.textContent = `WebSocket: Connected=${monitor.isConnected}, Client=${!!monitor.client}`;
+                    websocketState.className = monitor.isConnected ? 'status-success' : 'status-warning';
+                } else {
+                    websocketState.textContent = 'WebSocket: Component not ready';
+                    websocketState.className = 'status-warning';
+                }
+            } catch (error) {
+                websocketState.textContent = 'WebSocket: Error checking status';
+                websocketState.className = 'status-error';
+            }
+        }
+
+        function testConnection() {
+            addLogEntry('info', '🧪 Testing connection manually...');
+
+            // Test 1: Check if client classes exist
+            addLogEntry('info', `StreamerbotClient available: ${typeof StreamerbotClient !== 'undefined'}`);
+            addLogEntry('info', `Streamerbot available: ${typeof Streamerbot !== 'undefined'}`);
+
+            if (typeof Streamerbot !== 'undefined') {
+                addLogEntry('info', `Streamerbot.Client available: ${typeof Streamerbot.Client !== 'undefined'}`);
+            }
+
+            // Test 2: Try creating client
+            try {
+                const ClientClass = typeof StreamerbotClient !== 'undefined' ? StreamerbotClient :
+                                   typeof Streamerbot !== 'undefined' && Streamerbot.Client ? Streamerbot.Client : null;
+
+                if (ClientClass) {
+                    addLogEntry('success', `Found client class: ${ClientClass.name}`);
+
+                    const config = {
+                        host: '127.0.0.1',
+                        port: 8080,
+                        endpoint: '/',
+                        immediate: false,
+                        autoReconnect: false,  // Don't auto-connect for test
+                        retries: 1
+                    };
+
+                    addLogEntry('info', `Creating test client with config: ${JSON.stringify(config)}`);
+                    const testClient = new ClientClass(config);
+                    addLogEntry('success', 'Test client created successfully');
+
+                    // Try to connect
+                    addLogEntry('info', 'Attempting test connection...');
+                    testClient.connect().then(() => {
+                        addLogEntry('success', '🎉 Test connection successful!');
+                        testClient.disconnect();
+                    }).catch(error => {
+                        addLogEntry('error', `Test connection failed: ${error.message}`);
+                    });
+
+                } else {
+                    addLogEntry('error', 'No client class found');
+                }
+            } catch (error) {
+                addLogEntry('error', `Test connection error: ${error.message}`);
+            }
+        }
+
+        function testWebSocket() {
+            addLogEntry('info', '🧪 Testing raw WebSocket connection...');
+
+            try {
+                const ws = new WebSocket('ws://127.0.0.1:8080/');
+
+                ws.onopen = () => {
+                    addLogEntry('success', '✅ Raw WebSocket connected successfully!');
+                    ws.close();
+                };
+
+                ws.onerror = (error) => {
+                    addLogEntry('error', `❌ Raw WebSocket error: ${error}`);
+                };
+
+                ws.onclose = (event) => {
+                    addLogEntry('info', `Raw WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
+                };
+
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    if (ws.readyState === WebSocket.CONNECTING) {
+                        addLogEntry('error', '⏰ Raw WebSocket connection timeout');
+                        ws.close();
+                    }
+                }, 5000);
+
+            } catch (error) {
+                addLogEntry('error', `Raw WebSocket test failed: ${error.message}`);
+            }
+        }
+
+        function showGlobals() {
+            addLogEntry('info', '🔍 Checking global variables...');
+            addLogEntry('info', `window.StreamerbotClient: ${typeof window.StreamerbotClient}`);
+            addLogEntry('info', `window.Streamerbot: ${typeof window.Streamerbot}`);
+            addLogEntry('info', `globalThis.StreamerbotClient: ${typeof globalThis.StreamerbotClient}`);
+            addLogEntry('info', `globalThis.Streamerbot: ${typeof globalThis.Streamerbot}`);
+
+            // Check if variables are loaded in iframe
+            try {
+                const frame = document.getElementById('component-frame');
+                if (frame && frame.contentWindow) {
+                    const frameWindow = frame.contentWindow;
+                    addLogEntry('info', `iframe.StreamerbotClient: ${typeof frameWindow.StreamerbotClient}`);
+                    addLogEntry('info', `iframe.Streamerbot: ${typeof frameWindow.Streamerbot}`);
+                    addLogEntry('info', `iframe.heartRateMonitor: ${typeof frameWindow.heartRateMonitor}`);
+                } else {
+                    addLogEntry('warn', 'Cannot access iframe window');
+                }
+            } catch (error) {
+                addLogEntry('error', `Error checking iframe globals: ${error.message}`);
+            }
+        }
+
+        function simulateHeartRate(bpm) {
+            try {
+                const frame = document.getElementById('component-frame');
+                if (frame && frame.contentWindow && frame.contentWindow.testHeartRate) {
+                    frame.contentWindow.testHeartRate(bpm);
+                    addLogEntry('success', `Simulated ${bpm} BPM heart rate`);
+                } else {
+                    addLogEntry('error', 'Component test function not available');
+                }
+            } catch (error) {
+                addLogEntry('error', `Failed to simulate heart rate: ${error.message}`);
+            }
+        }
+
+        function runSequence() {
+            try {
+                const frame = document.getElementById('component-frame');
+                if (frame && frame.contentWindow && frame.contentWindow.testHeartRateSequence) {
+                    frame.contentWindow.testHeartRateSequence();
+                    addLogEntry('success', 'Started heart rate test sequence');
+                } else {
+                    addLogEntry('error', 'Component sequence function not available');
+                }
+            } catch (error) {
+                addLogEntry('error', `Failed to run sequence: ${error.message}`);
+            }
+        }
+
+        function clearLog() {
+            debugLog.innerHTML = '<div class="log-entry log-info">[CLEARED] Debug log cleared</div>';
+            componentLog.innerHTML = '<div class="log-entry log-info">[CLEARED] Component log cleared</div>';
+        }
+
+        // Initialize
+        setupConsoleCapture();
+
+        // Start monitoring
+        setInterval(updateConnectionStatus, 2000);
+
+        // Add component load listener
+        document.getElementById('component-frame').addEventListener('load', function() {
+            addLogEntry('success', '✅ Component iframe loaded');
+
+            // Monitor component console output
+            setTimeout(() => {
+                try {
+                    const frame = document.getElementById('component-frame');
+                    if (frame.contentWindow && frame.contentWindow.console) {
+                        // We can't easily capture iframe console, but we can check if component loaded
+                        addLogEntry('info', 'Component window accessible');
+                    }
+                } catch (error) {
+                    addLogEntry('warn', `Cannot access component console: ${error.message}`);
+                }
+            }, 1000);
+        });
+
+        addLogEntry('info', '🚀 Debug console initialized');
+    </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+/* Broadcaster Branding Component CSS */
+
+/* CSS Variables for theming */
+:root {
+    --primary: #00d4ff;
+    --secondary: #ff3366;
+    --border-color: rgba(255, 255, 255, 0.2);
+    --text-muted: rgba(255, 255, 255, 0.6);
+    --font-display: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --glass-bg: rgba(0, 0, 0, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --bg-dark: rgba(0, 0, 0, 0.8);
+}
+
+/* Base component styling */
+body {
+    margin: 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    font-family: var(--font-display);
+    color: white;
+}
+
+.branding-component {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    padding: 16px;
+}
+
+.section-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.live-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff0000;
+    animation: livePulse 2s infinite;
+    flex-shrink: 0;
+}
+
+@keyframes livePulse {
+    0%, 50% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+
+.section-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Branding section */
+.branding-section {
+    flex: 1;
+    min-width: 200px;
+}
+
+.branding-section .section-content {
+    flex-direction: column;
+}
+
+/* Profile Area */
+.profile-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.profile-image-container {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+    position: relative;
+    background: var(--bg-dark);
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-name {
+    font-family: var(--font-display);
+    font-size: 60px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-link {
+    font-size: 24px;
+    color: var(--secondary);
+    text-shadow: 0 0 5px rgba(255, 51, 102, 0.4);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Goals Container */
+.goals-container {
+    width: 100%;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-goals {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .profile-area {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-image-container {
+        width: 80px;
+        height: 80px;
+    }
+
+    .profile-fallback {
+        font-size: 24px;
+    }
+
+    .profile-name {
+        font-size: 36px;
+    }
+
+    .profile-link {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 320px) {
+    .profile-name {
+        font-size: 28px;
+    }
+
+    .profile-link {
+        font-size: 16px;
+    }
+}
+
+/* OBS Studio Optimizations */
+@media (max-width: 1920px) {
+    .branding-component {
+        transform-origin: top left;
+    }
+}
+
+/* Animation for profile image loading */
+.profile-image {
+    transition: opacity 0.3s ease;
+}
+
+.profile-image[style*="display: block"] {
+    opacity: 1;
+}
+
+.profile-image[style*="display: none"] {
+    opacity: 0;
+}
+
+/* Enhanced visual effects */
+.profile-image-container:hover {
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.6);
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+}
+
+.profile-name {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.profile-link {
+    transition: color 0.3s ease;
+}
+
+.profile-link:hover {
+    color: var(--primary);
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+}

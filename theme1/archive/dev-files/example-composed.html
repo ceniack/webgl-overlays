@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Stream Overlay Bar - Composed</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Enhanced Common Styles -->
+    <link rel="stylesheet" href="/css/overlay-common.css">
+    <link rel="stylesheet" href="/css/theme1.css">
+
+    <style>
+        /* Composed template layout styles */
+        :root {
+            --primary: var(--brb-primary);
+            --secondary: var(--brb-secondary);
+            --accent: var(--brb-accent);
+            --bg-dark: var(--brb-bg-dark);
+            --bg-panel: var(--brb-bg-panel);
+            --border-color: var(--brb-border);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 257px;
+            background: transparent;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .overlay-bar {
+            position: relative;
+            width: 1920px;
+            height: 257px;
+            display: flex;
+            background: var(--bg-panel);
+        }
+
+        /* Animated gradient border on top */
+        .overlay-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg,
+                var(--secondary) 0%,
+                var(--primary) 25%,
+                var(--accent) 50%,
+                var(--primary) 75%,
+                var(--secondary) 100%);
+            background-size: 200% 100%;
+            animation: gradientFlow 4s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* Component iframe styling */
+        .component-frame {
+            border: none;
+            background: transparent;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            scrolling: no;
+        }
+
+        /* Section layout */
+        .camera-section {
+            width: 200px;
+            height: 100%;
+            background: transparent;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .branding-section {
+            width: 400px;
+        }
+
+        .counters-section {
+            width: 600px;
+        }
+
+        .heart-rate-section {
+            width: 720px;
+        }
+
+        /* Section borders */
+        .camera-section,
+        .branding-section,
+        .counters-section {
+            border-right: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay-bar">
+        <!-- Camera Cutout Section -->
+        <div class="camera-section">
+            <!-- Transparent area for webcam -->
+        </div>
+
+        <!-- Branding Section - Component -->
+        <div class="branding-section">
+            <iframe src="/components/sections/BroadcasterInfo/BroadcasterInfo.html"
+                    class="component-frame"
+                    scrolling="no"
+                    frameborder="0"
+                    allow="autoplay">
+            </iframe>
+        </div>
+
+        <!-- Counters Section - Component -->
+        <div class="counters-section">
+            <iframe src="/components/sections/CounterCarousel/CounterCarousel.html"
+                    class="component-frame"
+                    scrolling="no"
+                    frameborder="0"
+                    allow="autoplay">
+            </iframe>
+        </div>
+
+        <!-- Heart Rate Section - Component -->
+        <div class="heart-rate-section">
+            <iframe src="/components/sections/HealthMonitor/HealthMonitor.html"
+                    class="component-frame"
+                    scrolling="no"
+                    frameborder="0"
+                    allow="autoplay">
+            </iframe>
+        </div>
+    </div>
+</body>
+</html>

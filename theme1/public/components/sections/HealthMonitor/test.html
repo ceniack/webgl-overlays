@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Rate Monitor - Test Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        .test-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .component-container {
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            display: inline-block;
+        }
+        iframe {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Heart Rate Monitor Component Test</h1>
+
+    <div class="test-controls">
+        <h3>Test Controls</h3>
+        <p>Use these buttons to test the heart rate monitor functionality:</p>
+
+        <button onclick="testHeartRate(60)">Test 60 BPM</button>
+        <button onclick="testHeartRate(75)">Test 75 BPM</button>
+        <button onclick="testHeartRate(90)">Test 90 BPM</button>
+        <button onclick="testHeartRate(120)">Test 120 BPM</button>
+        <button onclick="runTestSequence()">Run Test Sequence</button>
+        <button onclick="debugInfo()">Debug Info</button>
+
+        <p><small>Note: Test functions work if the component is loaded and Streamer.bot client is available.</small></p>
+    </div>
+
+    <div class="component-container">
+        <iframe src="heartrate-monitor.html"
+                width="350"
+                height="250"
+                style="border: none;"
+                allow="autoplay"
+                id="heartrate-frame">
+        </iframe>
+    </div>
+
+    <script>
+        function testHeartRate(bpm) {
+            const frame = document.getElementById('heartrate-frame');
+            if (frame && frame.contentWindow) {
+                try {
+                    frame.contentWindow.testHeartRate(bpm);
+                } catch (error) {
+                    console.log('Test function not available yet. Component may still be loading.');
+                }
+            }
+        }
+
+        function runTestSequence() {
+            const frame = document.getElementById('heartrate-frame');
+            if (frame && frame.contentWindow) {
+                try {
+                    frame.contentWindow.testHeartRateSequence();
+                } catch (error) {
+                    console.log('Test function not available yet. Component may still be loading.');
+                }
+            }
+        }
+
+        function debugInfo() {
+            const frame = document.getElementById('heartrate-frame');
+            if (frame && frame.contentWindow) {
+                try {
+                    frame.contentWindow.debugHeartRate();
+                } catch (error) {
+                    console.log('Debug function not available yet. Component may still be loading.');
+                }
+            }
+        }
+
+        // Wait for iframe to load before enabling functions
+        document.getElementById('heartrate-frame').addEventListener('load', function() {
+            console.log('Heart Rate Monitor component loaded successfully!');
+            console.log('You can now use the test buttons above.');
+        });
+    </script>
+</body>
+</html>

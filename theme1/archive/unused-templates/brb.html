@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be Right Back - Compiled</title>
+
+    <!--
+    🎯 COMPILED TEMPLATE IDENTIFICATION
+    Template: brb.html (COMPILED VERSION)
+    Build System: Vite Component Compilation
+    Architecture: Zero iframe dependencies - All components inlined
+    Client: Single shared Streamer.bot connection
+    Generated: Automated build process
+    Purpose: Be Right Back full-screen overlay
+    -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Enhanced Common Styles -->
+    <link rel="stylesheet" href="/css/overlay-common.css">
+    <link rel="stylesheet" href="/css/theme1.css">
+
+    <style>
+        /* BRB template specific styles */
+        :root {
+            --primary: var(--brb-primary);
+            --secondary: var(--brb-secondary);
+            --accent: var(--brb-accent);
+            --bg-dark: var(--brb-bg-dark);
+            --bg-panel: var(--brb-bg-panel);
+            --border-color: var(--brb-border);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            background: var(--bg-dark);
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .brb-container {
+            position: relative;
+            width: 1920px;
+            height: 1080px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-dark);
+        }
+
+        .brb-content {
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .brb-title {
+            font-family: var(--font-primary);
+            font-size: 4em;
+            font-weight: 900;
+            margin-bottom: 0.5em;
+            text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.5);
+        }
+
+        .brb-subtitle {
+            font-family: var(--font-body);
+            font-size: 1.5em;
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="brb-container">
+        <div class="brb-content">
+            <div class="brb-title">Be Right Back</div>
+            <div class="brb-subtitle">Stream will return shortly</div>
+        </div>
+    </div>
+
+    <script type="module" src="/js/main.js"></script>
+</body>
+</html>

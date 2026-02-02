@@ -1,0 +1,66 @@
+
+@font-face {
+  font-family: "Iconify Explorer Font";
+  src: url("./iconfont.eot");
+  src: url("./iconfont.eot") format("embedded-opentype"),
+       url("./iconfont.ttf") format("truetype"),
+       url("./iconfont.woff") format("woff"),
+       url("./iconfont.woff2") format("woff2"),
+       url("./iconfont.svg") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.i {
+  font-family: "Iconify Explorer Font" !important;
+  font-size: 1em;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+.i.simple-icons\:facebook:before {
+content: "\e001";
+}
+
+.i.simple-icons\:instagram:before {
+content: "\e002";
+}
+
+.i.simple-icons\:kick:before {
+content: "\e003";
+}
+
+.i.simple-icons\:linkedin:before {
+content: "\e004";
+}
+
+.i.simple-icons\:obsstudio:before {
+content: "\e005";
+}
+
+.i.simple-icons\:patreon:before {
+content: "\e006";
+}
+
+.i.simple-icons\:paypal:before {
+content: "\e007";
+}
+
+.i.simple-icons\:spotify:before {
+content: "\e008";
+}
+
+.i.simple-icons\:tiktok:before {
+content: "\e009";
+}
+
+.i.simple-icons\:twitch:before {
+content: "\e00a";
+}
+
+.i.simple-icons\:youtube:before {
+content: "\e00b";
+}
+

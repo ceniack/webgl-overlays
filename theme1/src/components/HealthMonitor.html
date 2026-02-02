@@ -1,0 +1,32 @@
+<!-- Health Monitor Component -->
+<div class="heart-rate-component">
+    <div class="section heart-rate-section">
+        <div class="section-header">Vitals</div>
+        <div class="section-content">
+            <div id="heart-rate-monitor" class="heart-rate-container">
+                <!-- Heart Rate Line Graph -->
+                <div class="heart-rate-graph">
+                    <div class="heart-rate-monitor">
+                        <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                             width="200px" height="60px" viewBox="0 0 200 60">
+                            <polyline fill="none" stroke="var(--primary)" stroke-width="2"
+                                      stroke-miterlimit="10"
+                                      points="0,37 21,37 25,34 29,37 33,37 37,37 42,39 46,37 50,15 54,44 58,37 62,37 71,33 79,37 83,37 104,37 108,34 112,37 117,37 121,37 125,39 129,37 133,15 137,44 142,37 146,37 154,33 162,37 167,37 200,37"/>
+                        </svg>
+                        <div class="fade-in"></div>
+                        <div class="fade-out"></div>
+                    </div>
+                </div>
+
+                <!-- BPM Display -->
+                <div class="heart-rate-display">
+                    <div class="heart-rate-value" id="heart-rate-value">--</div>
+                    <div class="heart-rate-label">BPM</div>
+                </div>
+
+                <!-- Status -->
+                <div class="heart-rate-status" id="heart-rate-status">Waiting for data...</div>
+            </div>
+        </div>
+    </div>
+</div>

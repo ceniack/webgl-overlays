@@ -1,0 +1,229 @@
+/* Heart Rate Monitor Component CSS */
+
+/* CSS Variables for theming */
+:root {
+    --primary: #00d4ff;
+    --secondary: #ff3366;
+    --border-color: rgba(255, 255, 255, 0.2);
+    --text-muted: rgba(255, 255, 255, 0.6);
+    --font-display: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --glass-bg: rgba(0, 0, 0, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+/* Base component styling */
+body {
+    margin: 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    font-family: var(--font-display);
+    color: white;
+}
+
+.heart-rate-component {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    padding: 16px;
+}
+
+.section-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-content {
+    padding: 0;
+}
+
+/* Heart Rate Container */
+.heart-rate-section {
+    flex: 1;
+    min-width: 280px;
+}
+
+.heart-rate-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-width: 260px;
+    width: 100%;
+    margin: 0 auto;
+    height: 100%;
+}
+
+/* Heart Rate Graph */
+.heart-rate-graph {
+    position: relative;
+    width: 275px;
+    height: 90px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.heart-rate-monitor {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000000;
+    --animation-duration: 2.5s; /* Default 60 BPM equivalent */
+}
+
+.heart-rate-monitor svg {
+    width: 100%;
+    height: 100%;
+}
+
+.heart-rate-monitor svg polyline {
+    stroke: var(--primary);
+    filter: drop-shadow(0 0 4px var(--primary));
+}
+
+/* Animation Elements */
+.fade-in {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    background: #000000;
+    animation: heartRateIn var(--animation-duration, 2.5s) linear infinite;
+    z-index: 2;
+}
+
+.fade-out {
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 120%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        rgba(0,0,0,1) 0%,
+        rgba(0,0,0,0.8) 50%,
+        rgba(0,0,0,0) 100%);
+    animation: heartRateOut var(--animation-duration, 2.5s) linear infinite;
+    z-index: 1;
+}
+
+/* Keyframe Animations */
+@keyframes heartRateIn {
+    0% { width: 100%; }
+    50%, 100% { width: 0%; }
+}
+
+@keyframes heartRateOut {
+    0%, 30% { left: -120%; }
+    100% { left: 0%; }
+}
+
+/* BPM Display */
+.heart-rate-display {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.heart-rate-value {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--secondary);
+    text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+    line-height: 1;
+}
+
+.heart-rate-label {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+}
+
+.heart-rate-status {
+    font-size: 12px;
+    color: var(--text-muted);
+    opacity: 0.6;
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Active State */
+.heart-rate-container.active {
+    border-color: var(--secondary);
+}
+
+.heart-rate-container.active .heart-rate-graph {
+    border-color: var(--secondary);
+    box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
+}
+
+.heart-rate-container.active .heart-rate-monitor svg polyline {
+    stroke: var(--primary);
+    filter: drop-shadow(0 0 4px var(--primary));
+}
+
+/* Inactive State */
+.heart-rate-container.inactive {
+    opacity: 0.5;
+}
+
+.heart-rate-container.inactive .heart-rate-monitor {
+    opacity: 0.5;
+}
+
+.heart-rate-container.inactive .heart-rate-monitor svg polyline {
+    stroke: rgba(0, 212, 255, 0.3);
+    filter: none;
+}
+
+.heart-rate-container.inactive .heart-rate-monitor .fade-in,
+.heart-rate-container.inactive .heart-rate-monitor .fade-out {
+    animation-play-state: paused;
+}
+
+/* Responsive Design */
+@media (max-width: 320px) {
+    .heart-rate-graph {
+        width: 240px;
+        height: 80px;
+    }
+
+    .heart-rate-value {
+        font-size: 48px;
+    }
+
+    .heart-rate-label {
+        font-size: 20px;
+    }
+}
+
+/* OBS Studio Optimizations */
+@media (max-width: 1920px) {
+    .heart-rate-component {
+        transform-origin: top left;
+    }
+}

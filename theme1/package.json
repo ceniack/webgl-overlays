@@ -1,0 +1,25 @@
+{
+  "name": "stream-overlays-theme1",
+  "version": "1.0.0",
+  "description": "OBS Stream Overlays with Streamer.bot Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:dev": "tsc && npm run dev"
+  },
+  "dependencies": {
+    "@streamerbot/client": "^1.12.2",
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "nodemon": "^3.0.2",
+    "typescript": "^5.9.3"
+  },
+  "author": "",
+  "license": "MIT"
+}
