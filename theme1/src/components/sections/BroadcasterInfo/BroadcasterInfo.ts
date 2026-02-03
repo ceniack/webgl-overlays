@@ -10,6 +10,9 @@ import type {
   BroadcasterInfo as BroadcasterData,
   GlobalVariableEvent
 } from '../../../types';
+import { logger } from '../../../js/Logger';
+
+const componentLogger = logger.createChildLogger('BroadcasterInfo');
 
 export interface BroadcasterInfoConfig {
   broadcaster: {
@@ -59,7 +62,7 @@ export class BroadcasterInfo implements SectionComponent {
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
-    console.log('📺 BroadcasterInfo Component initializing...');
+    componentLogger.info('Initializing...');
 
     // Set default values
     this.setDefaults();
@@ -71,7 +74,7 @@ export class BroadcasterInfo implements SectionComponent {
     this.setupDebugFunctions();
 
     this.isInitialized = true;
-    console.log('📺 BroadcasterInfo Component initialized successfully');
+    componentLogger.info('Initialized successfully');
   }
 
   updateData(data: Partial<ComponentData>): void {
@@ -123,7 +126,7 @@ export class BroadcasterInfo implements SectionComponent {
 
     // First, try to use existing global client (created by streamerbot-integration)
     if (windowAny.streamerbotClient) {
-      console.log('📺 Using existing global Streamer.bot client');
+      componentLogger.debug('Using existing global Streamer.bot client');
       this.client = windowAny.streamerbotClient;
       this.isConnected = true;  // Assume connected if global client exists
       this.setupEventHandlers();
@@ -135,7 +138,7 @@ export class BroadcasterInfo implements SectionComponent {
     const ClientClass = this.getStreamerbotClientClass();
 
     if (!ClientClass) {
-      console.error('📺 ❌ Streamer.bot client not found. Make sure streamerbot-client.js is loaded.');
+      componentLogger.error('Streamer.bot client not found. Make sure streamerbot-client.js is loaded.');
       this.showConnectionError('Streamer.bot client not loaded');
       return;
     }
@@ -152,7 +155,7 @@ export class BroadcasterInfo implements SectionComponent {
         retryInterval: 2000
       };
 
-      console.log('📺 Creating new Streamer.bot client with config:', config);
+      componentLogger.debug('Creating new Streamer.bot client');
 
       // Create and initialize client
       this.client = new ClientClass(config);
@@ -163,20 +166,19 @@ export class BroadcasterInfo implements SectionComponent {
       // Connect to Streamer.bot
       this.client.connect();
 
-      console.log('📺 Connecting to Streamer.bot...');
+      componentLogger.debug('Connecting to Streamer.bot...');
 
       // Add connection timeout - FAIL LOUD, no test mode
       setTimeout(() => {
         if (!this.isConnected) {
-          console.error('📺 ❌ CONNECTION TIMEOUT: Streamer.bot not responding after 10 seconds');
-          console.error('📺 ❌ Check that Streamer.bot is running and WebSocket Server is enabled on port 8080');
+          componentLogger.error('CONNECTION TIMEOUT: Streamer.bot not responding after 10 seconds');
+          componentLogger.error('Check that Streamer.bot is running and WebSocket Server is enabled on port 8080');
           this.showConnectionError('Connection timeout - Streamer.bot not responding');
         }
       }, 10000);
 
     } catch (error) {
-      console.error('📺 ❌ FAILED TO CONNECT to Streamer.bot:', error);
-      console.error('📺 ❌ Check that Streamer.bot is running and WebSocket Server is enabled on port 8080');
+      componentLogger.error('FAILED TO CONNECT to Streamer.bot:', error);
       this.showConnectionError('Connection failed - check Streamer.bot');
     }
   }
@@ -196,13 +198,13 @@ export class BroadcasterInfo implements SectionComponent {
     // Connection events
     this.client.on('WebsocketClient.Open', () => {
       this.isConnected = true;
-      console.log('📺 Connected to Streamer.bot successfully');
+      componentLogger.info('Connected to Streamer.bot');
       this.requestInitialData();
     });
 
     this.client.on('WebsocketClient.Close', (event: any) => {
       this.isConnected = false;
-      console.log('📺 Disconnected from Streamer.bot');
+      componentLogger.info('Disconnected from Streamer.bot');
     });
 
     // Global variable events for broadcaster info
@@ -212,11 +214,11 @@ export class BroadcasterInfo implements SectionComponent {
         const variableValue = data.variableValue;
 
         if (variableName && variableValue !== undefined) {
-          console.log('📺 GlobalVariableUpdated:', variableName, '=', variableValue);
+          componentLogger.debug(`GlobalVariableUpdated: ${variableName} = ${variableValue}`);
           this.handleVariableUpdate(variableName, variableValue);
         }
       } catch (error) {
-        console.error('📺 Error processing global variable update:', error);
+        componentLogger.error('Error processing global variable update:', error);
       }
     });
   }
@@ -224,7 +226,7 @@ export class BroadcasterInfo implements SectionComponent {
   private async requestInitialData(): Promise<void> {
     if (!this.client || !this.isConnected) return;
 
-    console.log('📺 Requesting initial broadcaster data...');
+    componentLogger.debug('Requesting initial broadcaster data...');
 
     // Request all broadcaster-related variables
     const variables = [
@@ -239,7 +241,7 @@ export class BroadcasterInfo implements SectionComponent {
       try {
         const response = await this.client.getGlobal(variable);
         if (response?.variable !== undefined) {
-          console.log(`📺 Got initial ${variable} =`, response.variable);
+          componentLogger.debug(`Got initial ${variable} = ${response.variable}`);
           this.handleVariableUpdate(variable, response.variable);
         }
       } catch (error) {
@@ -247,7 +249,7 @@ export class BroadcasterInfo implements SectionComponent {
         // Only log unexpected errors
         const errorMessage = error instanceof Error ? error.message : String(error);
         if (!errorMessage.includes('Request failed')) {
-          console.warn(`📺 Failed to get initial ${variable}:`, error);
+          componentLogger.warn(`Failed to get initial ${variable}:`, error);
         }
         // Variable doesn't exist in Streamer.bot - this is normal, will use defaults or API fallback
       }
@@ -257,11 +259,11 @@ export class BroadcasterInfo implements SectionComponent {
     try {
       const broadcasterData = await this.client.getBroadcaster();
       if (broadcasterData?.status === 'ok') {
-        console.log('📺 Got broadcaster data from API:', broadcasterData);
+        componentLogger.debug('Got broadcaster data from API');
         this.updateFromBroadcasterAPI(broadcasterData);
       }
     } catch (error) {
-      console.warn('📺 Could not get broadcaster data from API:', error);
+      componentLogger.warn('Could not get broadcaster data from API:', error);
     }
   }
 
@@ -276,7 +278,7 @@ export class BroadcasterInfo implements SectionComponent {
         this.updateBroadcasterUsername(String(variableValue));
         break;
       case config.userIdVariable:
-        console.log('📺 Broadcaster user ID updated:', variableValue);
+        componentLogger.debug(`Broadcaster user ID updated: ${variableValue}`);
         break;
       case config.twitchUrlVariable:
         this.updateBroadcasterTwitchUrl(String(variableValue));
@@ -301,12 +303,12 @@ export class BroadcasterInfo implements SectionComponent {
         const username = platformData.broadcastUser || platformData.broadcasterLogin;
 
         if (displayName) {
-          console.log('📺 Updating display name from API:', displayName);
+          componentLogger.debug(`Updating display name from API: ${displayName}`);
           this.updateBroadcasterDisplayName(displayName);
         }
 
         if (username) {
-          console.log('📺 Updating username from API:', username);
+          componentLogger.debug(`Updating username from API: ${username}`);
           this.updateBroadcasterUsername(username);
         }
       }
@@ -330,7 +332,7 @@ export class BroadcasterInfo implements SectionComponent {
   private updateBroadcasterDisplayName(displayName: string): void {
     if (!displayName || displayName.trim() === '') return;
 
-    console.log('📺 Updating broadcaster display name:', displayName);
+    componentLogger.debug(`Updating broadcaster display name: ${displayName}`);
 
     const profileName = this.container.querySelector('#profile-name') as HTMLElement;
     const profileFallback = this.container.querySelector('#profile-fallback') as HTMLElement;
@@ -344,7 +346,7 @@ export class BroadcasterInfo implements SectionComponent {
   private updateBroadcasterTwitchUrl(twitchUrl: string): void {
     if (!twitchUrl || twitchUrl.trim() === '') return;
 
-    console.log('📺 Updating broadcaster Twitch URL:', twitchUrl);
+    componentLogger.debug(`Updating broadcaster Twitch URL: ${twitchUrl}`);
 
     const profileLink = this.container.querySelector('#profile-link') as HTMLElement;
     if (profileLink) profileLink.textContent = twitchUrl;
@@ -353,38 +355,38 @@ export class BroadcasterInfo implements SectionComponent {
   private updateBroadcasterUsername(username: string): void {
     if (!username || username.trim() === '') return;
 
-    console.log('📺 Updating broadcaster username:', username);
+    componentLogger.debug(`Updating broadcaster username: ${username}`);
 
     // Update the Twitch URL
     const profileLink = this.container.querySelector('#profile-link') as HTMLElement;
     if (profileLink) profileLink.textContent = `twitch.tv/${username}`;
 
     // Also trigger profile image loading
-    console.log('📺 Auto-triggering profile image load from username update');
+    componentLogger.debug('Auto-triggering profile image load from username update');
     this.loadBroadcasterProfileImage(username);
   }
 
   private loadBroadcasterProfileImage(username: string): void {
-    console.log('📺 Loading broadcaster profile image for username:', username);
+    componentLogger.debug(`Loading broadcaster profile image for username: ${username}`);
 
     if (!username || username.trim() === '') {
-      console.error('📺 No username provided for profile image loading');
+      componentLogger.error('No username provided for profile image loading');
       this.showFallbackImage();
       return;
     }
 
     const decApiUrl = `https://decapi.me/twitch/avatar/${username}`;
-    console.log('📺 Making DecAPI request to:', decApiUrl);
+    componentLogger.debug(`Making DecAPI request to: ${decApiUrl}`);
 
     // Use DecAPI to get the actual profile image URL
     fetch(decApiUrl)
       .then(response => {
-        console.log('📺 DecAPI response status:', response.status, response.statusText);
+        componentLogger.debug(`DecAPI response status: ${response.status} ${response.statusText}`);
         return response.text();
       })
       .then(url => {
         const cleanUrl = url.trim();
-        console.log('📺 DecAPI raw response:', cleanUrl);
+        componentLogger.debug(`DecAPI raw response: ${cleanUrl}`);
 
         if (cleanUrl &&
             cleanUrl.startsWith('http') &&
@@ -392,12 +394,12 @@ export class BroadcasterInfo implements SectionComponent {
             !cleanUrl.toLowerCase().includes('user not found')) {
           this.loadImageFromUrl(cleanUrl);
         } else {
-          console.log('📺 DecAPI returned invalid/error response:', cleanUrl);
+          componentLogger.debug(`DecAPI returned invalid/error response: ${cleanUrl}`);
           this.showFallbackImage();
         }
       })
       .catch(error => {
-        console.error('📺 DecAPI fetch failed:', error);
+        componentLogger.error('DecAPI fetch failed:', error);
         this.showFallbackImage();
       });
   }
@@ -407,28 +409,28 @@ export class BroadcasterInfo implements SectionComponent {
     const fallback = this.container.querySelector('#profile-fallback') as HTMLElement;
 
     if (!img || !fallback) {
-      console.error('📺 Profile image elements not found');
+      componentLogger.error('Profile image elements not found');
       return;
     }
 
-    console.log('📺 Attempting to load image from URL:', url);
+    componentLogger.debug(`Attempting to load image from URL: ${url}`);
 
     // Add a timeout to catch slow-loading images
     const timeout = setTimeout(() => {
-      console.warn('📺 Profile image loading timeout, showing fallback');
+      componentLogger.warn('Profile image loading timeout, showing fallback');
       this.showFallbackImage();
     }, 10000); // 10 second timeout
 
     img.onload = () => {
       clearTimeout(timeout);
-      console.log('📺 Broadcaster profile image loaded successfully');
+      componentLogger.debug('Broadcaster profile image loaded successfully');
       img.style.display = 'block';
       fallback.style.display = 'none';
     };
 
     img.onerror = () => {
       clearTimeout(timeout);
-      console.error('📺 Broadcaster profile image failed to load from URL:', url);
+      componentLogger.error(`Broadcaster profile image failed to load from URL: ${url}`);
       this.showFallbackImage();
     };
 
@@ -464,24 +466,14 @@ export class BroadcasterInfo implements SectionComponent {
     }
   }
 
-  private enableTestMode(): void {
-    console.log('📺 Enabling test mode - Streamer.bot client not available');
-
-    // Set test data after a delay
-    setTimeout(() => {
-      this.updateBroadcasterDisplayName('TestStreamer');
-      this.updateBroadcasterUsername('testuser');
-    }, 2000);
-  }
-
   // Test functions for development
   public testProfileImage(username = 'shroud'): void {
-    console.log(`📺 Testing profile image with username: ${username}`);
+    componentLogger.debug(`Testing profile image with username: ${username}`);
     this.loadBroadcasterProfileImage(username);
   }
 
   public testBroadcasterData(displayName = 'TestStreamer', username = 'testuser'): void {
-    console.log(`📺 Testing broadcaster data: ${displayName} (${username})`);
+    componentLogger.debug(`Testing broadcaster data: ${displayName} (${username})`);
     this.updateBroadcasterDisplayName(displayName);
     this.updateBroadcasterUsername(username);
   }
@@ -493,25 +485,25 @@ export class BroadcasterInfo implements SectionComponent {
     (window as any).broadcasterInfoComponent = this;
 
     (window as any).debugBroadcasterInfo = () => {
-      console.log('📺 BroadcasterInfo Component Debug Info:');
-      console.log('- Connected:', this.isConnected);
+      componentLogger.info('BroadcasterInfo Component Debug Info:');
+      componentLogger.info(`- Connected: ${this.isConnected}`);
 
       const profileName = this.container.querySelector('#profile-name') as HTMLElement;
       const profileLink = this.container.querySelector('#profile-link') as HTMLElement;
       const profileFallback = this.container.querySelector('#profile-fallback') as HTMLElement;
       const img = this.container.querySelector('#profile-image') as HTMLImageElement;
 
-      console.log('- Display Name:', profileName?.textContent);
-      console.log('- Profile Link:', profileLink?.textContent);
-      console.log('- Profile Fallback:', profileFallback?.textContent);
-      console.log('- Profile Image Visible:', img?.style.display === 'block');
-      console.log('- Profile Image URL:', img?.src);
+      componentLogger.info(`- Display Name: ${profileName?.textContent}`);
+      componentLogger.info(`- Profile Link: ${profileLink?.textContent}`);
+      componentLogger.info(`- Profile Fallback: ${profileFallback?.textContent}`);
+      componentLogger.info(`- Profile Image Visible: ${img?.style.display === 'block'}`);
+      componentLogger.info(`- Profile Image URL: ${img?.src}`);
     };
 
     (window as any).testProfileImage = (username: string) => this.testProfileImage(username);
     (window as any).testBroadcasterData = (displayName: string, username: string) =>
       this.testBroadcasterData(displayName, username);
 
-    console.log('📺 Debug functions registered: debugBroadcasterInfo(), testProfileImage(username), testBroadcasterData(displayName, username)');
+    componentLogger.debug('Debug functions registered: debugBroadcasterInfo(), testProfileImage(username), testBroadcasterData(displayName, username)');
   }
 }
