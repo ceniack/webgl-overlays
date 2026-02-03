@@ -69,19 +69,13 @@ export interface LayoutConfig {
   sections: ComponentConfig[];
 }
 
-// Component loading and composition
-export interface ComponentLoader {
-  loadComponent<T extends Component>(config: ComponentConfig): Promise<T>;
-  loadHTML(path: string): Promise<string>;
-  loadCSS(path: string): Promise<string>;
-  loadJS(path: string): Promise<string>;
-}
-
+// Component composition
 export interface ComponentComposer {
   addComponent(config: ComponentConfig): Promise<Component>;
   removeComponent(componentId: string): void;
   updateComponent(componentId: string, data: Partial<ComponentData>): void;
-  composeLayout(layout: LayoutConfig): Promise<HTMLElement>;
+  getComponents(): Component[];
+  getComponent(componentId: string): Component | undefined;
 }
 
 // Component registry for dependency injection
@@ -93,11 +87,3 @@ export interface ComponentRegistry {
 }
 
 export type ComponentFactory<T extends Component> = (config: ComponentConfig) => Promise<T>;
-
-// Real-time update system
-export interface ComponentUpdateManager {
-  subscribe(componentId: string, callback: (data: Partial<ComponentData>) => void): void;
-  unsubscribe(componentId: string): void;
-  broadcast(data: Partial<ComponentData>): void;
-  broadcastToComponent(componentId: string, data: Partial<ComponentData>): void;
-}
