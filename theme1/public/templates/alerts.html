@@ -292,28 +292,37 @@
 
             // Listen for alert events via EventBus (exposed by the JS bundle)
             function setupEventListeners() {
-                // Wait for the bundle to load and expose eventBus
-                const checkInterval = setInterval(() => {
+                function registerEventBusListeners() {
+                    // Subscribe to alert trigger events
+                    window.eventBus.on('alert:trigger', (alertData) => {
+                        console.log('[Alerts] Received alert:', alertData);
+                        queueAlert(alertData);
+                    });
+                    console.log('[Alerts] EventBus listeners registered');
+                }
+
+                // Check if eventBus is already available
+                if (window.eventBus) {
+                    registerEventBusListeners();
+                    return;
+                }
+
+                // Listen for the bundle ready event (emitted by main.ts)
+                window.addEventListener('streamoverlay:ready', () => {
                     if (window.eventBus) {
-                        clearInterval(checkInterval);
-
-                        // Subscribe to alert trigger events
-                        window.eventBus.on('alert:trigger', (alertData) => {
-                            console.log('[Alerts] Received alert:', alertData);
-                            queueAlert(alertData);
-                        });
-
-                        console.log('[Alerts] EventBus listeners registered');
+                        registerEventBusListeners();
+                    } else {
+                        console.warn('[Alerts] EventBus not available after ready event');
                     }
-                }, 100);
+                }, { once: true });
 
-                // Fallback timeout
+                // Fallback: check once after bundle should have loaded
                 setTimeout(() => {
-                    clearInterval(checkInterval);
-                    if (!window.eventBus) {
-                        console.warn('[Alerts] EventBus not available after timeout');
+                    if (window.eventBus && !window._alertsEventBusRegistered) {
+                        window._alertsEventBusRegistered = true;
+                        registerEventBusListeners();
                     }
-                }, 5000);
+                }, 1000);
             }
 
             // Test functions for debugging
