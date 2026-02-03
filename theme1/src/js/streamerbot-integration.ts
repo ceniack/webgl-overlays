@@ -1019,15 +1019,15 @@ if (typeof window !== 'undefined') {
   (window as any).subscribeToKick = async () => {
     const client = (window as any).streamerbotClient;
     if (!client) {
-      console.error('Streamer.bot client not available');
+      sbLogger.error('Streamer.bot client not available');
       return;
     }
-    console.log('Subscribing to Kick events...');
+    sbLogger.info('Subscribing to Kick events...');
     const result = await client.subscribe({
       Kick: ['Follow', 'Subscription', 'Resubscription', 'GiftSubscription', 'FirstWords',
              'ChatMessage', 'StreamOnline', 'StreamOffline', 'BroadcasterAuthenticated']
     });
-    console.log('Subscribe result:', result);
+    sbLogger.info('Subscribe result:', result);
     return result;
   };
 
@@ -1035,10 +1035,10 @@ if (typeof window !== 'undefined') {
   (window as any).getSubscriptions = () => {
     const client = (window as any).streamerbotClient;
     if (!client) {
-      console.error('Streamer.bot client not available');
+      sbLogger.error('Streamer.bot client not available');
       return;
     }
-    console.log('Current subscriptions:', client.subscriptions);
+    sbLogger.info('Current subscriptions:', client.subscriptions);
     return client.subscriptions;
   };
 
@@ -1046,12 +1046,12 @@ if (typeof window !== 'undefined') {
   (window as any).subscribeToAll = async () => {
     const client = (window as any).streamerbotClient;
     if (!client) {
-      console.error('Streamer.bot client not available');
+      sbLogger.error('Streamer.bot client not available');
       return;
     }
-    console.log('Subscribing to ALL events (*)...');
+    sbLogger.info('Subscribing to ALL events (*)...');
     const result = await client.subscribe('*');
-    console.log('Subscribe result:', result);
+    sbLogger.info('Subscribe result:', result);
     return result;
   };
 }
