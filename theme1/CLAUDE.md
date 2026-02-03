@@ -22,6 +22,14 @@ DEBUG_TO_FILE=true npm run dev
 npm install
 ```
 
+### Building TypeScript (IMPORTANT)
+**After editing any TypeScript files in `src/`, you MUST rebuild:**
+```bash
+# Build TypeScript to public/dist/ (REQUIRED after TS changes)
+node build.js
+```
+**Note:** `npm run build` does not work reliably on this system due to npm/Windows shell issues. Always use `node build.js` directly to ensure the build runs.
+
 ## Production URL
 - **OBS Browser Source**: `http://localhost:3000/template/example` (clean URL - no .html needed)
 - **Architecture**: Modular TypeScript components with ComponentComposer

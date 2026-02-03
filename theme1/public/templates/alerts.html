@@ -100,6 +100,10 @@
             border-left-color: #e91e63;
         }
 
+        .alert-item[data-type="firstword"] {
+            border-left-color: #00ff88;
+        }
+
         @keyframes alertSlideIn {
             from {
                 opacity: 0;
@@ -193,7 +197,7 @@
 
                     case 'cheer':
                         let cheerText = `${typeTag} ${alert.user} - ${alert.amount} bits`;
-                        if (alert.message) {
+                        if (hasValidMessage(alert.message)) {
                             cheerText += `: "${truncate(alert.message, 50)}"`;
                         }
                         return cheerText;
@@ -203,13 +207,20 @@
 
                     case 'donation':
                         let donationText = `${typeTag} ${alert.user} - ${alert.currency || '$'}${alert.amount}`;
-                        if (alert.message) {
+                        if (hasValidMessage(alert.message)) {
                             donationText += `: "${truncate(alert.message, 50)}"`;
                         }
                         return donationText;
 
                     case 'redemption':
                         return `${typeTag} ${alert.user} - ${alert.reward}`;
+
+                    case 'firstword':
+                        let firstWordText = `${typeTag} ${alert.user}`;
+                        if (hasValidMessage(alert.message)) {
+                            firstWordText += `: "${truncate(alert.message, 50)}"`;
+                        }
+                        return firstWordText;
 
                     default:
                         return `${typeTag} ${alert.user}`;
@@ -218,7 +229,14 @@
 
             function truncate(str, maxLen) {
                 if (!str) return '';
-                return str.length > maxLen ? str.substring(0, maxLen) + '...' : str;
+                // Ensure we have a string, not an object
+                const text = typeof str === 'string' ? str : String(str);
+                if (text === '[object Object]') return '';
+                return text.length > maxLen ? text.substring(0, maxLen) + '...' : text;
+            }
+
+            function hasValidMessage(msg) {
+                return msg && typeof msg === 'string' && msg.trim() !== '' && msg !== '[object Object]';
             }
 
             function updateDebug() {
@@ -327,12 +345,15 @@
                 if (type === 'redemption') {
                     testData.reward = 'Hydrate!';
                 }
+                if (type === 'firstword') {
+                    testData.message = 'Hello everyone!';
+                }
 
                 queueAlert(testData);
             };
 
             window.testAlertQueue = function(count) {
-                const types = ['follow', 'sub', 'cheer', 'raid', 'donation', 'redemption'];
+                const types = ['follow', 'sub', 'cheer', 'raid', 'donation', 'redemption', 'firstword'];
                 for (let i = 0; i < (count || 5); i++) {
                     setTimeout(() => {
                         const type = types[i % types.length];
@@ -349,10 +370,128 @@
                 debugPanel.classList.remove('visible');
             };
 
+            // Test alerts with specific platform - goes through EventBus like real events
+            window.testPlatformAlert = function(platform, type, user, options = {}) {
+                const testData = {
+                    type: type || 'follow',
+                    platform: platform || 'twitch',
+                    user: user || `${platform}User123`,
+                    timestamp: Date.now(),
+                    isTest: true,
+                    id: `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                };
+
+                // Add type-specific data
+                if (type === 'sub') {
+                    testData.tier = options.tier || '1';
+                    testData.months = options.months || 1;
+                    testData.isGift = options.isGift || false;
+                    testData.giftRecipient = options.giftRecipient;
+                }
+                if (type === 'cheer') {
+                    testData.amount = options.amount || 100;
+                    testData.message = options.message || 'Test cheer!';
+                }
+                if (type === 'raid') {
+                    testData.viewers = options.viewers || 50;
+                }
+                if (type === 'donation') {
+                    testData.amount = options.amount || 5;
+                    testData.currency = options.currency || '$';
+                    testData.message = options.message || 'Test donation!';
+                }
+                if (type === 'redemption') {
+                    testData.reward = options.reward || 'Test Reward';
+                    testData.cost = options.cost || 500;
+                }
+                if (type === 'firstword') {
+                    testData.message = options.message || 'Hello stream!';
+                }
+
+                // Emit through EventBus (same path as real events)
+                if (window.eventBus) {
+                    window.eventBus.emit('alert:trigger', testData);
+                    console.log(`[Test] Emitted ${platform}.${type} alert for ${testData.user}`);
+                } else {
+                    // Fallback to direct queue
+                    queueAlert(testData);
+                    console.log(`[Test] Queued ${platform}.${type} alert for ${testData.user}`);
+                }
+            };
+
+            // Test all new platforms quickly
+            window.testAllPlatforms = function() {
+                const tests = [
+                    ['kick', 'follow'], ['kick', 'sub'], ['kick', 'firstword'],
+                    ['trovo', 'follow'], ['trovo', 'sub'], ['trovo', 'cheer'], ['trovo', 'raid'],
+                    ['youtube', 'sub'], ['youtube', 'cheer'],
+                    ['kofi', 'donation'], ['kofi', 'sub'],
+                    ['tipeeestream', 'donation'], ['donordrive', 'donation'], ['fourthwall', 'donation']
+                ];
+
+                tests.forEach(([platform, type], i) => {
+                    setTimeout(() => {
+                        window.testPlatformAlert(platform, type, `${platform}Tester`);
+                    }, i * 800);
+                });
+                console.log(`[Test] Queued ${tests.length} platform alerts`);
+            };
+
+            // Help reference
+            window.testHelp = function() {
+                console.log(`
+=== Alert Testing Commands ===
+
+EXISTING (preserved):
+  testAlert(type, user)     - Quick UI test (Twitch only)
+  testAlertQueue(count)     - Queue multiple alerts
+  showDebug() / hideDebug() - Toggle debug panel
+
+NEW PLATFORM TESTS:
+  testPlatformAlert(platform, type, user, options)
+  testAllPlatforms()        - Test all new platforms
+
+PLATFORMS: twitch, youtube, kick, trovo, kofi, streamlabs,
+           streamelements, tipeeestream, donordrive, fourthwall
+
+TYPES: follow, sub, cheer, raid, donation, redemption, firstword
+
+EXAMPLES:
+  testPlatformAlert('kick', 'follow', 'KickUser')
+  testPlatformAlert('trovo', 'cheer', 'TrovoFan', {amount: 500})
+  testPlatformAlert('youtube', 'sub', 'YTMember', {months: 6})
+                `);
+            };
+
+            // List all available Streamer.bot actions
+            window.listActions = async function() {
+                const client = window.streamerbotClient;
+                if (!client) {
+                    console.error('Streamer.bot client not connected');
+                    return;
+                }
+                const result = await client.getActions();
+                console.table(result.actions.map(a => ({ id: a.id, name: a.name, group: a.group })));
+                return result.actions;
+            };
+
+            // Execute a Streamer.bot action by name
+            window.runAction = async function(name, args = {}) {
+                const client = window.streamerbotClient;
+                if (!client) {
+                    console.error('Streamer.bot client not connected');
+                    return;
+                }
+                const result = await client.doAction({ name }, args);
+                console.log('Action result:', result);
+                return result;
+            };
+
             // Initialize
             setupEventListeners();
             console.log('[Alerts] Alert overlay initialized');
-            console.log('[Alerts] Test with: testAlert("follow", "Username") or testAlertQueue(5)');
+            console.log('[Alerts] Test with: testAlert(), testPlatformAlert(), or testAllPlatforms()');
+            console.log('[Alerts] Run testHelp() for all testing commands');
         })();
     </script>
 

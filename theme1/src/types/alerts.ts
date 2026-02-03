@@ -3,8 +3,10 @@
  * Platform-agnostic types for stream alerts (follows, subs, cheers, raids, donations)
  */
 
-export type AlertType = 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption';
-export type AlertPlatform = 'twitch' | 'youtube' | 'streamlabs' | 'kofi';
+export type AlertType = 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption' | 'firstword';
+export type AlertPlatform =
+  | 'twitch' | 'youtube' | 'streamlabs' | 'kofi' | 'streamelements'
+  | 'kick' | 'trovo' | 'tipeeestream' | 'donordrive' | 'fourthwall';
 
 /**
  * Normalized alert event - platform-agnostic format

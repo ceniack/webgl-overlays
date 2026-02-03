@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "vite build",
+    "build": "node build.js",
     "build:check": "tsc --noEmit",
-    "build:watch": "vite build --watch",
+    "build:watch": "node node_modules/vite/bin/vite.js build --watch",
     "build:dev": "vite build && npm run dev"
   },
   "dependencies": {

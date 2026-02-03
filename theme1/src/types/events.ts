@@ -37,8 +37,8 @@ export interface ComponentReadyEvent {
 
 // Alert system events
 export interface AlertTriggerEvent {
-  type: 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption';
-  platform: 'twitch' | 'youtube' | 'streamlabs' | 'kofi';
+  type: 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption' | 'firstword';
+  platform: 'twitch' | 'youtube' | 'streamlabs' | 'kofi' | 'streamelements' | 'kick' | 'trovo' | 'tipeeestream' | 'donordrive' | 'fourthwall';
   user: string;
   amount?: number;
   currency?: string;
@@ -72,8 +72,8 @@ export interface GoalProgressEvent {
 
 export interface ActivityItemEvent {
   id: string;
-  type: 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption';
-  platform: 'twitch' | 'youtube' | 'streamlabs' | 'kofi';
+  type: 'follow' | 'sub' | 'cheer' | 'raid' | 'donation' | 'redemption' | 'firstword';
+  platform: 'twitch' | 'youtube' | 'streamlabs' | 'kofi' | 'streamelements' | 'kick' | 'trovo' | 'tipeeestream' | 'donordrive' | 'fourthwall';
   user: string;
   detail?: string;
   timestamp: number;

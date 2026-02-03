@@ -35,6 +35,7 @@ interface StreamerbotConfig {
   autoReconnect: boolean;
   retries: number;
   retryInterval: number;
+  subscribe?: Record<string, string[]> | '*';
   onConnect?: (data: any) => void;
   onDisconnect?: () => void;
   onError?: (error: any) => void;
@@ -218,12 +219,81 @@ class StreamerbotIntegration {
   /**
    * Normalize platform-specific events into unified AlertTriggerEvent format
    */
+  /**
+   * Extract username from various possible data structures
+   */
+  private extractUsername(data: any): string {
+    // Handle anonymous events (e.g., anonymous cheers)
+    if (data.isAnonymous === true || data.message?.isAnonymous === true) return 'Anonymous';
+
+    // Check if 'user' is a string directly (YouTube pattern)
+    // YouTube sends user as the display name string, not an object
+    if (typeof data.user === 'string' && data.user.trim() !== '') {
+      return data.user;
+    }
+
+    // Try nested user object first (common in Streamer.bot/Twitch)
+    if (data.user?.displayName) return data.user.displayName;
+    if (data.user?.display_name) return data.user.display_name;
+    if (data.user?.username) return data.user.username;
+    if (data.user?.name) return data.user.name;
+    if (data.user?.login) return data.user.login;
+
+    // Try nested message object (Streamer.bot cheer events)
+    if (data.message?.displayName) return data.message.displayName;
+    if (data.message?.display_name) return data.message.display_name;
+    if (data.message?.username) return data.message.username;
+    if (data.message?.user_name) return data.message.user_name;
+    if (data.message?.userName) return data.message.userName;
+
+    // Try direct properties
+    if (data.displayName) return data.displayName;
+    if (data.display_name) return data.display_name;
+    if (data.username) return data.username;
+    if (data.user_name) return data.user_name;
+    if (data.userName) return data.userName;
+    if (data.name) return data.name;
+    if (data.login) return data.login;
+
+    return 'Unknown';
+  }
+
+  /**
+   * Extract message text from various possible data structures
+   */
+  private extractMessage(data: any): string | undefined {
+    // Handle null/undefined
+    if (data.message === null || data.message === undefined) {
+      return undefined;
+    }
+
+    // If message is already a string, return it
+    if (typeof data.message === 'string') {
+      return data.message;
+    }
+
+    // If message is an object, try common nested properties
+    if (typeof data.message === 'object') {
+      if (data.message.message) return data.message.message;
+      if (data.message.text) return data.message.text;
+      if (data.message.content) return data.message.content;
+      // Don't return [object Object]
+      return undefined;
+    }
+
+    return undefined;
+  }
+
   private normalizeAlertEvent(source: string, type: AlertType, data: any): AlertTriggerEvent {
     const platform = source.split('.')[0].toLowerCase() as AlertPlatform;
+
+    // Debug log the raw data structure
+    sbLogger.debug(`Raw ${type} event data:`, JSON.stringify(data, null, 2));
+
     const baseEvent: AlertTriggerEvent = {
       type,
       platform,
-      user: data.user_name || data.displayName || data.userName || data.name || 'Unknown',
+      user: this.extractUsername(data),
       timestamp: Date.now(),
       isTest: data.isTest ?? false,
       id: `${type}-${platform}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -240,14 +310,14 @@ class StreamerbotIntegration {
           months: data.cumulative_months || data.cumulativeMonths || data.months || 1,
           isGift: data.is_gift || data.isGift || false,
           giftRecipient: data.recipient_user_name || data.recipientUserName,
-          message: data.message?.text || data.message
+          message: this.extractMessage(data)
         };
 
       case 'cheer':
         return {
           ...baseEvent,
           amount: data.bits || data.amount || 0,
-          message: data.message?.text || data.message
+          message: this.extractMessage(data)
         };
 
       case 'raid':
@@ -261,7 +331,7 @@ class StreamerbotIntegration {
           ...baseEvent,
           amount: parseFloat(data.amount) || data.amount || 0,
           currency: data.currency || 'USD',
-          message: data.message?.text || data.message
+          message: this.extractMessage(data)
         };
 
       case 'redemption':
@@ -269,7 +339,13 @@ class StreamerbotIntegration {
           ...baseEvent,
           reward: data.reward?.title || data.rewardTitle || data.title || 'Unknown Reward',
           cost: data.reward?.cost || data.rewardCost || data.cost || 0,
-          message: data.user_input || data.userInput || data.message
+          message: data.user_input || data.userInput || this.extractMessage(data)
+        };
+
+      case 'firstword':
+        return {
+          ...baseEvent,
+          message: data.message?.message || undefined
         };
 
       default:
@@ -320,6 +396,8 @@ class StreamerbotIntegration {
         return `donated ${alert.currency || '$'}${alert.amount}`;
       case 'redemption':
         return `redeemed ${alert.reward}`;
+      case 'firstword':
+        return 'sent their first message';
       default:
         return '';
     }
@@ -329,6 +407,71 @@ class StreamerbotIntegration {
     if (!this.client) return;
 
     sbLogger.debug('Registering event listeners');
+
+    // ============================================
+    // DEBUG: Wildcard listener to catch ALL events (filtered)
+    // ============================================
+    this.client.on('*', (payload: any) => {
+      const source = payload?.event?.source;
+      const type = payload?.event?.type;
+      // Filter out noisy events
+      if (source === 'Inputs' && type === 'InputMouseClick') return;
+      if (source === 'Inputs' && type === 'InputKeyPress') return;
+      sbLogger.info('🔔 RAW EVENT RECEIVED:', source, type, payload);
+    });
+
+    // ============================================
+    // RAW.ACTION HANDLER - Catches test events from Streamer.bot UI
+    // Test buttons trigger Actions, not native platform events
+    // ============================================
+    this.client.on('Raw.Action', ({ event, data }: any) => {
+      const eventSource = data?.arguments?.eventSource?.toLowerCase();
+      const triggerName = data?.arguments?.triggerName;
+      const triggerCategory = data?.arguments?.triggerCategory;
+
+      sbLogger.debug('Raw.Action received:', { eventSource, triggerName, triggerCategory, data });
+
+      // Only process if this looks like a platform event test
+      if (!eventSource || !triggerName) return;
+
+      // Map trigger names to our alert types
+      // Different platforms use different trigger names for similar events
+      let alertType: AlertType | null = null;
+
+      // Follow events
+      if (triggerName === 'Follow' || triggerName === 'New Subscriber') alertType = 'follow';
+      // Sub/membership events
+      else if (triggerName === 'Subscription' || triggerName === 'Sub' || triggerName === 'New Sponsor') alertType = 'sub';
+      else if (triggerName === 'Resubscription' || triggerName === 'ReSub' || triggerName === 'MemberMileStone') alertType = 'sub';
+      else if (triggerName === 'GiftSubscription' || triggerName === 'GiftSub') alertType = 'sub';
+      // Cheer/donation events
+      else if (triggerName === 'Cheer' || triggerName === 'SpellCast' || triggerName === 'Super Chat' || triggerName === 'SuperChat') alertType = 'cheer';
+      else if (triggerName === 'Super Sticker' || triggerName === 'SuperSticker') alertType = 'cheer';
+      // Raid
+      else if (triggerName === 'Raid') alertType = 'raid';
+      // First message
+      else if (triggerName === 'FirstWords' || triggerName === 'FirstWord' || triggerName === 'First Words') alertType = 'firstword';
+
+      if (!alertType) {
+        sbLogger.debug('Unhandled Raw.Action trigger:', triggerName);
+        return;
+      }
+
+      // Build alert from action arguments
+      const args = data?.arguments || {};
+      const alertEvent = this.normalizeAlertEvent(
+        `${eventSource}.${triggerName}`,
+        alertType,
+        {
+          ...args,
+          user: args.user || args.userName || args.displayName || 'Unknown',
+          isTest: args.isTest ?? true
+        }
+      );
+
+      sbLogger.info(`📢 Test Alert from Raw.Action: ${alertType} from ${eventSource}`);
+      this.emitAlertEvent(alertEvent);
+    });
 
     // ============================================
     // TWITCH EVENTS
@@ -392,6 +535,13 @@ class StreamerbotIntegration {
     this.client.on('Twitch.RewardRedemption', ({ event, data }: any) => {
       sbLogger.debug('Twitch.RewardRedemption event received', data);
       const alertEvent = this.normalizeAlertEvent('Twitch.RewardRedemption', 'redemption', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // Twitch FirstWord (First Chat Message)
+    this.client.on('Twitch.FirstWord', ({ event, data }: any) => {
+      sbLogger.debug('Twitch.FirstWord event received', data);
+      const alertEvent = this.normalizeAlertEvent('Twitch.FirstWord', 'firstword', data);
       this.emitAlertEvent(alertEvent);
     });
 
@@ -469,6 +619,154 @@ class StreamerbotIntegration {
     this.client.on('StreamElements.Tip', ({ event, data }: any) => {
       sbLogger.debug('StreamElements.Tip event received', data);
       const alertEvent = this.normalizeAlertEvent('StreamElements.Tip', 'donation', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // ============================================
+    // KICK EVENTS
+    // ============================================
+
+    this.client.on('Kick.Follow', ({ event, data }: any) => {
+      sbLogger.debug('Kick.Follow event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kick.Follow', 'follow', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Kick.Subscription', ({ event, data }: any) => {
+      sbLogger.debug('Kick.Subscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kick.Subscription', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Kick.Resubscription', ({ event, data }: any) => {
+      sbLogger.debug('Kick.Resubscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kick.Resubscription', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Kick.GiftSubscription', ({ event, data }: any) => {
+      sbLogger.debug('Kick.GiftSubscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kick.GiftSubscription', 'sub', { ...data, isGift: true });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Kick.FirstWords', ({ event, data }: any) => {
+      sbLogger.debug('Kick.FirstWords event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kick.FirstWords', 'firstword', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // ============================================
+    // TROVO EVENTS
+    // ============================================
+
+    this.client.on('Trovo.Follow', ({ event, data }: any) => {
+      sbLogger.debug('Trovo.Follow event received', data);
+      const alertEvent = this.normalizeAlertEvent('Trovo.Follow', 'follow', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Trovo.Subscription', ({ event, data }: any) => {
+      sbLogger.debug('Trovo.Subscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Trovo.Subscription', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Trovo.Resubscription', ({ event, data }: any) => {
+      sbLogger.debug('Trovo.Resubscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Trovo.Resubscription', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Trovo.GiftSubscription', ({ event, data }: any) => {
+      sbLogger.debug('Trovo.GiftSubscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Trovo.GiftSubscription', 'sub', { ...data, isGift: true });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Trovo.SpellCast', ({ event, data }: any) => {
+      sbLogger.debug('Trovo.SpellCast event received', data);
+      // Map Trovo spell value to amount for cheer normalization
+      const alertEvent = this.normalizeAlertEvent('Trovo.SpellCast', 'cheer', {
+        ...data,
+        bits: data.spellValue || data.value || data.amount || 0
+      });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Trovo.Raid', ({ event, data }: any) => {
+      sbLogger.debug('Trovo.Raid event received', data);
+      const alertEvent = this.normalizeAlertEvent('Trovo.Raid', 'raid', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Trovo.FirstWords', ({ event, data }: any) => {
+      sbLogger.debug('Trovo.FirstWords event received', data);
+      const alertEvent = this.normalizeAlertEvent('Trovo.FirstWords', 'firstword', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // ============================================
+    // YOUTUBE MEMBERSHIP EVENTS (expand existing)
+    // ============================================
+
+    this.client.on('YouTube.NewSponsor', ({ event, data }: any) => {
+      sbLogger.debug('YouTube.NewSponsor event received', data);
+      const alertEvent = this.normalizeAlertEvent('YouTube.NewSponsor', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('YouTube.MemberMileStone', ({ event, data }: any) => {
+      sbLogger.debug('YouTube.MemberMileStone event received', data);
+      // Map YouTube membership months to sub months field
+      const alertEvent = this.normalizeAlertEvent('YouTube.MemberMileStone', 'sub', {
+        ...data,
+        months: data.memberMonths || data.months || 1
+      });
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('YouTube.FirstWords', ({ event, data }: any) => {
+      sbLogger.debug('YouTube.FirstWords event received', data);
+      const alertEvent = this.normalizeAlertEvent('YouTube.FirstWords', 'firstword', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // ============================================
+    // ADDITIONAL DONATION PLATFORMS
+    // ============================================
+
+    this.client.on('TipeeeStream.Donation', ({ event, data }: any) => {
+      sbLogger.debug('TipeeeStream.Donation event received', data);
+      const alertEvent = this.normalizeAlertEvent('TipeeeStream.Donation', 'donation', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('DonorDrive.Donation', ({ event, data }: any) => {
+      sbLogger.debug('DonorDrive.Donation event received', data);
+      const alertEvent = this.normalizeAlertEvent('DonorDrive.Donation', 'donation', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Fourthwall.Donation', ({ event, data }: any) => {
+      sbLogger.debug('Fourthwall.Donation event received', data);
+      const alertEvent = this.normalizeAlertEvent('Fourthwall.Donation', 'donation', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    // ============================================
+    // KO-FI MEMBERSHIP EVENTS
+    // ============================================
+
+    this.client.on('Kofi.Subscription', ({ event, data }: any) => {
+      sbLogger.debug('Kofi.Subscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kofi.Subscription', 'sub', data);
+      this.emitAlertEvent(alertEvent);
+    });
+
+    this.client.on('Kofi.Resubscription', ({ event, data }: any) => {
+      sbLogger.debug('Kofi.Resubscription event received', data);
+      const alertEvent = this.normalizeAlertEvent('Kofi.Resubscription', 'sub', data);
       this.emitAlertEvent(alertEvent);
     });
 
@@ -623,7 +921,7 @@ class StreamerbotIntegration {
 
     sbLogger.info('Initializing Streamerbot client');
 
-    const config: StreamerbotConfig = {
+    const config: any = {
       host: '127.0.0.1',
       port: 8080,
       endpoint: '/',
@@ -631,8 +929,51 @@ class StreamerbotIntegration {
       autoReconnect: true,
       retries: 5,
       retryInterval: 2000,
-      onConnect: (data: any) => {
+      logLevel: 'debug',  // Enable debug logging to see subscription activity
+      subscribe: {
+        // Twitch events
+        Twitch: ['Follow', 'Sub', 'ReSub', 'GiftSub', 'GiftBomb', 'Cheer', 'Raid',
+                 'RewardRedemption', 'FirstWord', 'StreamOnline', 'StreamOffline',
+                 'CommunityGoalContribution'],
+        // YouTube events
+        YouTube: ['NewSubscriber', 'SuperChat', 'SuperSticker', 'NewSponsor',
+                  'MemberMileStone', 'FirstWords'],
+        // Kick events
+        Kick: ['Follow', 'Subscription', 'Resubscription', 'GiftSubscription', 'FirstWords'],
+        // Trovo events
+        Trovo: ['Follow', 'Subscription', 'Resubscription', 'GiftSubscription',
+                'SpellCast', 'Raid', 'FirstWords'],
+        // Donation platforms
+        Streamlabs: ['Donation'],
+        Kofi: ['Donation', 'Subscription', 'Resubscription'],
+        StreamElements: ['Tip'],
+        TipeeeStream: ['Donation'],
+        DonorDrive: ['Donation'],
+        Fourthwall: ['Donation'],
+        // System events
+        Misc: ['GlobalVariableUpdated']
+      },
+      onConnect: async (data: any) => {
         sbLogger.info('Connected to Streamer.bot', data);
+        // Log subscription status and ensure subscriptions after connection
+        setTimeout(async () => {
+          try {
+            const events = await this.client?.getEvents();
+            sbLogger.info('Available events from Streamer.bot:', events);
+
+            // Explicitly subscribe to all events including Kick/Trovo
+            sbLogger.info('Explicitly subscribing to Kick/Trovo events...');
+            const subscribeResult = await this.client?.subscribe({
+              Kick: ['Follow', 'Subscription', 'Resubscription', 'GiftSubscription', 'FirstWords',
+                     'ChatMessage', 'StreamOnline', 'StreamOffline'],
+              Trovo: ['Follow', 'Subscription', 'Resubscription', 'GiftSubscription',
+                      'SpellCast', 'Raid', 'FirstWords', 'ChatMessage']
+            });
+            sbLogger.info('Subscribe result:', subscribeResult);
+          } catch (e) {
+            sbLogger.warn('Could not fetch available events or subscribe', e);
+          }
+        }, 1000);
       },
       onDisconnect: () => {
         sbLogger.warn('Disconnected from Streamer.bot');
@@ -640,7 +981,7 @@ class StreamerbotIntegration {
       },
       onError: (error: any) => {
         sbLogger.error('Connection error', error);
-        
+
         eventBus.emit(EVENT_TYPES.HEALTH_STATUS, {
           status: HEALTH_STATUS.ERROR,
           message: `Connection error: ${error}`,
@@ -673,6 +1014,46 @@ export const streamerbotIntegration = new StreamerbotIntegration();
 
 if (typeof window !== 'undefined') {
   (window as any).streamerbotIntegration = streamerbotIntegration;
+
+  // Debug helper: manually subscribe to events
+  (window as any).subscribeToKick = async () => {
+    const client = (window as any).streamerbotClient;
+    if (!client) {
+      console.error('Streamer.bot client not available');
+      return;
+    }
+    console.log('Subscribing to Kick events...');
+    const result = await client.subscribe({
+      Kick: ['Follow', 'Subscription', 'Resubscription', 'GiftSubscription', 'FirstWords',
+             'ChatMessage', 'StreamOnline', 'StreamOffline', 'BroadcasterAuthenticated']
+    });
+    console.log('Subscribe result:', result);
+    return result;
+  };
+
+  // Debug helper: get current subscriptions
+  (window as any).getSubscriptions = () => {
+    const client = (window as any).streamerbotClient;
+    if (!client) {
+      console.error('Streamer.bot client not available');
+      return;
+    }
+    console.log('Current subscriptions:', client.subscriptions);
+    return client.subscriptions;
+  };
+
+  // Debug helper: subscribe to ALL events
+  (window as any).subscribeToAll = async () => {
+    const client = (window as any).streamerbotClient;
+    if (!client) {
+      console.error('Streamer.bot client not available');
+      return;
+    }
+    console.log('Subscribing to ALL events (*)...');
+    const result = await client.subscribe('*');
+    console.log('Subscribe result:', result);
+    return result;
+  };
 }
 
 sbLogger.info('Streamerbot integration module loaded');
