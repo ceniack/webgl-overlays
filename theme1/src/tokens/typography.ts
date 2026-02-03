@@ -4,9 +4,9 @@
  */
 export const typographyTokens = {
   fontFamily: {
-    primary: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+    primary: "'Rajdhani', sans-serif",
     monospace: "'Consolas', 'Monaco', 'Courier New', monospace",
-    display: "'Inter', 'Segoe UI', system-ui, sans-serif"
+    display: "'Orbitron', sans-serif"
   },
 
   fontSize: {
@@ -68,7 +68,7 @@ export const typographyTokens = {
       fontSize: '20px',
       fontWeight: 600,
       lineHeight: 1.2,
-      color: '#00ff88'
+      color: '#ff3366'
     },
 
     label: {

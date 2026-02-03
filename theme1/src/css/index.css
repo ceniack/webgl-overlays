@@ -1,0 +1,12 @@
+/* ===== CSS Layer Imports ===== */
+/* Cascade order: reset → tokens → base → utilities → animations → layout → shared → theme */
+
+@layer reset, tokens, base, utilities, animations, layout, shared, theme;
+
+@import './layers/01-reset.css' layer(reset);
+@import './layers/02-tokens.css' layer(tokens);
+@import './layers/03-base.css' layer(base);
+@import './layers/04-utilities.css' layer(utilities);
+@import './layers/05-animations.css' layer(animations);
+@import './layers/06-layout.css' layer(layout);
+@import './layers/07-shared.css' layer(shared);

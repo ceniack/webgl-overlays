@@ -422,8 +422,8 @@ export class BroadcasterInfo implements SectionComponent {
     img.onload = () => {
       clearTimeout(timeout);
       console.log('📺 Broadcaster profile image loaded successfully');
-      img.style.display = 'block';
-      fallback.style.display = 'none';
+      const container = this.container.querySelector('.profile-image-container');
+      if (container) container.classList.add('has-image');
     };
 
     img.onerror = () => {
@@ -436,31 +436,33 @@ export class BroadcasterInfo implements SectionComponent {
   }
 
   private showFallbackImage(): void {
-    const img = this.container.querySelector('#profile-image') as HTMLImageElement;
-    const fallback = this.container.querySelector('#profile-fallback') as HTMLElement;
-
-    if (img) img.style.display = 'none';
-    if (fallback) fallback.style.display = 'block';
+    const container = this.container.querySelector('.profile-image-container');
+    if (container) container.classList.remove('has-image');
   }
 
   private showConnectionError(message: string): void {
-    // Update display to show error state
+    // Update display to show error state via CSS classes
     const nameEl = this.container.querySelector('#profile-name');
     const linkEl = this.container.querySelector('#profile-link');
     const fallback = this.container.querySelector('#profile-fallback') as HTMLElement;
+    const imageContainer = this.container.querySelector('.profile-image-container');
+
+    this.container.classList.add('is-error');
 
     if (nameEl) {
-      nameEl.textContent = '⚠️ CONNECTION ERROR';
-      (nameEl as HTMLElement).style.color = '#ff3366';
+      nameEl.textContent = 'CONNECTION ERROR';
+      (nameEl as HTMLElement).classList.add('is-error');
     }
     if (linkEl) {
       linkEl.textContent = message;
-      (linkEl as HTMLElement).style.color = '#ff6666';
+      (linkEl as HTMLElement).classList.add('is-error');
     }
     if (fallback) {
       fallback.textContent = '!';
-      fallback.style.backgroundColor = '#ff3366';
-      fallback.style.display = 'block';
+    }
+    if (imageContainer) {
+      imageContainer.classList.remove('has-image');
+      imageContainer.classList.add('is-error');
     }
   }
 
@@ -504,7 +506,8 @@ export class BroadcasterInfo implements SectionComponent {
       console.log('- Display Name:', profileName?.textContent);
       console.log('- Profile Link:', profileLink?.textContent);
       console.log('- Profile Fallback:', profileFallback?.textContent);
-      console.log('- Profile Image Visible:', img?.style.display === 'block');
+      const imageContainer = this.container.querySelector('.profile-image-container');
+      console.log('- Profile Image Visible:', imageContainer?.classList.contains('has-image'));
       console.log('- Profile Image URL:', img?.src);
     };
 

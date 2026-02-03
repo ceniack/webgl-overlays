@@ -1,0 +1,56 @@
+/* ===== DARK MINIMAL THEME ===== */
+/* Clean, understated look with muted colors and Inter font */
+
+:root {
+  --token-color-brand-primary: #6366f1;
+  --token-color-brand-secondary: #ec4899;
+  --token-color-brand-accent: #22c55e;
+  --token-color-brand-tertiary: #8b5cf6;
+
+  --token-color-background-dark: #09090b;
+  --token-color-background-panel: rgba(9, 9, 11, 0.95);
+  --token-color-border-accent: rgba(99, 102, 241, 0.2);
+
+  --token-typography-font-family-display: 'Inter', 'Segoe UI', sans-serif;
+  --token-typography-font-family-primary: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* Softer text shadows */
+.profile-name {
+  text-shadow: none;
+}
+
+.section-header {
+  text-shadow: none;
+  letter-spacing: 3px;
+  font-weight: 500;
+}
+
+.counter-value-large {
+  text-shadow: 0 0 8px rgba(236, 72, 153, 0.3);
+}
+
+.heart-rate-value {
+  text-shadow: 0 0 8px rgba(236, 72, 153, 0.3);
+}
+
+/* Subtler live indicator */
+.live-indicator {
+  box-shadow: 0 0 4px var(--secondary), 0 0 8px rgba(236, 72, 153, 0.4);
+}
+
+/* Muted border glow on camera section */
+.camera-section {
+  box-shadow: inset -3px 0 10px rgba(99, 102, 241, 0.05);
+}
+
+/* Subtler profile image glow */
+.profile-image-container {
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+}
+
+/* Gentler gradient bar */
+.overlay-bar::before {
+  height: 2px;
+  opacity: 0.8;
+}

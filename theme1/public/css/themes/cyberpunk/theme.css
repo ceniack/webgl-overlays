@@ -1,0 +1,204 @@
+/* ===== CYBERPUNK THEME ===== */
+/* The default look — neon cyan/pink with Orbitron font */
+/* This file overrides token variables to create the cyberpunk aesthetic */
+
+:root {
+  --token-color-brand-primary: #00d4ff;
+  --token-color-brand-secondary: #ff3366;
+  --token-color-brand-accent: #00ff88;
+  --token-color-brand-tertiary: #a855f7;
+
+  --token-color-background-dark: #0a0a0a;
+  --token-color-background-panel: rgba(13, 13, 13, 0.9);
+  --token-color-border-accent: rgba(0, 212, 255, 0.3);
+
+  --token-typography-font-family-display: 'Orbitron', sans-serif;
+  --token-typography-font-family-primary: 'Rajdhani', sans-serif;
+}
+
+/* Theme1-specific panel overrides */
+.theme1-panel {
+  background: rgba(26, 26, 46, 0.9);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.theme1-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.theme1-panel-title {
+  font-size: 20px;
+  font-weight: bold;
+  background: linear-gradient(45deg, var(--token-color-brand-accent), #00bcd4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Theme1 buttons */
+.theme1-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 1px solid transparent;
+  padding: 8px 16px;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme1-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.theme1-btn:hover::before { left: 100%; }
+.theme1-btn:hover { border-color: var(--token-color-brand-accent); }
+
+/* Theme1 alerts */
+.theme1-alert {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid var(--token-color-brand-accent);
+  animation: theme1AlertEntry 0.8s ease-out;
+}
+
+.theme1-alert::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  background: conic-gradient(from 0deg, var(--token-color-brand-accent), #667eea, #764ba2, var(--token-color-brand-accent));
+  z-index: -1;
+  animation: theme1BorderSpin 3s linear infinite;
+}
+
+/* Theme1 chat */
+.theme1-chat-container {
+  background: rgba(26, 26, 46, 0.95);
+  border: 2px solid rgba(102, 126, 234, 0.4);
+  backdrop-filter: blur(20px);
+}
+
+.theme1-chat-message {
+  background: rgba(102, 126, 234, 0.15);
+  border-left: 4px solid var(--token-color-brand-accent);
+  margin: 8px 0;
+  padding: 12px 16px;
+  animation: theme1MessageSlide 0.4s ease-out;
+}
+
+.theme1-chat-message.moderator { border-left-color: #4caf50; background: rgba(76, 175, 80, 0.15); }
+.theme1-chat-message.subscriber { border-left-color: #ffd700; background: rgba(255, 215, 0, 0.15); }
+.theme1-chat-message.vip { border-left-color: #e91e63; background: rgba(233, 30, 99, 0.15); }
+
+/* Theme1 progress bars */
+.theme1-progress { background: rgba(255, 255, 255, 0.1); overflow: hidden; height: 24px; position: relative; }
+.theme1-progress-fill {
+  background: linear-gradient(45deg, var(--token-color-brand-accent), #00bcd4);
+  height: 100%;
+  position: relative;
+  transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.theme1-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: theme1ProgressShine 2s infinite;
+}
+
+/* Theme1 badges */
+.theme1-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme1-badge.mod { background: linear-gradient(45deg, #4caf50, #8bc34a); }
+.theme1-badge.sub { background: linear-gradient(45deg, #ffd700, #ffed4e); color: #333; }
+.theme1-badge.vip { background: linear-gradient(45deg, #e91e63, #ad1457); }
+
+/* Theme1 status indicators */
+.theme1-status { position: relative; display: inline-block; }
+.theme1-status::after {
+  content: '';
+  position: absolute;
+  top: 50%; right: -15px;
+  transform: translateY(-50%);
+  width: 8px; height: 8px;
+  background: var(--token-color-brand-accent);
+  animation: theme1StatusPulse 2s infinite;
+}
+.theme1-status.offline::after { background: #ff6b6b; }
+.theme1-status.warning::after { background: #ffa726; }
+
+/* Theme1 special effects */
+.theme1-glow {
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5), 0 0 20px rgba(102, 126, 234, 0.3), 0 0 30px rgba(102, 126, 234, 0.1);
+}
+.theme1-glass {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.theme1-floating { animation: theme1Float 6s ease-in-out infinite; }
+
+/* Theme1 notifications */
+.theme1-notification {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid var(--token-color-brand-accent);
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.6), 0 15px 50px rgba(0, 0, 0, 0.4);
+}
+.theme1-notification.success { background: linear-gradient(45deg, #4caf50, #8bc34a); border-color: #4caf50; }
+.theme1-notification.warning { background: linear-gradient(45deg, #ff6b6b, #ffa726); border-color: #ff9800; }
+.theme1-notification.error { background: linear-gradient(45deg, #f44336, #e57373); border-color: #f44336; }
+
+/* Theme1 animation utility classes */
+.theme1-bounce-in { animation: theme1BounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.theme1-slide-up { animation: theme1SlideUp 0.6s ease-out; }
+
+/* Theme1 scrollbar */
+.theme1-scroll::-webkit-scrollbar { width: 8px; }
+.theme1-scroll::-webkit-scrollbar-track { background: rgba(26, 26, 46, 0.5); }
+.theme1-scroll::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.theme1-scroll::-webkit-scrollbar-thumb:hover { background: linear-gradient(45deg, var(--token-color-brand-accent), #00bcd4); }
+
+/* Theme1 dark mode overrides */
+.theme1-dark {
+  --token-color-brand-primary: #4a5568;
+  --token-color-brand-secondary: #2d3748;
+  --token-color-brand-accent: #63b3ed;
+}
+
+/* Theme1 high contrast */
+.theme1-high-contrast {
+  --token-color-brand-primary: #000000;
+  --token-color-brand-secondary: #ffffff;
+  --token-color-brand-accent: #ffff00;
+}
+.theme1-high-contrast .theme1-panel { border: 3px solid #ffffff; }
+.theme1-high-contrast .theme1-chat-message { border-width: 6px; }

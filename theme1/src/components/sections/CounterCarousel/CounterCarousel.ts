@@ -191,14 +191,10 @@ export class CounterCarousel implements SectionComponent {
     carouselContainer.classList.remove('carousel-container');
     carouselContainer.classList.add('splide-container');
 
-    // Create Splide structure with explicit dimensions
+    // Create Splide structure — dimensions handled by CSS (.counter-splide class)
     const splideRoot = document.createElement('div');
     splideRoot.className = 'splide counter-splide';
     splideRoot.id = 'counter-splide';
-    // Set explicit inline styles to ensure proper dimensions
-    splideRoot.style.width = '100%';
-    splideRoot.style.height = '180px';
-    splideRoot.style.position = 'relative';
 
     const splideTrack = document.createElement('div');
     splideTrack.className = 'splide__track';
@@ -614,16 +610,16 @@ export class CounterCarousel implements SectionComponent {
 
     this.counterVisibility[counterId] = isVisible;
 
-    // Find the Splide slide for this counter
+    // Find the Splide slide for this counter — use CSS class for visibility
     const slide = this.container.querySelector(`.splide__slide[data-counter-id="${counterId}"]`) as HTMLElement;
     const counterBox = document.querySelector(`#${counterId}-box`) as HTMLElement;
 
     if (slide) {
-      slide.style.display = isVisible ? '' : 'none';
+      slide.classList.toggle('is-hidden', !isVisible);
       console.log(`🔢 Set carousel ${counterId} visibility: ${isVisible}`);
     }
     if (counterBox) {
-      counterBox.style.display = isVisible ? 'block' : 'none';
+      counterBox.classList.toggle('is-hidden', !isVisible);
     }
 
     // Refresh Splide to handle hidden slides

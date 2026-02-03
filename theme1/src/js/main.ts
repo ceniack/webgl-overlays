@@ -1,5 +1,5 @@
 import '@splidejs/splide/css';
-import '../css/style.css';
+import '../css/index.css';
 
 // Component styles available but not yet integrated:
 // import '../components/sections/AlertFeed/AlertFeed.css';
@@ -9,6 +9,7 @@ import '../css/style.css';
 import { eventBus } from './EventBus';
 import { EVENT_TYPES } from './EventConstants';
 import { logger } from './Logger';
+import { initializeTheme } from './ThemeManager';
 import { streamerbotIntegration } from './streamerbot-integration';
 import { ComponentComposer } from '../composition/ComponentComposer';
 
@@ -34,6 +35,9 @@ async function initializeApp(): Promise<void> {
 
   try {
     mainLogger.info('Application starting');
+
+    // Apply theme and layout from URL parameters
+    initializeTheme();
 
     // Wait for DOM if still loading
     if (document.readyState === 'loading') {
