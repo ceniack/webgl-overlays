@@ -124,6 +124,18 @@ function generateAliases(tokens) {
     );
   }
 
+  // Alert type color aliases
+  if (colors?.alert) {
+    aliases.push(
+      '',
+      '  /* Alert type color aliases */',
+    );
+    for (const [key] of Object.entries(colors.alert)) {
+      const kebab = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+      aliases.push(`  --alert-${kebab}: var(--token-color-alert-${kebab});`);
+    }
+  }
+
   // Short-hand theme aliases used in overlay templates
   aliases.push(
     '',

@@ -27,6 +27,13 @@
   --token-color-border-accent: rgba(0, 212, 255, 0.3);
   --token-color-border-focus: #00d4ff;
   --token-color-border-divider: rgba(255, 255, 255, 0.1);
+  --token-color-alert-follow: #ff6b9d;
+  --token-color-alert-sub: #9b59b6;
+  --token-color-alert-cheer: #f1c40f;
+  --token-color-alert-raid: #e74c3c;
+  --token-color-alert-donation: #2ecc71;
+  --token-color-alert-redemption: #3498db;
+  --token-color-alert-firstword: #ff9800;
   --token-color-status-live: #ff0000;
   --token-color-status-offline: #666666;
   --token-color-status-connecting: #ff9800;
@@ -156,6 +163,15 @@
   /* Font aliases */
   --font-display: var(--token-typography-font-family-display);
   --font-body: var(--token-typography-font-family-primary);
+
+  /* Alert type color aliases */
+  --alert-follow: var(--token-color-alert-follow);
+  --alert-sub: var(--token-color-alert-sub);
+  --alert-cheer: var(--token-color-alert-cheer);
+  --alert-raid: var(--token-color-alert-raid);
+  --alert-donation: var(--token-color-alert-donation);
+  --alert-redemption: var(--token-color-alert-redemption);
+  --alert-firstword: var(--token-color-alert-firstword);
 
   /* Short-hand aliases for overlay templates */
   --primary: var(--token-color-brand-primary);

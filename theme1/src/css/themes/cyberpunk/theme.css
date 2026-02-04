@@ -14,6 +14,15 @@
 
   --token-typography-font-family-display: 'Orbitron', sans-serif;
   --token-typography-font-family-primary: 'Rajdhani', sans-serif;
+
+  /* Alert type colors */
+  --token-color-alert-follow: #ff6b9d;
+  --token-color-alert-sub: #9b59b6;
+  --token-color-alert-cheer: #f1c40f;
+  --token-color-alert-raid: #e74c3c;
+  --token-color-alert-donation: #2ecc71;
+  --token-color-alert-redemption: #3498db;
+  --token-color-alert-firstword: #ff9800;
 }
 
 /* Theme1-specific panel overrides */

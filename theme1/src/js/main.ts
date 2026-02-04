@@ -1,8 +1,9 @@
 import '@splidejs/splide/css';
 import '../css/index.css';
 
+import '../components/sections/AlertFeed/AlertFeed.css';
+
 // Component styles available but not yet integrated:
-// import '../components/sections/AlertFeed/AlertFeed.css';
 // import '../components/sections/GoalTracker/GoalTracker.css';
 // import '../components/sections/RecentActivity/RecentActivity.css';
 
@@ -114,6 +115,27 @@ async function initializeApp(): Promise<void> {
       setupGlobalFunctions(composer);
 
       mainLogger.info('ComponentComposer fully initialized');
+    } else if (componentName === 'alerts-html') {
+      mainLogger.debug('Initializing ComponentComposer for alerts');
+
+      const composer = new ComponentComposer();
+
+      try {
+        const component = await composer.addComponent({
+          name: 'AlertFeed',
+          path: '.alerts-overlay',
+          data: { maxVisible: 3, displayDuration: 5000 }
+        });
+        await component.initialize();
+        mainLogger.debug('AlertFeed component initialized for alerts page');
+      } catch (error) {
+        mainLogger.error('Failed to initialize AlertFeed:', error);
+      }
+
+      // Expose composer for debugging
+      (window as any).ComponentComposer = composer;
+
+      mainLogger.info('ComponentComposer initialized for alerts page');
     } else {
       mainLogger.info(`Skipping ComponentComposer for ${componentName} - streamerbot connection active`);
     }

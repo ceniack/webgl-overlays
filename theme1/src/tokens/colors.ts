@@ -36,6 +36,16 @@ export const colorTokens = {
     divider: 'rgba(255, 255, 255, 0.1)'       // Section dividers
   },
 
+  alert: {
+    follow: '#ff6b9d',        // Follow alert (pink)
+    sub: '#9b59b6',            // Subscription alert (purple)
+    cheer: '#f1c40f',          // Cheer/bits alert (gold)
+    raid: '#e74c3c',           // Raid alert (red)
+    donation: '#2ecc71',       // Donation alert (green)
+    redemption: '#3498db',     // Redemption alert (blue)
+    firstword: '#ff9800'       // First word alert (orange)
+  },
+
   status: {
     live: '#ff0000',           // Live indicator
     offline: '#666666',        // Offline state

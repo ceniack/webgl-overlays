@@ -1,6 +1,8 @@
 /**
  * AlertFeed Component Styles
- * Animated alerts for follows, subs, cheers, raids, and donations
+ * Animated alerts for follows, subs, cheers, raids, donations, and redemptions
+ * Platform brand color driven via --platform-brand-color custom property
+ * Alert type colors driven via --token-color-alert-* design tokens
  */
 
 /* Container */
@@ -21,12 +23,12 @@
   position: relative;
 }
 
-.alert-content {
-  width: 100%;
-  max-width: 400px;
+/* Multi-alert stacking for fullscreen alerts page */
+.alerts-overlay .alert-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 12px;
 }
 
 /* Base Alert Styles */
@@ -46,7 +48,7 @@
   max-width: 380px;
 }
 
-/* Alert Icon */
+/* Alert Icon — gradient uses platform brand color */
 .alert-icon {
   width: 48px;
   height: 48px;
@@ -54,16 +56,52 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary, #00d4ff), var(--secondary, #ff3366));
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--platform-brand-color, var(--primary, #00d4ff)),
+    color-mix(in srgb, var(--platform-brand-color, var(--primary, #00d4ff)) 70%, black)
+  );
   border-radius: 50%;
   padding: 10px;
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--platform-brand-color, var(--primary, #00d4ff)) 50%, transparent);
 }
 
 .alert-icon svg {
   width: 100%;
   height: 100%;
   fill: white;
+}
+
+/* Platform letter fallback inside icon circle */
+.alert-icon .platform-letter {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 22px;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* Type badge — small icon at bottom-right corner of the platform icon */
+.alert-type-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.alert-type-badge svg {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
 }
 
 /* Alert Body */
@@ -114,106 +152,76 @@
   text-overflow: ellipsis;
 }
 
-/* Type-specific Styles */
+/* Type-specific Styles — border + title color driven by design tokens */
 
 /* Follow Alert */
 .alert-follow {
-  border-color: #ff6b9d;
-}
-
-.alert-follow .alert-icon {
-  background: linear-gradient(135deg, #ff6b9d, #ff3366);
-  box-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
+  border-color: var(--token-color-alert-follow);
 }
 
 .alert-follow .alert-title {
-  color: #ff6b9d;
-  text-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+  color: var(--token-color-alert-follow);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--token-color-alert-follow) 50%, transparent);
 }
 
 /* Subscription Alert */
 .alert-sub {
-  border-color: #9b59b6;
-}
-
-.alert-sub .alert-icon {
-  background: linear-gradient(135deg, #9b59b6, #8e44ad);
-  box-shadow: 0 0 15px rgba(155, 89, 182, 0.5);
+  border-color: var(--token-color-alert-sub);
 }
 
 .alert-sub .alert-title {
-  color: #9b59b6;
-  text-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
+  color: var(--token-color-alert-sub);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--token-color-alert-sub) 50%, transparent);
 }
 
 /* Cheer/Bits Alert */
 .alert-cheer {
-  border-color: #f1c40f;
-}
-
-.alert-cheer .alert-icon {
-  background: linear-gradient(135deg, #f1c40f, #f39c12);
-  box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+  border-color: var(--token-color-alert-cheer);
 }
 
 .alert-cheer .alert-title {
-  color: #f1c40f;
-  text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+  color: var(--token-color-alert-cheer);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--token-color-alert-cheer) 50%, transparent);
 }
 
 /* Raid Alert */
 .alert-raid {
-  border-color: #e74c3c;
-}
-
-.alert-raid .alert-icon {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+  border-color: var(--token-color-alert-raid);
 }
 
 .alert-raid .alert-title {
-  color: #e74c3c;
-  text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+  color: var(--token-color-alert-raid);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--token-color-alert-raid) 50%, transparent);
 }
 
 /* Donation Alert */
 .alert-donation {
-  border-color: #2ecc71;
-}
-
-.alert-donation .alert-icon {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+  border-color: var(--token-color-alert-donation);
 }
 
 .alert-donation .alert-title {
-  color: #2ecc71;
-  text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+  color: var(--token-color-alert-donation);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--token-color-alert-donation) 50%, transparent);
 }
 
 /* Redemption Alert */
 .alert-redemption {
-  border-color: #3498db;
-}
-
-.alert-redemption .alert-icon {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+  border-color: var(--token-color-alert-redemption);
 }
 
 .alert-redemption .alert-title {
-  color: #3498db;
-  text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+  color: var(--token-color-alert-redemption);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--token-color-alert-redemption) 50%, transparent);
 }
 
-/* Platform-specific tweaks */
-.alert-youtube .alert-icon {
-  background: linear-gradient(135deg, #ff0000, #cc0000);
+/* First Word Alert */
+.alert-firstword {
+  border-color: var(--token-color-alert-firstword);
 }
 
-.alert-streamlabs .alert-icon,
-.alert-kofi .alert-icon {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+.alert-firstword .alert-title {
+  color: var(--token-color-alert-firstword);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--token-color-alert-firstword) 50%, transparent);
 }
 
 /* Animation keyframes */
@@ -234,6 +242,27 @@
   animation: alertPulse 2s ease-in-out infinite;
 }
 
+/* Debug Panel */
+.debug-panel {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  display: none;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.debug-panel.visible {
+  display: block;
+}
+
 /* Responsive adjustments for smaller containers */
 @media (max-width: 400px) {
   .alert {
@@ -245,6 +274,20 @@
     width: 40px;
     height: 40px;
     padding: 8px;
+  }
+
+  .alert-icon .platform-letter {
+    font-size: 18px;
+  }
+
+  .alert-type-badge {
+    width: 16px;
+    height: 16px;
+  }
+
+  .alert-type-badge svg {
+    width: 9px;
+    height: 9px;
   }
 
   .alert-title {
