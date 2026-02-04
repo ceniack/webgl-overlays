@@ -123,7 +123,7 @@ app.get('/template/:name', (req, res) => {
 
   if (!filePath) {
     console.log(`❌ Template not found: ${templateName}`);
-    return res.status(404).send(`Template ${templateName} not found`);
+    return res.status(404).type('text').send(`Template ${templateName} not found`);
   }
 
   // Read and inject theme/layout parameters into HTML
@@ -154,7 +154,7 @@ app.get('/compiled/:name', (req, res) => {
     res.sendFile(compiledPath);
   } else {
     console.log(`❌ Compiled template not found: ${templateName}`);
-    res.status(404).send(`Compiled template ${templateName} not found`);
+    res.status(404).type('text').send(`Compiled template ${templateName} not found`);
   }
 });
 
@@ -166,7 +166,7 @@ app.get('/component/element/:name', (req, res) => {
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
   } else {
-    res.status(404).send(`Component ${componentName} not found`);
+    res.status(404).type('text').send(`Component ${componentName} not found`);
   }
 });
 
@@ -176,7 +176,7 @@ app.get('/component/feature/:name', (req, res) => {
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
   } else {
-    res.status(404).send(`Component ${componentName} not found`);
+    res.status(404).type('text').send(`Component ${componentName} not found`);
   }
 });
 
@@ -186,7 +186,7 @@ app.get('/component/section/:name', (req, res) => {
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
   } else {
-    res.status(404).send(`Component ${componentName} not found`);
+    res.status(404).type('text').send(`Component ${componentName} not found`);
   }
 });
 

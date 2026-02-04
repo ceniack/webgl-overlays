@@ -60,6 +60,7 @@ body {
 /* Panels */
 .panel {
   background: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.1);
   padding: 12px;
@@ -68,6 +69,7 @@ body {
 
 .panel-glass {
   background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(15px);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 12px;
