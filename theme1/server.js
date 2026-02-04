@@ -102,6 +102,10 @@ app.get('/', (req, res) => {
   res.redirect('/template/overlay');
 });
 
+// Valid themes and layouts for query parameter injection
+const VALID_THEMES = ['cyberpunk', 'dark-minimal'];
+const VALID_LAYOUTS = ['default', 'wide', 'compact', 'fullscreen'];
+
 // Routes for template rendering
 app.get('/template/:name', (req, res) => {
   const templateName = req.params.name;
@@ -117,14 +121,35 @@ app.get('/template/:name', (req, res) => {
   const compiledPath = path.join(__dirname, 'public', 'templates', 'compiled', 'templates', `${templateName}.html`);
   const originalPath = path.join(__dirname, 'public', 'templates', `${templateName}.html`);
 
+  let filePath = null;
   if (fs.existsSync(compiledPath)) {
-    res.sendFile(compiledPath);
+    filePath = compiledPath;
   } else if (fs.existsSync(originalPath)) {
-    res.sendFile(originalPath);
-  } else {
-    console.log(`❌ Template not found: ${templateName}`);
-    res.status(404).send(`Template ${templateName} not found`);
+    filePath = originalPath;
   }
+
+  if (!filePath) {
+    console.log(`❌ Template not found: ${templateName}`);
+    return res.status(404).type('text').send(`Template ${templateName} not found`);
+  }
+
+  // Read and inject theme/layout parameters into HTML
+  const theme = VALID_THEMES.includes(req.query.theme) ? req.query.theme : 'cyberpunk';
+  const layout = VALID_LAYOUTS.includes(req.query.layout) ? req.query.layout : 'default';
+
+  let html = fs.readFileSync(filePath, 'utf-8');
+
+  // Inject data-theme and data-layout attributes
+  html = html.replace(/data-theme="[^"]*"/, `data-theme="${theme}"`);
+  html = html.replace(/data-layout="[^"]*"/, `data-layout="${layout}"`);
+
+  // Inject the correct theme stylesheet path
+  html = html.replace(
+    /href="\/css\/themes\/[^"]*\/theme\.css"/,
+    `href="/css/themes/${theme}/theme.css"`
+  );
+
+  res.type('html').send(html);
 });
 
 // Route for compiled templates specifically
@@ -142,7 +167,7 @@ app.get('/compiled/:name', (req, res) => {
     res.sendFile(compiledPath);
   } else {
     console.log(`❌ Compiled template not found: ${templateName}`);
-    res.status(404).send(`Compiled template ${templateName} not found`);
+    res.status(404).type('text').send(`Compiled template ${templateName} not found`);
   }
 });
 
@@ -160,7 +185,7 @@ app.get('/component/element/:name', (req, res) => {
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
   } else {
-    res.status(404).send(`Component ${componentName} not found`);
+    res.status(404).type('text').send(`Component ${componentName} not found`);
   }
 });
 
@@ -173,7 +198,7 @@ app.get('/component/feature/:name', (req, res) => {
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
   } else {
-    res.status(404).send(`Component ${componentName} not found`);
+    res.status(404).type('text').send(`Component ${componentName} not found`);
   }
 });
 
@@ -186,7 +211,7 @@ app.get('/component/section/:name', (req, res) => {
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
   } else {
-    res.status(404).send(`Component ${componentName} not found`);
+    res.status(404).type('text').send(`Component ${componentName} not found`);
   }
 });
 
@@ -195,34 +220,6 @@ app.get('/component/section/:name', (req, res) => {
 app.use('/component/section', express.static(path.join(__dirname, 'public', 'components', 'sections')));
 app.use('/component/element', express.static(path.join(__dirname, 'public', 'components', 'elements')));
 app.use('/component/feature', express.static(path.join(__dirname, 'public', 'components', 'features')));
-
-app.get('/layout/:name', (req, res) => {
-  const layoutName = req.params.name;
-  res.sendFile(path.join(__dirname, 'public', 'layouts', `${layoutName}.html`));
-});
-
-// TypeScript component routes (serve compiled JS)
-app.get('/component/ts/:type/:name', (req, res) => {
-  const componentType = req.params.type; // element, feature, section
-  const componentName = req.params.name;
-  res.sendFile(path.join(__dirname, 'public', 'dist', 'components', componentType, componentName, `${componentName}.js`));
-});
-
-// Legacy atomic design routes (backwards compatibility)
-app.get('/component/atom/:name', (req, res) => {
-  const componentName = req.params.name;
-  res.sendFile(path.join(__dirname, 'public', 'components', 'atoms', `${componentName}.html`));
-});
-
-app.get('/component/molecule/:name', (req, res) => {
-  const componentName = req.params.name;
-  res.sendFile(path.join(__dirname, 'public', 'components', 'molecules', `${componentName}.html`));
-});
-
-app.get('/component/organism/:name', (req, res) => {
-  const componentName = req.params.name;
-  res.sendFile(path.join(__dirname, 'public', 'components', 'organisms', `${componentName}.html`));
-});
 
 // ASSET ROUTES THIRD
 

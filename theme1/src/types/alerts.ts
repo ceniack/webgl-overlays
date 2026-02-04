@@ -53,6 +53,8 @@ export interface AlertEvent {
 export interface AlertFeedConfig {
   /** Maximum number of alerts in queue */
   maxQueueSize: number;
+  /** Maximum number of alerts visible simultaneously */
+  maxVisible: number;
   /** Display duration for each alert in milliseconds */
   displayDuration: number;
   /** Delay between alerts in milliseconds */

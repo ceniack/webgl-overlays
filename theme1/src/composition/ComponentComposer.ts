@@ -20,8 +20,10 @@ import { logger } from '../js/Logger';
 
 const composerLogger = logger.createChildLogger('ComponentComposer');
 
+import { AlertFeed } from '../components/sections/AlertFeed/AlertFeed';
+import type { AlertFeedConfig } from '../types/alerts';
+
 // Components available but not yet integrated into overlay:
-// import { AlertFeed } from '../components/sections/AlertFeed/AlertFeed';
 // import { GoalTracker } from '../components/sections/GoalTracker/GoalTracker';
 // import { RecentActivity } from '../components/sections/RecentActivity/RecentActivity';
 
@@ -190,8 +192,16 @@ export class ComponentComposer implements IComponentComposer {
       return new HealthMonitor(container) as unknown as Component;
     });
 
+    this.registry.register('AlertFeed', async (config: ComponentConfig) => {
+      const container = document.querySelector(config.path) as HTMLElement;
+      if (!container) {
+        throw new Error(`Container not found for AlertFeed: ${config.path}`);
+      }
+      return new AlertFeed(container, config.data as Partial<AlertFeedConfig>) as unknown as Component;
+    });
+
     // Components available but not yet integrated:
-    // AlertFeed, GoalTracker, RecentActivity
+    // GoalTracker, RecentActivity
 
     composerLogger.info('ComponentComposer initialized with factories:', this.registry.list());
   }

@@ -1,14 +1,16 @@
 import '@splidejs/splide/css';
-import '../css/style.css';
+import '../css/index.css';
+
+import '../components/sections/AlertFeed/AlertFeed.css';
 
 // Component styles available but not yet integrated:
-// import '../components/sections/AlertFeed/AlertFeed.css';
 // import '../components/sections/GoalTracker/GoalTracker.css';
 // import '../components/sections/RecentActivity/RecentActivity.css';
 
 import { eventBus } from './EventBus';
 import { EVENT_TYPES } from './EventConstants';
 import { logger } from './Logger';
+import { initializeTheme } from './ThemeManager';
 import { streamerbotIntegration } from './streamerbot-integration';
 import { ComponentComposer } from '../composition/ComponentComposer';
 
@@ -34,6 +36,9 @@ async function initializeApp(): Promise<void> {
 
   try {
     mainLogger.info('Application starting');
+
+    // Apply theme and layout from URL parameters
+    initializeTheme();
 
     // Wait for DOM if still loading
     if (document.readyState === 'loading') {
@@ -110,6 +115,27 @@ async function initializeApp(): Promise<void> {
       setupGlobalFunctions(composer);
 
       mainLogger.info('ComponentComposer fully initialized');
+    } else if (componentName === 'alerts-html') {
+      mainLogger.debug('Initializing ComponentComposer for alerts');
+
+      const composer = new ComponentComposer();
+
+      try {
+        const component = await composer.addComponent({
+          name: 'AlertFeed',
+          path: '.alerts-overlay',
+          data: { maxVisible: 3, displayDuration: 5000 }
+        });
+        await component.initialize();
+        mainLogger.debug('AlertFeed component initialized for alerts page');
+      } catch (error) {
+        mainLogger.error('Failed to initialize AlertFeed:', error);
+      }
+
+      // Expose composer for debugging
+      (window as any).ComponentComposer = composer;
+
+      mainLogger.info('ComponentComposer initialized for alerts page');
     } else {
       mainLogger.info(`Skipping ComponentComposer for ${componentName} - streamerbot connection active`);
     }

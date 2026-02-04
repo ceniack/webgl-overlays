@@ -1,0 +1,80 @@
+/* ===== UTILITY CLASSES ===== */
+
+/* Text alignment */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Font weight */
+.font-bold { font-weight: bold; }
+.font-normal { font-weight: normal; }
+
+/* Text effects */
+.text-shadow { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); }
+.text-shadow-light { text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); }
+
+/* Position utilities */
+.pos-absolute { position: absolute; }
+.pos-relative { position: relative; }
+.pos-fixed { position: fixed; }
+
+.top-left { top: 30px; left: 30px; }
+.top-right { top: 30px; right: 30px; }
+.bottom-left { bottom: 30px; left: 30px; }
+.bottom-right { bottom: 30px; right: 30px; }
+.center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+/* Visibility */
+.is-hidden { display: none !important; }
+.is-visible { display: block !important; }
+
+/* State classes for components */
+.is-error {
+  color: var(--token-color-text-error, #f44336) !important;
+}
+
+.has-image .profile-image {
+  display: block;
+}
+
+.has-image .profile-fallback {
+  display: none;
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.high-contrast {
+  filter: contrast(1.5);
+}
+
+.reduced-motion {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Neon glow effect */
+.neon-glow {
+  box-shadow:
+    0 0 5px var(--accent-color),
+    0 0 10px var(--accent-color),
+    0 0 15px var(--accent-color);
+}

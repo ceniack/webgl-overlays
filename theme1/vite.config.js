@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import designTokensPlugin from './src/build/vite-plugin-design-tokens.js';
 
 export default defineConfig({
   build: {
@@ -20,7 +21,9 @@ export default defineConfig({
     // Inline all dependencies into the bundle
     cssCodeSplit: false
   },
-  plugins: [],
+  plugins: [
+    designTokensPlugin()
+  ],
   css: {
     postcss: {
       plugins: []

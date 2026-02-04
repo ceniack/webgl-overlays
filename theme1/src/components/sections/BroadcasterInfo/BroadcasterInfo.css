@@ -1,200 +1,99 @@
 /* Broadcaster Branding Component CSS */
+/* Uses var(--token-*) references — no hardcoded colors */
 
-/* Component-specific layout only - inherits colors and fonts from parent */
+/* ===== Image show/hide via CSS classes ===== */
 
-.branding-component {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
+.profile-image-container .profile-image {
+  display: none;
 }
 
-/* Layout-specific CSS only - styling inherited from parent .panel */
-
-.section-header {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--primary-color);
-    text-align: center;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+.profile-image-container .profile-fallback {
+  display: block;
 }
 
-.live-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ff0000;
-    animation: livePulse 2s infinite;
-    flex-shrink: 0;
+.profile-image-container.has-image .profile-image {
+  display: block;
+  opacity: 1;
 }
 
-@keyframes livePulse {
-    0%, 50% { opacity: 1; }
-    100% { opacity: 0.3; }
+.profile-image-container.has-image .profile-fallback {
+  display: none;
 }
 
-.section-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+/* ===== Error state ===== */
+
+.profile-image-container.is-error {
+  border-color: var(--token-color-text-error, #f44336);
+  background: var(--token-color-text-error, #f44336);
 }
 
-/* Branding section */
-.branding-section {
-    flex: 1;
-    min-width: 200px;
+.profile-name.is-error {
+  color: var(--token-color-text-error, #f44336);
 }
 
-.branding-section .section-content {
-    flex-direction: column;
+.profile-link.is-error {
+  color: var(--token-color-text-warning, #ff9800);
 }
 
-/* Profile Area */
-.profile-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.profile-image-container {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 2px solid var(--primary-color);
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-    position: relative;
-    background: var(--bg-dark);
-    flex-shrink: 0;
-    aspect-ratio: 1 / 1;
-}
+/* ===== Animation for profile image loading ===== */
 
 .profile-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  transition: opacity 0.3s ease;
 }
 
-.profile-fallback {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: var(--font-display);
-    font-size: 32px;
-    font-weight: 900;
-    color: var(--primary-color);
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
-}
+/* ===== Enhanced visual effects ===== */
 
-.profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-}
-
-.profile-name {
-    font-family: var(--font-display);
-    font-size: 60px;
-    font-weight: 700;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.profile-link {
-    font-size: 24px;
-    color: var(--secondary-color);
-    text-shadow: 0 0 5px rgba(255, 51, 102, 0.4);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Responsive Design */
-@media (max-width: 480px) {
-    .profile-area {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .profile-image-container {
-        width: 80px;
-        height: 80px;
-    }
-
-    .profile-fallback {
-        font-size: 24px;
-    }
-
-    .profile-name {
-        font-size: 36px;
-    }
-
-    .profile-link {
-        font-size: 18px;
-    }
-}
-
-@media (max-width: 320px) {
-    .profile-name {
-        font-size: 28px;
-    }
-
-    .profile-link {
-        font-size: 16px;
-    }
-}
-
-/* OBS Studio Optimizations */
-@media (max-width: 1920px) {
-    .branding-component {
-        transform-origin: top left;
-    }
-}
-
-/* Animation for profile image loading */
-.profile-image {
-    transition: opacity 0.3s ease;
-}
-
-.profile-image[style*="display: block"] {
-    opacity: 1;
-}
-
-.profile-image[style*="display: none"] {
-    opacity: 0;
-}
-
-/* Enhanced visual effects */
 .profile-image-container:hover {
-    box-shadow: 0 0 25px rgba(0, 212, 255, 0.6);
-    transform: scale(1.02);
-    transition: all 0.3s ease;
+  box-shadow: 0 0 25px rgba(0, 212, 255, 0.6);
+  transform: scale(1.02);
+  transition: all 0.3s ease;
 }
 
 .profile-name {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .profile-link {
-    transition: color 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .profile-link:hover {
-    color: var(--primary-color);
-    text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+  color: var(--token-color-brand-primary, #00d4ff);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 480px) {
+  .profile-area {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-image-container {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-fallback {
+    font-size: 24px;
+  }
+
+  .profile-name {
+    font-size: 36px;
+  }
+
+  .profile-link {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 320px) {
+  .profile-name {
+    font-size: 28px;
+  }
+
+  .profile-link {
+    font-size: 16px;
+  }
 }

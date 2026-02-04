@@ -89,7 +89,7 @@
   }
 }
 
-/* Activity Icon */
+/* Activity Icon — platform brand color driven */
 .activity-icon {
   width: 24px;
   height: 24px;
@@ -102,7 +102,17 @@
 .activity-icon svg {
   width: 18px;
   height: 18px;
-  fill: var(--primary, #00d4ff);
+  fill: var(--platform-brand-color, var(--primary, #00d4ff));
+}
+
+/* Platform letter fallback */
+.activity-icon .platform-letter {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--platform-brand-color, var(--primary, #00d4ff));
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 /* Activity Body */
@@ -144,58 +154,41 @@
 
 /* Type-specific Styles */
 
+/* Type-specific border-left colors still indicate event type */
+
 /* Follow */
 .activity-follow {
-  border-left-color: #ff6b9d;
-}
-
-.activity-follow .activity-icon svg {
-  fill: #ff6b9d;
+  border-left-color: var(--token-color-alert-follow);
 }
 
 /* Subscription */
 .activity-sub {
-  border-left-color: #9b59b6;
-}
-
-.activity-sub .activity-icon svg {
-  fill: #9b59b6;
+  border-left-color: var(--token-color-alert-sub);
 }
 
 /* Cheer/Bits */
 .activity-cheer {
-  border-left-color: #f1c40f;
-}
-
-.activity-cheer .activity-icon svg {
-  fill: #f1c40f;
+  border-left-color: var(--token-color-alert-cheer);
 }
 
 /* Raid */
 .activity-raid {
-  border-left-color: #e74c3c;
-}
-
-.activity-raid .activity-icon svg {
-  fill: #e74c3c;
+  border-left-color: var(--token-color-alert-raid);
 }
 
 /* Donation */
 .activity-donation {
-  border-left-color: #2ecc71;
-}
-
-.activity-donation .activity-icon svg {
-  fill: #2ecc71;
+  border-left-color: var(--token-color-alert-donation);
 }
 
 /* Redemption */
 .activity-redemption {
-  border-left-color: #3498db;
+  border-left-color: var(--token-color-alert-redemption);
 }
 
-.activity-redemption .activity-icon svg {
-  fill: #3498db;
+/* First Word */
+.activity-firstword {
+  border-left-color: var(--token-color-alert-firstword);
 }
 
 /* Compact Mode */

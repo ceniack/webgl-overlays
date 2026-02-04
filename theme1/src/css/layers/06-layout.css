@@ -1,0 +1,436 @@
+/* ===== LAYOUT LAYER ===== */
+/* Overlay bar, sections, OBS dimensions, positioning */
+
+/* Layout custom properties */
+:root {
+  --layout-width: 1920px;
+  --layout-height: 257px;
+  --layout-camera-width: 457px;
+  --layout-carousel-height: 180px;
+  --layout-section-min-width: 200px;
+}
+
+/* Layout variants via data attribute */
+[data-layout="wide"] {
+  --layout-width: 2560px;
+  --layout-height: 300px;
+}
+
+[data-layout="compact"] {
+  --layout-camera-width: 0px;
+}
+
+/* ===== Overlay Bar ===== */
+
+html, body {
+  width: var(--layout-width);
+  height: var(--layout-height);
+}
+
+.overlay-bar {
+  position: relative;
+  width: var(--layout-width);
+  height: var(--layout-height);
+  display: flex;
+  background: var(--bg-panel);
+}
+
+/* Animated gradient border on top */
+.overlay-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--secondary) 0%,
+    var(--primary) 25%,
+    var(--accent) 50%,
+    var(--primary) 75%,
+    var(--secondary) 100%);
+  background-size: 200% 100%;
+  animation: gradientFlow 4s ease infinite;
+}
+
+/* ===== Section Layout ===== */
+
+.section {
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.section:last-child {
+  border-right: none;
+}
+
+.section-header {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 15px 8px;
+  border-bottom: 1px solid var(--border-color);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-content {
+  flex: 1;
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Camera Section ===== */
+
+.camera-section {
+  width: var(--layout-camera-width);
+  flex-shrink: 0;
+  background: transparent;
+  border-right: 2px solid var(--primary);
+  box-shadow: inset -5px 0 15px rgba(0, 212, 255, 0.1);
+}
+
+/* ===== Branding Section ===== */
+
+.branding-section {
+  flex: 1;
+  min-width: var(--layout-section-min-width);
+}
+
+.branding-section .section-content {
+  flex-direction: row;
+}
+
+/* ===== Profile Area Layout ===== */
+
+.profile-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.profile-image-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+  position: relative;
+  background: var(--bg-dark);
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 60px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-link {
+  font-size: 24px;
+  color: var(--secondary);
+  text-shadow: 0 0 5px rgba(255, 51, 102, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Live Indicator ===== */
+
+.live-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--secondary);
+  box-shadow: 0 0 6px var(--secondary), 0 0 12px rgba(255, 51, 102, 0.6);
+  animation: live-blink 1.5s ease-in-out infinite;
+}
+
+/* ===== Counters Section ===== */
+
+.counters-section {
+  flex: 1;
+  min-width: var(--layout-section-min-width);
+}
+
+.carousel-indicators {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  max-width: 120px;
+  overflow: hidden;
+}
+
+.indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.indicator.active {
+  background: var(--primary);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.5);
+}
+
+.splide-container {
+  height: var(--layout-carousel-height);
+  width: 100%;
+}
+
+.counters-section .section-content {
+  height: var(--layout-carousel-height);
+  min-height: var(--layout-carousel-height);
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+}
+
+/* Counter display */
+.counter-content {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.counter-value-large {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 96px;
+  font-weight: 900;
+  color: var(--secondary);
+  text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.counter-label-large {
+  font-size: 32px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* ===== Heart Rate Section ===== */
+
+.heart-rate-section {
+  flex: 1;
+  min-width: 280px;
+}
+
+.heart-rate-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  min-width: 260px;
+  width: 100%;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.heart-rate-graph {
+  position: relative;
+  width: 275px;
+  height: 90px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.heart-rate-monitor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000000;
+  --animation-duration: 2.5s;
+}
+
+.heart-rate-monitor svg {
+  width: 100%;
+  height: 100%;
+}
+
+.fade-in {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  background: #000000;
+  animation: heartRateIn var(--animation-duration, 2.5s) linear infinite;
+  z-index: 2;
+}
+
+.fade-out {
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 120%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,0.8) 50%,
+    rgba(0,0,0,0) 100%);
+  animation: heartRateOut var(--animation-duration, 2.5s) linear infinite;
+  z-index: 1;
+}
+
+/* Active/Inactive states */
+.heart-rate-container.active .heart-rate-monitor svg polyline {
+  stroke: var(--primary);
+  filter: drop-shadow(0 0 4px var(--primary));
+}
+
+.heart-rate-container.inactive .heart-rate-monitor {
+  opacity: 0.5;
+}
+
+.heart-rate-container.inactive .heart-rate-monitor svg polyline {
+  stroke: rgba(0, 212, 255, 0.3);
+  filter: none;
+}
+
+.heart-rate-container.inactive .heart-rate-monitor .fade-in,
+.heart-rate-container.inactive .heart-rate-monitor .fade-out {
+  animation-play-state: paused;
+}
+
+.heart-rate-section .section-content {
+  padding: 0;
+}
+
+/* BPM Display */
+.heart-rate-display {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.heart-rate-value {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--secondary);
+  text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+  line-height: 1;
+}
+
+.heart-rate-label {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.heart-rate-status {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  text-align: center;
+  display: none;
+}
+
+/* Active/Inactive container states */
+.heart-rate-container.active {
+  border-color: var(--secondary);
+}
+
+.heart-rate-container.active .heart-rate-graph {
+  border-color: var(--secondary);
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
+}
+
+.heart-rate-container.inactive {
+  opacity: 0.5;
+}
+
+.heart-rate-container.inactive .heart-rate-graph {
+  background: rgba(64, 64, 64, 0.3);
+}
+
+/* SVG icons */
+.icon-svg {
+  display: none;
+}
+
+/* ===== Fullscreen Alert Layout ===== */
+html[data-layout="fullscreen"],
+html[data-layout="fullscreen"] body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+.alerts-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  pointer-events: none;
+}
