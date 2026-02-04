@@ -1,6 +1,6 @@
-# CLAUDE.md - Clean Example.html Stream Overlay System
+# CLAUDE.md - Stream Overlay System (Theme1)
 
-This file provides guidance to Claude Code (claude.ai/code) when working with this clean, minimal stream overlay system.
+This file provides guidance to Claude Code (claude.ai/code) when working with this TypeScript-based stream overlay system.
 
 ## Project Overview
 
@@ -30,252 +30,180 @@ node build.js
 ```
 **Note:** `npm run build` does not work reliably on this system due to npm/Windows shell issues. Always use `node build.js` directly to ensure the build runs.
 
-## Production URL
-- **OBS Browser Source**: `http://localhost:3000/template/example` (clean URL - no .html needed)
-- **Architecture**: Modular TypeScript components with ComponentComposer
-
-## Modular Component System
-- `/template/example` - Complete overlay with all components
-- `/component/section/:name` - Individual component access
+## Production URLs
+- `/template/overlay` - Main overlay bar (OBS Browser Source)
+- `/template/alerts` - Alert notifications overlay
 - `/debug/system` - System information
+- `/api/global-variables` - Variable API
+
+## Directory Structure
+
+```
+theme1/
+├── package.json
+├── server.js                 # Express server
+├── build.js                  # Vite build wrapper
+├── vite.config.js            # Build configuration
+├── CLAUDE.md                 # This documentation
+├── CONTRIBUTING.md           # Contributor guide
+├── config.js                 # Server configuration
+├── data/
+│   └── globalVariables.json  # Persistent variable storage
+├── archive/
+│   ├── legacy-js/            # Archived JavaScript files
+│   │   ├── overlay-common.js
+│   │   ├── platform-data.js
+│   │   └── streamerbot-integration.js
+│   ├── legacy-overlays/
+│   └── dev-files/
+├── public/
+│   ├── css/
+│   │   ├── overlay-common.css
+│   │   └── theme1.css
+│   ├── js/
+│   │   └── streamerbot-client.js  # Official @streamerbot/client
+│   ├── dist/                      # Vite build output
+│   │   └── stream-overlay.iife.js
+│   ├── templates/
+│   │   ├── overlay.html           # Main overlay bar
+│   │   └── alerts.html            # Alert notifications
+│   └── components/                # Legacy component files
+└── src/
+    ├── js/
+    │   ├── main.ts                # Application entry point
+    │   ├── EventBus.ts            # Event system
+    │   ├── EventConstants.ts      # Event type constants
+    │   ├── Logger.ts              # Logging system
+    │   └── streamerbot-integration.ts  # Platform integration
+    ├── css/
+    │   └── style.css              # Main styles
+    ├── types/
+    │   ├── index.ts               # Type exports
+    │   ├── events.ts              # Event interfaces
+    │   ├── alerts.ts              # Alert types
+    │   ├── components.ts          # Component interfaces
+    │   ├── streamerbot.ts         # Streamer.bot types
+    │   ├── goals.ts               # Goal tracking types
+    │   └── carousel.ts            # Carousel types
+    ├── tokens/                    # Design tokens
+    │   ├── index.ts
+    │   ├── colors.ts
+    │   ├── spacing.ts
+    │   ├── typography.ts
+    │   └── animation.ts
+    ├── components/sections/       # TypeScript components
+    │   ├── BroadcasterInfo/
+    │   │   ├── BroadcasterInfo.ts
+    │   │   └── BroadcasterInfo.css
+    │   ├── CounterCarousel/
+    │   │   ├── CounterCarousel.ts
+    │   │   └── CounterCarousel.css
+    │   ├── HealthMonitor/
+    │   │   ├── HealthMonitor.ts
+    │   │   └── HealthMonitor.css
+    │   ├── AlertFeed/             # Available, not yet integrated
+    │   │   ├── AlertFeed.ts
+    │   │   └── AlertFeed.css
+    │   ├── GoalTracker/           # Available, not yet integrated
+    │   │   ├── GoalTracker.ts
+    │   │   └── GoalTracker.css
+    │   └── RecentActivity/        # Available, not yet integrated
+    │       ├── RecentActivity.ts
+    │       └── RecentActivity.css
+    └── composition/
+        └── ComponentComposer.ts   # Component orchestration
+```
 
 ## Component Architecture
+
+### Active Components
 - **BroadcasterInfo**: Profile display, live indicator, Twitch URL, DecAPI image loading
 - **CounterCarousel**: Multi-counter rotating display with real-time updates
 - **HealthMonitor**: Heart rate/ECG waveform display
-- **ComponentComposer**: Orchestrates real-time updates across all components
 
-## Clean Architecture
+### Available Components (Not Yet Integrated)
+- **AlertFeed**: Event notification display
+- **GoalTracker**: Progress bar for stream goals
+- **RecentActivity**: Activity feed display
 
-### Technology Stack
-- **Backend**: Express.js server + WebSocket server + JSON persistence
-- **Frontend**: Single self-contained HTML overlay with inline JavaScript
-- **Integration**: Official @streamerbot/client (no custom WebSocket code)
-- **Dependencies**: express, ws (minimal dependencies)
+### ComponentComposer
+Orchestrates component lifecycle and registration. Components are registered by name and instantiated with container selectors.
 
-### WebSocket Architecture (Clean Separation)
+## Event System
+
+### EventBus
+Central event hub for inter-component communication. Located at `src/js/EventBus.ts`.
+
+### Event Types (from EventConstants.ts)
+```typescript
+// Core events
+COMPONENT_READY        // Component initialized
+COMPONENT_DESTROYED    // Component destroyed
+
+// Counter events
+COUNTER_UPDATE         // Counter value changed
+
+// Broadcaster events
+BROADCASTER_UPDATE     // Profile data updated
+
+// Alert events
+ALERT_TRIGGER          // Alert notification triggered
+
+// Stream events
+STREAM_STATUS          // Stream online/offline state
+
+// Health events
+HEALTH_STATUS          // Heart rate data received
 ```
-Streaming Platform Events (Twitch/YouTube/etc)
+
+### Platform Events (from streamerbot-integration.ts)
+Supported platforms and events:
+- **Twitch**: Follow, Subscribe, Cheer, Raid, Host, RewardRedemption
+- **YouTube**: Subscribe, SuperChat, SuperSticker, MemberMilestone
+- **Kick**: Follow, Subscribe
+- **Trovo**: Follow, Subscribe
+- **Donations**: StreamElements, Streamlabs, TipeeeStream, TreatStream, Fourthwall, KoFi, Patreon
+
+## WebSocket Architecture
+
+```
+Streaming Platform Events (Twitch/YouTube/Kick/Trovo)
          ↓
 Streamer.bot (localhost:8080)
          ↓
 Official @streamerbot/client
          ↓
-example.html overlay
+streamerbot-integration.ts → EventBus
+         ↓
+TypeScript Components
          ↓
 Overlay Server (localhost:3000) ← Variables persist to data/globalVariables.json
 ```
 
 **Port Usage:**
-- **Port 8080**: Official @streamerbot/client handles all Streamer.bot communication
-- **Port 3000**: Overlay server handles UI communication and variable persistence
+- **Port 8080**: Streamer.bot WebSocket server
+- **Port 3000**: Overlay Express server
 
-## Essential Files Structure
+## Global Variables
 
-**Minimal File Set:**
-```
-/
-├── package.json              # Dependencies
-├── server.js                 # Clean Express server
-├── CLAUDE.md                 # This documentation
-├── data/
-│   └── globalVariables.json  # Persistent variable storage
-├── archive/
-│   └── streamerbot-scripts/  # Archived C# scripts
-│       ├── TwitchGoals.cs
-│       └── (other C# files)
-└── public/
-    ├── css/
-    │   ├── overlay-common.css # Essential overlay styles
-    │   └── theme1.css         # Glass-morphism theme
-    ├── js/
-    │   ├── streamerbot-client.js    # Official @streamerbot/client
-    │   ├── overlay-common.js        # Utilities (no custom WebSocket)
-    │   └── streamerbot-integration.js  # Official client setup
-    └── overlays/
-        └── example.html       # Main overlay (self-contained)
-```
-
-### Core JavaScript Libraries (Cleaned)
-
-**`public/js/overlay-common.js`**:
-- `WebSocketManager` - Handles overlay server communication (port 3000)
-- `OverlayUtils` - Animation, formatting, notification utilities
-- `OverlayBase` - Simplified base class (no custom Streamer.bot client)
-- **Removed**: Custom `StreamerbotClient` class (replaced by official client)
-
-**`public/js/streamerbot-integration.js`**:
-- Initializes official @streamerbot/client
-- Auto-requests global variables on connection
-- Maps platform events to example.html format
-- Handles `GlobalVariableUpdated` events
-- **Single source of truth** for Streamer.bot communication
-
-**`public/overlays/example.html`**:
-- **Self-contained** overlay (2,500+ lines)
-- Uses official @streamerbot/client via streamerbot-integration.js
-- Features: counters, broadcaster info, goal tracking, activity feeds
-- **No custom WebSocket code** - everything via official client
-
-## Streamer.bot Integration
-
-### C# Scripts (Archived)
-All C# scripts moved to `archive/streamerbot-scripts/`:
-- `TwitchGoals.cs` - Fetch Twitch goals from API
-- `GoalBeginHandler.cs` - Handle goal start events
-- `GoalProgressHandler.cs` - Track goal progress
-- `GoalEndHandler.cs` - Handle goal completion
-- `BroadcasterInfoHandler.cs` - Get broadcaster profile
-
-### Global Variables (Auto-Handled)
-**Counter Variables:**
+### Counter Variables
 - `counter1`, `counter1label`
 - `counter2`, `counter2label`
+- `counter3`, `counter3label`
 
-**Broadcaster Variables:**
+### Broadcaster Variables
 - `broadcasterDisplayName`, `broadcasterUsername`
 - `broadcasterUserId`, `broadcasterTwitchUrl`
 - `broadcasterProfileImageTrigger`
 
-**Goal Variables:**
+### Goal Variables
 - `activeGoalTypes` (comma-separated: "Follower,Subscription,Bit")
 - Type-specific: `goalFollowerCurrent`, `goalFollowerTarget`, etc.
 
-### Official Client Configuration
-```javascript
-StreamerbotConfig = {
-    endpoint: 'ws://127.0.0.1:8080/',
-    autoReconnect: true,
-    retries: 10,
-    retryInterval: 1000
-};
-```
-
-## Platform Support (Official Client)
-
-**Supported Events:**
-- **Twitch**: Follow, Subscribe, Cheer, Raid
-- **YouTube**: Subscribe, SuperChat
-- **Global Variables**: Automatic handling with persistence
-
-**Event Flow:**
-1. Platform event → Streamer.bot
-2. Official client receives event
-3. Event mapped to example.html format
-4. Activity feed updated
-5. Variables auto-persisted to JSON storage
-
-## Development & Debugging
-
-### Built-in Debug Functions
-Open browser console in example.html:
+## Streamer.bot Client Configuration
 
 ```javascript
-// Debug all global variables
-window.debugVariables();
-
-// Debug goal system
-window.debugGoals();
-
-// Test profile image loading
-window.testProfileImage('yourusername');
-
-// Test goal rendering with mock data
-window.testGoalRender();
-```
-
-### File Logging (Development)
-```bash
-# Enable file logging to logs/ directory
-DEBUG_TO_FILE=true npm run dev
-```
-
-**Log Files:**
-- `logs/debug.log` - Server and browser messages
-- Variable changes auto-logged to console
-
-## Server Configuration (Simplified)
-
-### Essential Endpoints Only
-- `GET /` → Redirects to /overlay/example
-- `GET /overlay/:name` → Serves overlay HTML files
-- `GET /api/global-variables` → Read persisted variables
-- `POST /api/global-variables` → Update single variable
-- `POST /api/global-variables/bulk` → Update multiple variables
-- **WebSocket server** → Real-time communication with overlay
-
-**Removed Endpoints:**
-- Debug logging endpoints (replaced with simple console logging)
-- Complex message routing (official client handles this)
-- Multiple overlay support (single overlay focus)
-
-## Key Design Principles
-
-### 1. Zero Redundancy
-- **Single overlay**: Only example.html
-- **Single client**: Official @streamerbot/client only
-- **Single purpose**: Production-ready stream overlay
-
-### 2. Official Client First
-- **No custom WebSocket code** for Streamer.bot
-- **Auto-reconnection** handled by official client
-- **Event mapping** standardized through official client
-- **Global variables** handled through official client API
-
-### 3. Persistent Storage
-- Variables automatically persist to `data/globalVariables.json`
-- **Throttled writes** (max 1 write per 100ms)
-- **Atomic writes** with retry logic for WSL/Windows compatibility
-- **Graceful fallbacks** if storage fails
-
-### 4. Self-Contained Design
-- example.html has **all JavaScript inline** (no external dependencies)
-- **Minimal script tags**: Official client + integration + utilities
-- **No build process** required
-- **Direct editing** of HTML file for customization
-
-## Important Development Notes
-
-- **Production-ready**: Optimized for streaming performance
-- **Error handling**: Comprehensive fallbacks throughout
-- **Browser compatibility**: Tested with Chromium (OBS), Chrome, Firefox
-- **Auto-reconnection**: Built into official client with exponential backoff
-- **Minimal dependencies**: Only essential packages
-- **Clean separation**: Overlay server (port 3000) vs Streamer.bot client (port 8080)
-
-## Usage Instructions
-
-### 1. Start the Server
-```bash
-DEBUG_TO_FILE=true npm start
-```
-
-### 2. Add to OBS
-- **Browser Source URL**: `http://localhost:3000/template/example`
-- **Resolution**: 1920x257 (bottom bar overlay) or custom
-- **Custom CSS**: Not required (styles included in components)
-
-### 3. Configure Streamer.bot
-- Official @streamerbot/client connects automatically
-- ComponentComposer orchestrates real-time updates
-- Global variables sync with all components
-
-### 4. Customize
-- Edit individual components in `/src/components/sections/`
-- Components auto-compile via TypeScript → Vite
-- Use ComponentComposer for component orchestration
-- Leverage design tokens for consistent theming
-
-**Result**: A clean, maintainable overlay system with zero redundancy and official client integration.
-
-## Common Development Issues & Solutions
-
-### Streamer.bot WebSocket Connection Configuration
-
-**CRITICAL PATTERN**: Always use separate `host`, `port`, and `endpoint` parameters for StreamerbotClient:
-
-```javascript
-// ✅ CORRECT - Separate parameters
+// Correct pattern - separate parameters
 const client = new StreamerbotClient({
     host: '127.0.0.1',
     port: 8080,
@@ -285,35 +213,84 @@ const client = new StreamerbotClient({
     retryInterval: 2000
 });
 
-// ❌ WRONG - Full URL as endpoint causes duplication
+// WRONG - causes URL duplication error
 const client = new StreamerbotClient({
-    endpoint: 'ws://127.0.0.1:8080/',  // Results in: ws://127.0.0.1:8080ws://127.0.0.1:8080/
-    autoReconnect: true
+    endpoint: 'ws://127.0.0.1:8080/'  // Results in: ws://127.0.0.1:8080ws://127.0.0.1:8080/
 });
 ```
 
-**Common Error**: `Failed to construct 'WebSocket': The URL 'ws://127.0.0.1:8080ws://127.0.0.1:8080/' is invalid.`
+## Development & Debugging
 
-**Root Cause**: The client constructor concatenates `scheme://host:port` + `endpoint`, so passing a full URL as `endpoint` duplicates the URL.
+### Logger Usage
+Use the Logger class instead of console.log:
+```typescript
+import { logger } from './Logger';
+const myLogger = logger.createChildLogger('MyComponent');
+myLogger.info('Message');
+myLogger.debug('Debug message');
+myLogger.error('Error message', error);
+```
 
-**Solution**: Use the separate parameter pattern shown above. The official @streamerbot/client library expects this configuration format.
+### Debug Functions (Browser Console)
+```javascript
+// Debug all global variables
+window.debugVariables();
 
-### Component Integration Architecture
+// Debug goal system
+window.debugGoals();
 
-**Pattern**: Use existing client instead of creating multiple clients:
+// Access ComponentComposer
+window.ComponentComposer
 
-1. **streamer-integration.js** creates the primary client and handles connection
-2. **ComponentComposer** should reuse the existing `window.streamerbotClient`
-3. **Components** receive updates via the ComponentComposer broadcast system
+// Access Streamer.bot client
+window.streamerbotClient
+```
 
-**Why**: Multiple clients cause connection conflicts and resource waste. Single client pattern ensures reliable real-time updates.
+### File Logging
+```bash
+# Enable file logging to logs/ directory
+DEBUG_TO_FILE=true npm run dev
+```
 
-### Debugging Client Connection Issues
+## OBS Integration
 
-**Check these in browser console**:
+### Browser Source Settings
+- **URL**: `http://localhost:3000/template/overlay`
+- **Resolution**: 1920×257 (bottom bar overlay) or custom
+- **Custom CSS**: Not required (styles included)
 
-1. **Client Availability**: `typeof window.streamerbotClient !== 'undefined'`
-2. **Connection State**: `window.streamerbotClient?.socket?.readyState` (should be 1 for OPEN)
-3. **Component Registration**: `window.ComponentComposer?.components.size` (should show component count)
+### Alerts Overlay
+- **URL**: `http://localhost:3000/template/alerts`
+- **Resolution**: 1920×1080 (full screen)
+- Displays notifications for follows, subs, cheers, etc.
 
-**Real-time Data Flow**: Streamer.bot → Official Client → Integration Script → ComponentComposer → Individual Components
+## API Endpoints
+
+- `GET /` → Redirects to /template/overlay
+- `GET /template/:name` → Serves template HTML files
+- `GET /api/global-variables` → Read persisted variables
+- `POST /api/global-variables` → Update single variable
+- `POST /api/global-variables/bulk` → Update multiple variables
+- `GET /debug/system` → System information
+
+## Key Design Principles
+
+### 1. Type Safety
+- Full TypeScript with strict mode
+- Defined interfaces for all events and data
+- No implicit any types
+
+### 2. Event-Driven Architecture
+- EventBus for decoupled communication
+- Components subscribe to relevant events
+- Clear event type constants
+
+### 3. Component Isolation
+- Each component manages its own state
+- Components communicate via EventBus
+- Clean lifecycle (initialize/destroy)
+
+### 4. Persistent Storage
+- Variables persist to `data/globalVariables.json`
+- Throttled writes for performance
+- Graceful fallbacks if storage fails

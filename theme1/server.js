@@ -110,6 +110,13 @@ const VALID_LAYOUTS = ['default', 'wide', 'compact'];
 app.get('/template/:name', (req, res) => {
   const templateName = req.params.name;
 
+  // Input validation: prevent path traversal attacks
+  // Only allow alphanumeric characters, hyphens, and underscores
+  if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
+    console.log(`⚠️ Invalid template name rejected: ${templateName}`);
+    return res.status(400).send('Invalid template name');
+  }
+
   // Check for compiled template first (from Vite build - nested in templates/ subdirectory)
   const compiledPath = path.join(__dirname, 'public', 'templates', 'compiled', 'templates', `${templateName}.html`);
   const originalPath = path.join(__dirname, 'public', 'templates', `${templateName}.html`);
@@ -148,6 +155,12 @@ app.get('/template/:name', (req, res) => {
 // Route for compiled templates specifically
 app.get('/compiled/:name', (req, res) => {
   const templateName = req.params.name;
+
+  // Input validation: prevent path traversal attacks
+  if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
+    return res.status(400).send('Invalid template name');
+  }
+
   const compiledPath = path.join(__dirname, 'public', 'templates', 'compiled', `${templateName}.html`);
 
   if (fs.existsSync(compiledPath)) {
@@ -158,10 +171,16 @@ app.get('/compiled/:name', (req, res) => {
   }
 });
 
+// Input validation helper for component names
+const isValidComponentName = (name) => /^[a-zA-Z0-9_-]+$/.test(name);
+
 // Semantic atomic design routes (new structure)
 // Routes MUST come before static middleware to prevent directory redirects
 app.get('/component/element/:name', (req, res) => {
   const componentName = req.params.name;
+  if (!isValidComponentName(componentName)) {
+    return res.status(400).send('Invalid component name');
+  }
   const componentPath = path.join(__dirname, 'public', 'components', 'elements', componentName, `${componentName}.html`);
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
@@ -172,6 +191,9 @@ app.get('/component/element/:name', (req, res) => {
 
 app.get('/component/feature/:name', (req, res) => {
   const componentName = req.params.name;
+  if (!isValidComponentName(componentName)) {
+    return res.status(400).send('Invalid component name');
+  }
   const componentPath = path.join(__dirname, 'public', 'components', 'features', componentName, `${componentName}.html`);
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);
@@ -182,6 +204,9 @@ app.get('/component/feature/:name', (req, res) => {
 
 app.get('/component/section/:name', (req, res) => {
   const componentName = req.params.name;
+  if (!isValidComponentName(componentName)) {
+    return res.status(400).send('Invalid component name');
+  }
   const componentPath = path.join(__dirname, 'public', 'components', 'sections', componentName, `${componentName}.html`);
   if (fs.existsSync(componentPath)) {
     res.sendFile(componentPath);

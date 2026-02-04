@@ -15,6 +15,9 @@ import type {
 
 import { eventBus } from '../../../js/EventBus';
 import { EVENT_TYPES } from '../../../js/EventConstants';
+import { logger } from '../../../js/Logger';
+
+const componentLogger = logger.createChildLogger('CounterCarousel');
 
 export interface CounterConfig {
   valueVariable: string;
@@ -67,7 +70,7 @@ export class CounterCarousel implements SectionComponent {
    */
   static getInstance(container: HTMLElement, config?: Partial<CounterCarouselConfig>): CounterCarousel {
     if (CounterCarousel.instance) {
-      console.warn('🔢 CounterCarousel already exists, returning existing instance');
+      componentLogger.warn('CounterCarousel already exists, returning existing instance');
       return CounterCarousel.instance;
     }
     return new CounterCarousel(container, config);
@@ -76,7 +79,7 @@ export class CounterCarousel implements SectionComponent {
   constructor(container: HTMLElement, config?: Partial<CounterCarouselConfig>) {
     // Check if instance already exists (for direct constructor calls)
     if (CounterCarousel.instance) {
-      console.warn('🔢 CounterCarousel already exists, use getInstance() instead');
+      componentLogger.warn('CounterCarousel already exists, use getInstance() instead');
       // Copy properties from existing instance to satisfy TypeScript
       this.container = CounterCarousel.instance.container;
       this.elementId = CounterCarousel.instance.elementId;
@@ -148,11 +151,11 @@ export class CounterCarousel implements SectionComponent {
 
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.log('🔢 CounterCarousel already initialized, skipping');
+      componentLogger.debug('Already initialized, skipping');
       return;
     }
 
-    console.log('🔢 CounterCarousel Component initializing with Splide.js...');
+    componentLogger.info('Initializing with Splide.js...');
 
     // Build carousel HTML structure
     this.buildCarouselStructure();
@@ -170,7 +173,7 @@ export class CounterCarousel implements SectionComponent {
     this.setupDebugFunctions();
 
     this.isInitialized = true;
-    console.log('🔢 CounterCarousel Component initialized successfully with Splide');
+    componentLogger.info('Initialized successfully with Splide');
   }
 
   private buildCarouselStructure(): void {
@@ -180,7 +183,7 @@ export class CounterCarousel implements SectionComponent {
                               this.container.querySelector('.section-content');
 
     if (!carouselContainer) {
-      console.error('🔢 Could not find carousel container element');
+      componentLogger.error('Could not find carousel container element');
       return;
     }
 
@@ -216,7 +219,7 @@ export class CounterCarousel implements SectionComponent {
     // Update indicators in header
     this.updateIndicators();
 
-    console.log('🔢 Splide carousel structure built');
+    componentLogger.debug('Splide carousel structure built');
   }
 
   private createCounterSlide(counterId: string, config: CounterConfig): HTMLLIElement {
@@ -251,13 +254,13 @@ export class CounterCarousel implements SectionComponent {
   private initializeSplide(): void {
     const splideElement = this.container.querySelector('#counter-splide') as HTMLElement;
     if (!splideElement) {
-      console.error('🔢 Splide element not found');
+      componentLogger.error('Splide element not found');
       return;
     }
 
     // Ensure the splide element has proper dimensions before mounting
     const containerRect = splideElement.parentElement?.getBoundingClientRect();
-    console.log('🔢 Container dimensions:', containerRect?.width, 'x', containerRect?.height);
+    componentLogger.debug(`Container dimensions: ${containerRect?.width} x ${containerRect?.height}`);
 
     try {
       this.splide = new Splide(splideElement, {
@@ -295,28 +298,28 @@ export class CounterCarousel implements SectionComponent {
 
       // Log when ready
       this.splide.on('mounted', () => {
-        console.log('🔢 Splide mounted event fired');
+        componentLogger.debug('Splide mounted event fired');
         const track = splideElement.querySelector('.splide__track') as HTMLElement;
         const list = splideElement.querySelector('.splide__list') as HTMLElement;
-        console.log('🔢 Track dimensions:', track?.offsetWidth, 'x', track?.offsetHeight);
-        console.log('🔢 List transform:', list?.style.transform);
+        componentLogger.debug(`Track dimensions: ${track?.offsetWidth} x ${track?.offsetHeight}`);
+        componentLogger.debug(`List transform: ${list?.style.transform}`);
       });
 
       this.splide.mount();
-      console.log('🔢 Splide carousel mounted successfully');
+      componentLogger.debug('Splide carousel mounted successfully');
 
       // Force a refresh after a short delay to ensure dimensions are correct
       setTimeout(() => {
         if (this.splide) {
           this.splide.refresh();
-          console.log('🔢 Splide refreshed after mount');
+          componentLogger.debug('Splide refreshed after mount');
         }
       }, 100);
 
       // Set initial indicator
       this.updateActiveIndicator(0);
     } catch (error) {
-      console.error('🔢 Failed to initialize Splide:', error);
+      componentLogger.error('Failed to initialize Splide:', error);
     }
   }
 
@@ -395,11 +398,11 @@ export class CounterCarousel implements SectionComponent {
   }
 
   private setupEventBusListeners(): void {
-    console.log('🔢 Setting up eventBus listeners for counter updates');
+    componentLogger.debug('Setting up eventBus listeners for counter updates');
 
     // Listen for counter updates from streamerbot-integration
     eventBus.on(EVENT_TYPES.COUNTER_UPDATE, (data: any) => {
-      console.log('🔢 EventBus COUNTER_UPDATE received:', data);
+      componentLogger.debug('EventBus COUNTER_UPDATE received:', data);
       if (data?.counterName) {
         // Handle different update types
         if (data.isLabel) {
@@ -445,7 +448,7 @@ export class CounterCarousel implements SectionComponent {
 
     // Use existing global client
     if (windowAny.streamerbotClient) {
-      console.log('🔢 Using existing global Streamer.bot client');
+      componentLogger.debug('Using existing global Streamer.bot client');
       this.client = windowAny.streamerbotClient;
       this.isConnected = true;
       this.setupEventHandlers();
@@ -456,7 +459,7 @@ export class CounterCarousel implements SectionComponent {
     const ClientClass = this.getStreamerbotClientClass();
 
     if (!ClientClass) {
-      console.error('🔢 ❌ Streamer.bot client not found');
+      componentLogger.error('Streamer.bot client not found');
       return;
     }
 
@@ -471,18 +474,18 @@ export class CounterCarousel implements SectionComponent {
         retryInterval: 2000
       };
 
-      console.log('🔢 Creating new Streamer.bot client');
+      componentLogger.debug('Creating new Streamer.bot client');
       this.client = new ClientClass(config);
       this.setupEventHandlers();
       this.client.connect();
 
       setTimeout(() => {
         if (!this.isConnected) {
-          console.error('🔢 ❌ CONNECTION TIMEOUT: Streamer.bot not responding');
+          componentLogger.error('CONNECTION TIMEOUT: Streamer.bot not responding');
         }
       }, 10000);
     } catch (error) {
-      console.error('🔢 ❌ FAILED TO CONNECT to Streamer.bot:', error);
+      componentLogger.error('FAILED TO CONNECT to Streamer.bot:', error);
     }
   }
 
@@ -497,20 +500,20 @@ export class CounterCarousel implements SectionComponent {
 
     this.client.on('WebsocketClient.Open', () => {
       this.isConnected = true;
-      console.log('🔢 Connected to Streamer.bot successfully');
+      componentLogger.info('Connected to Streamer.bot');
       this.requestInitialData();
     });
 
     this.client.on('WebsocketClient.Close', () => {
       this.isConnected = false;
-      console.log('🔢 Disconnected from Streamer.bot');
+      componentLogger.info('Disconnected from Streamer.bot');
     });
   }
 
   private async requestInitialData(): Promise<void> {
     if (!this.client || !this.isConnected) return;
 
-    console.log('🔢 Requesting initial counter data...');
+    componentLogger.debug('Requesting initial counter data...');
 
     const variables: string[] = [];
     Object.keys(this.config).forEach(counterId => {
@@ -525,11 +528,11 @@ export class CounterCarousel implements SectionComponent {
           const actualValue = response.variable.value !== undefined
             ? response.variable.value
             : response.variable;
-          console.log(`🔢 Got initial ${variable} =`, actualValue);
+          componentLogger.debug(`Got initial ${variable} = ${actualValue}`);
           this.updateCounterFromGlobalVariable(variable, actualValue);
         }
       } catch (error) {
-        console.warn(`🔢 Failed to get initial ${variable}:`, error);
+        componentLogger.warn(`Failed to get initial ${variable}:`, error);
       }
     }
   }
@@ -571,7 +574,7 @@ export class CounterCarousel implements SectionComponent {
       carouselElements.forEach(el => {
         el.textContent = displayValue;
       });
-      console.log(`🔢 Updated carousel ${counterId} value: ${displayValue} (${carouselElements.length} elements)`);
+      componentLogger.debug(`Updated carousel ${counterId} value: ${displayValue} (${carouselElements.length} elements)`);
     }
     if (originalElement) {
       originalElement.textContent = displayValue;
@@ -591,7 +594,7 @@ export class CounterCarousel implements SectionComponent {
       carouselElements.forEach(el => {
         el.textContent = displayLabel;
       });
-      console.log(`🔢 Updated carousel ${counterId} label: ${displayLabel} (${carouselElements.length} elements)`);
+      componentLogger.debug(`Updated carousel ${counterId} label: ${displayLabel} (${carouselElements.length} elements)`);
     }
     if (originalElement) {
       originalElement.textContent = displayLabel;
@@ -616,7 +619,7 @@ export class CounterCarousel implements SectionComponent {
 
     if (slide) {
       slide.classList.toggle('is-hidden', !isVisible);
-      console.log(`🔢 Set carousel ${counterId} visibility: ${isVisible}`);
+      componentLogger.debug(`Set carousel ${counterId} visibility: ${isVisible}`);
     }
     if (counterBox) {
       counterBox.classList.toggle('is-hidden', !isVisible);
@@ -633,7 +636,7 @@ export class CounterCarousel implements SectionComponent {
 
   // Public methods for testing
   public testCounterValues(): void {
-    console.log('🔢 Testing counter values...');
+    componentLogger.debug('Testing counter values...');
     this.updateCounterValue('counter1', Math.floor(Math.random() * 1000));
     this.updateCounterValue('counter2', Math.floor(Math.random() * 500));
     this.updateCounterValue('counter3', Math.floor(Math.random() * 10000));
@@ -641,7 +644,7 @@ export class CounterCarousel implements SectionComponent {
   }
 
   public testCounterLabels(): void {
-    console.log('🔢 Testing counter labels...');
+    componentLogger.debug('Testing counter labels...');
     const labels = ['Follows', 'Subs', 'Cheers', 'Raids'];
     Object.keys(this.config).forEach((counterId, index) => {
       this.updateCounterLabel(counterId, labels[index]);
@@ -649,7 +652,7 @@ export class CounterCarousel implements SectionComponent {
   }
 
   public testCounterVisibility(): void {
-    console.log('🔢 Testing counter visibility...');
+    componentLogger.debug('Testing counter visibility...');
     Object.keys(this.config).forEach((counterId) => {
       this.setCounterVisibility(counterId, Math.random() > 0.3);
     });
@@ -679,20 +682,16 @@ export class CounterCarousel implements SectionComponent {
     (window as any).counterCarouselComponent = this;
 
     (window as any).debugCounters = () => {
-      console.log('🔢 CounterCarousel Component Debug Info:');
-      console.log('- Connected:', this.isConnected);
-      console.log('- Splide mounted:', !!this.splide);
-      console.log('- Visibility state:', this.counterVisibility);
+      componentLogger.info('CounterCarousel Component Debug Info:');
+      componentLogger.info(`- Connected: ${this.isConnected}`);
+      componentLogger.info(`- Splide mounted: ${!!this.splide}`);
+      componentLogger.info(`- Visibility state: ${JSON.stringify(this.counterVisibility)}`);
 
       Object.keys(this.config).forEach(counterId => {
         const valueEl = document.querySelector(`#carousel-${counterId}-value`) as HTMLElement;
         const labelEl = document.querySelector(`#carousel-${counterId}-label`) as HTMLElement;
 
-        console.log(`- ${counterId}:`, {
-          value: valueEl?.textContent,
-          label: labelEl?.textContent,
-          visible: this.counterVisibility[counterId]
-        });
+        componentLogger.info(`- ${counterId}: value=${valueEl?.textContent}, label=${labelEl?.textContent}, visible=${this.counterVisibility[counterId]}`);
       });
     };
 
@@ -700,6 +699,6 @@ export class CounterCarousel implements SectionComponent {
     (window as any).testCounterLabels = () => this.testCounterLabels();
     (window as any).testCounterVisibility = () => this.testCounterVisibility();
 
-    console.log('🔢 Debug functions registered: debugCounters(), testCounterValues(), testCounterLabels(), testCounterVisibility()');
+    componentLogger.debug('Debug functions registered: debugCounters(), testCounterValues(), testCounterLabels(), testCounterVisibility()');
   }
 }
