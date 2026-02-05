@@ -298,8 +298,10 @@ npm start
 
 **Result**: A modern, flexible theme framework with easy template development, real-time data access, and visual layout editing capabilities.
 
-## Cleanup Reminders
+## Automatic Cleanup
 
-**Before committing or ending a session:**
-- Delete any `.tmp*` files created during editing (run: `find . -name "*.tmp*" -type f -delete`)
-- These temp files pollute the repo and should never be committed
+A pre-commit hook automatically deletes before each commit:
+- `.tmp*` files (created by Claude Code edit operations)
+- `nul` files (Windows artifacts from `/dev/null` redirects)
+
+No manual cleanup needed - the hook handles it.
