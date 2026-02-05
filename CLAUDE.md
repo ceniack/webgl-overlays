@@ -374,7 +374,15 @@ When communicating via afk-code (Slack/Discord/Telegram):
   ```
 - **For confirmations** - Ask user to type 'yes' or 'no' instead of clickable buttons
 - **Before commands that trigger dialogs** - Some commands (like git commit) may trigger confirmation dialogs the user can't see in Slack. Always ask for confirmation in plain text BEFORE running these commands, so the user can approve by typing 'yes'
-- This is a limitation of the afk-code integration
+- **Announce web fetches** - Tell the user before running WebFetch or WebSearch commands
+
+### Known afk-code Limitations
+
+- **Plan mode not supported** - Use `/mode` command or send any message to bypass
+- **AskUserQuestion not supported** - Form-based questions don't work (use numbered lists instead)
+- **`/interrupt` may not work** - Known issue, consider filing a bug at https://github.com/clharman/afk-code/issues
+- **Accept edits mode still prompts** - Some confirmation dialogs still appear even with accept edits enabled; this may be a Claude Code limitation rather than afk-code
+- **Tool calls not transmitted** - afk-code doesn't send tool call details to avoid rate limits
 
 ### Cleanup Reminders
 
