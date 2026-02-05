@@ -297,3 +297,86 @@ npm start
 - **Event Testing**: Comprehensive event monitoring and analysis
 
 **Result**: A modern, flexible theme framework with easy template development, real-time data access, and visual layout editing capabilities.
+
+## AFK-Code Integration (Slack/Discord/Telegram)
+
+This project uses [afk-code](https://github.com/clharman/afk-code) for remote Claude Code session management via Slack.
+
+### Automatic Image Uploads
+
+AFK-code automatically detects image file paths in Claude's responses and uploads them to the chat. To trigger an automatic upload:
+
+**Supported path formats:**
+- Paths starting with `~/`, `./`, or `../`
+- Paths wrapped in quotes (`"`, `'`, or backticks)
+
+**Rules:**
+1. Use `~/` prefix for paths from home directory
+2. **Wrap paths containing spaces in quotes**
+
+**Examples:**
+```
+# Simple path (no spaces) - works without quotes
+~/browser_screenshot.png
+
+# Path with spaces - MUST use quotes
+"~/Videos/OBS Studio/stream-overlays/browser_screenshot.png"
+
+# Relative paths also work
+./screenshot.png
+"./path with spaces/image.png"
+```
+
+**Supported formats:** PNG, JPG, JPEG, GIF, WebP, SVG, BMP, ICO, TIFF
+
+### Taking Browser Screenshots
+
+To capture and upload a browser screenshot:
+
+1. Save screenshot to a file using PowerShell:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File "C:/Users/ceniack/Videos/OBS Studio/stream-overlays/.utilities/capture_browser.ps1"
+   ```
+
+2. Reference the file path in your response with the correct format:
+   ```
+   "~/Videos/OBS Studio/stream-overlays/.screenshots/browser_screenshot.png"
+   ```
+
+The `capture_browser.ps1` script captures just the Chrome browser window (not the full desktop).
+
+**Note:** Screenshots are saved to `.screenshots/` which is git-ignored to keep the repo clean.
+
+## Development Utilities
+
+Utility scripts are stored in `.utilities/` (git-ignored) to keep the repo clean.
+
+### Available Utilities
+
+| Utility | Description | Usage |
+|---------|-------------|-------|
+| `capture_browser.ps1` | Captures Chrome window screenshot | `powershell -ExecutionPolicy Bypass -File ".utilities/capture_browser.ps1"` |
+
+### Adding New Utilities
+
+Place any development helper scripts in `.utilities/`. This folder is git-ignored so these tools won't pollute the repo.
+
+### User Interaction Preferences
+
+When communicating via afk-code (Slack/Discord/Telegram):
+- **Do NOT use the AskUserQuestion tool** - The user cannot interact with multiple choice or yes/no dialogs
+- **Present options as numbered lists** - User can type the number to choose:
+  ```
+  Which approach do you prefer?
+  1. Option A - description
+  2. Option B - description
+  3. Option C - description
+  ```
+- **For confirmations** - Ask user to type 'yes' or 'no' instead of clickable buttons
+- This is a limitation of the afk-code integration
+
+### Cleanup Reminders
+
+**Before committing or ending a session:**
+- Delete any `.tmp*` files created during editing (run: `find . -name "*.tmp*" -type f -delete`)
+- These temp files pollute the repo and should never be committed
