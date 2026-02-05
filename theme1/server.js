@@ -244,6 +244,15 @@ app.get('/favicon.ico', (req, res) => {
   res.status(204).send(); // No content - prevents 404 errors
 });
 
+// Disable caching for built assets (JS/CSS bundles change on every build)
+app.use('/dist', express.static(path.join(__dirname, 'public', 'dist'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'no-store');
+  }
+}));
+
 // STATIC MIDDLEWARE LAST - catch-all for files
 app.use(express.static(path.join(__dirname, 'public')));
 

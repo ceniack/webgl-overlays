@@ -102,8 +102,9 @@ html, body {
 /* ===== Branding Section ===== */
 
 .branding-section {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: var(--layout-section-min-width);
+  max-width: 50%;
 }
 
 .branding-section .section-content {
@@ -117,6 +118,8 @@ html, body {
   align-items: center;
   gap: 12px;
   margin-bottom: 15px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .profile-image-container {
@@ -167,7 +170,6 @@ html, body {
   letter-spacing: 1px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .profile-link {

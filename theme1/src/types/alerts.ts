@@ -112,3 +112,25 @@ export interface RecentActivityConfig {
   /** Time format for timestamps */
   timeFormat: 'relative' | 'absolute';
 }
+
+/**
+ * Configuration for LatestEvent component
+ */
+export interface LatestEventConfig {
+  /** Which alert type this instance tracks */
+  eventType: AlertType;
+  /** Display label (e.g., "Latest Follower") */
+  label: string;
+  /** Show platform icon in the icon circle */
+  showPlatformIcon: boolean;
+  /** Show type badge on the icon */
+  showTypeIcon: boolean;
+  /** Show relative timestamp */
+  showTimestamp: boolean;
+  /** Interval (ms) to refresh relative timestamp display */
+  timestampInterval: number;
+  /** Persist latest event to localStorage for OBS reload survival */
+  persist: boolean;
+  /** Text shown when no event has occurred yet */
+  placeholderText: string;
+}

@@ -2,6 +2,7 @@ import '@splidejs/splide/css';
 import '../css/index.css';
 
 import '../components/sections/AlertFeed/AlertFeed.css';
+import '../components/sections/LatestEvent/LatestEvent.css';
 
 // Component styles available but not yet integrated:
 // import '../components/sections/GoalTracker/GoalTracker.css';
@@ -73,7 +74,15 @@ async function initializeApp(): Promise<void> {
       const componentConfigs = [
         { name: 'BroadcasterInfo', path: '.branding-section' },
         { name: 'CounterCarousel', path: '.counters-section' },
-        { name: 'HealthMonitor', path: '.heart-rate-section' }
+        { name: 'HealthMonitor', path: '.heart-rate-section' },
+        // LatestEvent instances — hidden by default, enable by removing display:none in overlay.html
+        { name: 'LatestEvent', path: '.latest-follower-section', data: { eventType: 'follow', label: 'Latest Follower' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-sub-section', data: { eventType: 'sub', label: 'Latest Sub' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-cheer-section', data: { eventType: 'cheer', label: 'Latest Cheer' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-raid-section', data: { eventType: 'raid', label: 'Latest Raid' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-donation-section', data: { eventType: 'donation', label: 'Latest Donation' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-redemption-section', data: { eventType: 'redemption', label: 'Latest Redemption' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-firstword-section', data: { eventType: 'firstword', label: 'Latest First Word' }, optional: true }
         // Components available but not yet integrated:
         // { name: 'AlertFeed', path: '.alert-section', optional: true },
         // { name: 'GoalTracker', path: '.goal-section', optional: true },

@@ -51,9 +51,9 @@ export class BroadcasterInfo implements SectionComponent {
         userIdVariable: 'broadcasterUserId',
         twitchUrlVariable: 'broadcasterTwitchUrl',
         profileImageTriggerVariable: 'broadcasterProfileImageTrigger',
-        defaultDisplayName: 'STREAMER',
-        defaultUsername: 'streamer',
-        defaultTwitchUrl: 'twitch.tv/streamer',
+        defaultDisplayName: '',
+        defaultUsername: '',
+        defaultTwitchUrl: '',
         ...config?.broadcaster
       }
     };
@@ -109,6 +109,10 @@ export class BroadcasterInfo implements SectionComponent {
     this.elements.push(element);
   }
 
+  private static readonly BASE_FONT_SIZE = 60;
+  private static readonly MIN_FONT_SIZE = 30;
+  private static readonly MAX_NAME_LENGTH = 30;
+
   private setDefaults(): void {
     const profileName = this.container.querySelector('#profile-name') as HTMLElement;
     const profileLink = this.container.querySelector('#profile-link') as HTMLElement;
@@ -116,9 +120,7 @@ export class BroadcasterInfo implements SectionComponent {
 
     if (profileName) profileName.textContent = this.config.broadcaster.defaultDisplayName;
     if (profileLink) profileLink.textContent = this.config.broadcaster.defaultTwitchUrl;
-    if (profileFallback) {
-      profileFallback.textContent = this.config.broadcaster.defaultDisplayName.charAt(0).toUpperCase();
-    }
+    if (profileFallback) profileFallback.textContent = '';
   }
 
   private async connectToStreamerbot(): Promise<void> {
@@ -334,13 +336,20 @@ export class BroadcasterInfo implements SectionComponent {
 
     componentLogger.debug(`Updating broadcaster display name: ${displayName}`);
 
+    // Truncate names exceeding platform limits (Twitch 25, Kick/YouTube 30)
+    const truncated = displayName.length > BroadcasterInfo.MAX_NAME_LENGTH
+      ? displayName.slice(0, BroadcasterInfo.MAX_NAME_LENGTH) + '\u2026'
+      : displayName;
+
     const profileName = this.container.querySelector('#profile-name') as HTMLElement;
     const profileFallback = this.container.querySelector('#profile-fallback') as HTMLElement;
 
-    if (profileName) profileName.textContent = displayName;
+    if (profileName) profileName.textContent = truncated;
     if (profileFallback) {
       profileFallback.textContent = displayName.charAt(0).toUpperCase();
     }
+
+    this.fitProfileName();
   }
 
   private updateBroadcasterTwitchUrl(twitchUrl: string): void {
@@ -440,6 +449,51 @@ export class BroadcasterInfo implements SectionComponent {
   private showFallbackImage(): void {
     const container = this.container.querySelector('.profile-image-container');
     if (container) container.classList.remove('has-image');
+  }
+
+  /**
+   * Scale .profile-name font size so the text fits inside .profile-info.
+   * Uses DOM scrollWidth/clientWidth for accurate measurement with web fonts,
+   * with a two-pass approach to handle flex container reflow after scaling.
+   */
+  private fitProfileName(): void {
+    const el = this.container.querySelector('#profile-name') as HTMLElement;
+    if (!el || !el.textContent) return;
+
+    // Reset to base size
+    el.style.fontSize = `${BroadcasterInfo.BASE_FONT_SIZE}px`;
+
+    // Use setTimeout instead of rAF — rAF pauses in background tabs,
+    // but OBS Browser Source and multi-tab testing both need this to fire reliably
+    setTimeout(() => {
+      this.applyFitPass(el, 'first');
+
+      // Second pass: handle flex reflow after the font size changed
+      setTimeout(() => {
+        this.applyFitPass(el, 'second');
+      }, 0);
+    }, 0);
+  }
+
+  /** Single measurement + scale pass for fitProfileName */
+  private applyFitPass(el: HTMLElement, pass: string): void {
+    const textWidth = el.scrollWidth;
+    const containerWidth = el.clientWidth;
+
+    if (textWidth <= containerWidth || containerWidth <= 0) return;
+
+    const currentSize = parseFloat(getComputedStyle(el).fontSize);
+    // Scale with a 0.95 safety factor to account for flex reflow
+    // that may shrink the container after the font size changes
+    const newSize = Math.max(
+      BroadcasterInfo.MIN_FONT_SIZE,
+      Math.floor(currentSize * (containerWidth / textWidth) * 0.95)
+    );
+
+    if (newSize < currentSize) {
+      el.style.fontSize = `${newSize}px`;
+      componentLogger.debug(`Profile name ${pass} pass: scaled to ${newSize}px (container ${containerWidth}px)`);
+    }
   }
 
   private showConnectionError(message: string): void {
