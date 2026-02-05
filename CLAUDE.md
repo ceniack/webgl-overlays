@@ -373,6 +373,7 @@ When communicating via afk-code (Slack/Discord/Telegram):
   3. Option C - description
   ```
 - **For confirmations** - Ask user to type 'yes' or 'no' instead of clickable buttons
+- **Before commands that trigger dialogs** - Some commands (like git commit) may trigger confirmation dialogs the user can't see in Slack. Always ask for confirmation in plain text BEFORE running these commands, so the user can approve by typing 'yes'
 - This is a limitation of the afk-code integration
 
 ### Cleanup Reminders
