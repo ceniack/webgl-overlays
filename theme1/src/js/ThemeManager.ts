@@ -9,7 +9,7 @@ import { logger } from './Logger';
 
 const themeLogger = logger.createChildLogger('ThemeManager');
 
-const VALID_THEMES = ['cyberpunk', 'dark-minimal', 'arc-raiders'] as const;
+const VALID_THEMES = ['cyberpunk', 'dark-minimal', 'arc-raiders', 'fallout-pipboy', 'fallout-vaulttec', 'fallout-wasteland', 'fallout-nukacola'] as const;
 type ThemeName = (typeof VALID_THEMES)[number];
 
 const DEFAULT_THEME: ThemeName = 'cyberpunk';

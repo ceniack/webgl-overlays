@@ -1,0 +1,518 @@
+/* ===== FALLOUT PIP-BOY THEME — CRT TUBE TERMINAL ===== */
+/* Every section is a rounded CRT sub-screen. Phosphor glow, scanlines, */
+/* oscilloscope grid, curved-glass inset shadows, green monochrome filter. */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --token-color-brand-primary: #33ff33;
+  --token-color-brand-secondary: #00ff00;
+  --token-color-brand-accent: #66ff66;
+  --token-color-brand-tertiary: #1a9b1a;
+
+  --token-color-background-dark: #001a00;
+  --token-color-background-panel: rgba(0, 26, 0, 0.95);
+  --token-color-border-accent: rgba(51, 255, 51, 0.35);
+
+  --token-typography-font-family-display: 'VT323', 'Courier New', monospace;
+  --token-typography-font-family-primary: 'Share Tech Mono', 'Courier New', monospace;
+
+  /* Alert type colors — monochrome green variants */
+  --token-color-alert-follow: #66ff66;
+  --token-color-alert-sub: #33ff33;
+  --token-color-alert-cheer: #99ff99;
+  --token-color-alert-raid: #00ff00;
+  --token-color-alert-donation: #44dd44;
+  --token-color-alert-redemption: #22bb22;
+  --token-color-alert-firstword: #88ee88;
+}
+
+/* ===== Animations ===== */
+
+@keyframes pipboyScanlines {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 4px; }
+}
+
+@keyframes pipboyCursorBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes pipboyFlicker {
+  0%, 100% { opacity: 1; }
+  25% { opacity: 0.98; }
+  50% { opacity: 0.95; }
+  75% { opacity: 0.99; }
+}
+
+/* ===== Overlay Bar — CRT housing ===== */
+
+.overlay-bar {
+  border-radius: 12px;
+  background: rgba(0, 26, 0, 0.95);
+  /* Curved-glass vignette — darkens at edges like a CRT tube */
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.6),
+    inset 0 0 120px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(51, 255, 51, 0.08);
+  animation: pipboyFlicker 4s ease-in-out infinite;
+}
+
+/* Scanlines — full overlay, slowly scrolling */
+.overlay-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: auto;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 2px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  background-size: 100% 4px;
+  animation: pipboyScanlines 0.15s linear infinite;
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+/* Screen glass glare reflection */
+.overlay-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse 80% 50% at 40% 20%,
+    rgba(51, 255, 51, 0.04) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 11;
+  border-radius: 12px;
+}
+
+/* ===== Sections — CRT sub-panels ===== */
+
+.section {
+  border-radius: 8px;
+  margin: 4px 2px;
+  border-right: none;
+  background: rgba(0, 20, 0, 0.6);
+  /* Inset CRT curvature per section */
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 40px rgba(0, 0, 0, 0.2),
+    0 0 6px rgba(51, 255, 51, 0.08);
+  position: relative;
+}
+
+.section:last-child {
+  border-right: none;
+}
+
+/* Glowing green divider line on right edge */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: -2px;
+  width: 1px;
+  height: 70%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(51, 255, 51, 0.4) 20%,
+    rgba(51, 255, 51, 0.6) 50%,
+    rgba(51, 255, 51, 0.4) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 4px rgba(51, 255, 51, 0.4), 0 0 8px rgba(51, 255, 51, 0.2);
+  z-index: 12;
+}
+
+.section:last-child::before {
+  display: none;
+}
+
+/* ===== Section Header — Terminal prompt ===== */
+
+.section-header {
+  text-shadow: 0 0 6px rgba(51, 255, 51, 0.6);
+  letter-spacing: 4px;
+  font-weight: 400;
+  font-family: 'VT323', monospace;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(51, 255, 51, 0.15);
+  position: relative;
+}
+
+/* Terminal > prompt cursor */
+.section-header::before {
+  content: '>';
+  font-family: 'VT323', monospace;
+  color: #33ff33;
+  text-shadow: 0 0 6px #33ff33;
+  margin-right: 6px;
+  animation: pipboyCursorBlink 1s steps(1) infinite;
+}
+
+/* ===== Camera Section ===== */
+
+.camera-section {
+  background: transparent;
+  box-shadow: inset -3px 0 10px rgba(51, 255, 51, 0.06);
+  border-radius: 12px 0 0 12px;
+  margin-left: 4px;
+}
+
+/* ===== Profile Image — Square CRT mini-screen ===== */
+
+.profile-image-container {
+  border-radius: 8px;
+  border: 2px solid rgba(51, 255, 51, 0.5);
+  /* Inset CRT curvature shadow */
+  box-shadow:
+    inset 0 0 15px rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(51, 255, 51, 0.3);
+  overflow: hidden;
+}
+
+/* Scanlines over profile photo */
+.profile-image-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.2) 2px,
+    rgba(0, 0, 0, 0.2) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 8px;
+}
+
+/* Green monochrome filter on profile image */
+.profile-image {
+  filter: sepia(1) saturate(3) hue-rotate(70deg) brightness(0.8);
+}
+
+/* ===== Profile Name ===== */
+
+.profile-name {
+  text-shadow: 0 0 8px #33ff33, 0 0 16px rgba(51, 255, 51, 0.4);
+  font-family: 'VT323', monospace;
+}
+
+.profile-link {
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* ===== Live Indicator ===== */
+
+.live-indicator {
+  box-shadow: 0 0 4px #33ff33, 0 0 8px rgba(51, 255, 51, 0.5);
+}
+
+/* ===== Counter Section ===== */
+
+.counter-value-large {
+  text-shadow: 0 0 10px #33ff33, 0 0 20px rgba(51, 255, 51, 0.3);
+  font-family: 'VT323', monospace;
+}
+
+.counter-label-large {
+  font-family: 'Share Tech Mono', monospace;
+  text-shadow: 0 0 4px rgba(51, 255, 51, 0.3);
+}
+
+/* ===== Heart Rate — Oscilloscope ===== */
+
+.heart-rate-monitor {
+  background: #001a00;
+}
+
+.heart-rate-graph {
+  border-radius: 6px;
+  border: 1px solid rgba(51, 255, 51, 0.3);
+  position: relative;
+}
+
+/* Oscilloscope grid lines */
+.heart-rate-graph::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    /* Horizontal grid */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 14px,
+      rgba(51, 255, 51, 0.08) 14px,
+      rgba(51, 255, 51, 0.08) 15px
+    ),
+    /* Vertical grid */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 14px,
+      rgba(51, 255, 51, 0.08) 14px,
+      rgba(51, 255, 51, 0.08) 15px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scanlines on oscilloscope */
+.heart-rate-graph::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+.heart-rate-value {
+  text-shadow: 0 0 10px #33ff33, 0 0 20px rgba(51, 255, 51, 0.3);
+  font-family: 'VT323', monospace;
+}
+
+.heart-rate-label {
+  font-family: 'Share Tech Mono', monospace;
+  text-shadow: 0 0 4px rgba(51, 255, 51, 0.3);
+}
+
+.heart-rate-container {
+  background: rgba(0, 20, 0, 0.5);
+  border: 1px solid rgba(51, 255, 51, 0.2);
+  border-radius: 8px;
+}
+
+/* Heart rate fade overlays match green background */
+.fade-in {
+  background: #001a00;
+}
+
+.fade-out {
+  background: linear-gradient(90deg,
+    rgba(0, 26, 0, 1) 0%,
+    rgba(0, 26, 0, 0.8) 50%,
+    rgba(0, 26, 0, 0) 100%);
+}
+
+/* ===== Generic theme1- classes ===== */
+
+.theme1-panel {
+  background: rgba(0, 26, 0, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(51, 255, 51, 0.25);
+  position: relative;
+}
+
+.theme1-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  bottom: auto;
+  background: #33ff33;
+  box-shadow: 0 0 6px #33ff33, 0 0 12px rgba(51, 255, 51, 0.4);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.theme1-panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 1px,
+    rgba(0, 0, 0, 0.15) 1px, rgba(0, 0, 0, 0.15) 2px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.theme1-panel-title {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  font-weight: 400;
+  color: #33ff33;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #33ff33;
+  background-clip: unset;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  text-align: center;
+  text-shadow: 0 0 8px #33ff33, 0 0 16px rgba(51, 255, 51, 0.5);
+}
+
+.theme1-btn {
+  background: rgba(0, 26, 0, 0.9);
+  border: 1px solid rgba(51, 255, 51, 0.4);
+  padding: 8px 16px;
+  color: #33ff33;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 400;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme1-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(51, 255, 51, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.theme1-btn:hover::before { left: 100%; }
+.theme1-btn:hover {
+  border-color: #33ff33;
+  box-shadow: 0 0 10px rgba(51, 255, 51, 0.3), inset 0 0 10px rgba(51, 255, 51, 0.05);
+  text-shadow: 0 0 8px #33ff33;
+}
+
+.theme1-alert {
+  background: rgba(0, 26, 0, 0.95);
+  border: 1px solid rgba(51, 255, 51, 0.3);
+  border-left: 3px solid #33ff33;
+  animation: theme1AlertEntry 0.8s ease-out;
+}
+
+.theme1-alert::before { content: none; }
+
+.theme1-chat-container {
+  background: rgba(0, 26, 0, 0.95);
+  border: 1px solid rgba(51, 255, 51, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.theme1-chat-message {
+  background: rgba(51, 255, 51, 0.05);
+  border-left: 3px solid rgba(51, 255, 51, 0.3);
+  margin: 8px 0;
+  padding: 12px 16px;
+  animation: theme1MessageSlide 0.4s ease-out;
+}
+
+.theme1-chat-message.moderator { border-left-color: #66ff66; background: rgba(102, 255, 102, 0.08); }
+.theme1-chat-message.subscriber { border-left-color: #99ff99; background: rgba(153, 255, 153, 0.08); }
+.theme1-chat-message.vip { border-left-color: #00ff00; background: rgba(0, 255, 0, 0.08); }
+
+.theme1-progress { background: rgba(51, 255, 51, 0.08); overflow: hidden; height: 24px; position: relative; }
+.theme1-progress-fill {
+  background: linear-gradient(90deg, #1a9b1a, #33ff33);
+  height: 100%;
+  position: relative;
+  transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.theme1-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(102, 255, 102, 0.3), transparent);
+  animation: theme1ProgressShine 2s infinite;
+}
+
+.theme1-badge {
+  background: rgba(0, 26, 0, 0.9);
+  color: #33ff33;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(51, 255, 51, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme1-badge.mod { background: rgba(102, 255, 102, 0.15); border-color: #66ff66; }
+.theme1-badge.sub { background: rgba(153, 255, 153, 0.15); border-color: #99ff99; color: #99ff99; }
+.theme1-badge.vip { background: rgba(0, 255, 0, 0.15); border-color: #00ff00; }
+
+.theme1-status { position: relative; display: inline-block; }
+.theme1-status::after {
+  content: '';
+  position: absolute;
+  top: 50%; right: -15px;
+  transform: translateY(-50%);
+  width: 8px; height: 8px;
+  background: #33ff33;
+  animation: theme1StatusPulse 2s infinite;
+  box-shadow: 0 0 6px #33ff33;
+}
+.theme1-status.offline::after { background: #1a9b1a; box-shadow: 0 0 6px #1a9b1a; }
+.theme1-status.warning::after { background: #66ff66; box-shadow: 0 0 6px #66ff66; }
+
+.theme1-glow {
+  box-shadow: 0 0 10px rgba(51, 255, 51, 0.4), 0 0 20px rgba(51, 255, 51, 0.2), 0 0 40px rgba(51, 255, 51, 0.1);
+}
+.theme1-glass {
+  background: rgba(51, 255, 51, 0.03);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(51, 255, 51, 0.15);
+}
+.theme1-floating { animation: theme1Float 6s ease-in-out infinite; }
+
+.theme1-notification {
+  background: rgba(0, 26, 0, 0.95);
+  border: 1px solid #33ff33;
+  box-shadow: 0 0 20px rgba(51, 255, 51, 0.3), 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.theme1-notification.success { background: rgba(102, 255, 102, 0.15); border-color: #66ff66; }
+.theme1-notification.warning { background: rgba(153, 255, 153, 0.15); border-color: #99ff99; }
+.theme1-notification.error { background: rgba(26, 155, 26, 0.2); border-color: #1a9b1a; }
+
+.theme1-bounce-in { animation: theme1BounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.theme1-slide-up { animation: theme1SlideUp 0.6s ease-out; }
+
+.theme1-scroll::-webkit-scrollbar { width: 8px; }
+.theme1-scroll::-webkit-scrollbar-track { background: rgba(0, 26, 0, 0.5); }
+.theme1-scroll::-webkit-scrollbar-thumb { background: #1a9b1a; }
+.theme1-scroll::-webkit-scrollbar-thumb:hover { background: #33ff33; }
+
+/* Carousel indicators */
+.indicator.active {
+  background: #33ff33;
+  box-shadow: 0 0 6px rgba(51, 255, 51, 0.5);
+}

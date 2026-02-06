@@ -1,0 +1,558 @@
+/* ===== FALLOUT NUKA-COLA THEME — CHROME VENDING MACHINE ===== */
+/* Everything rounded (20px+). Chrome metallic borders via stacked box-shadow */
+/* bevels. Neon tube glow on all edges. Bottle-cap profile frame. Retro gauge */
+/* housing on heart rate. Heartbeat icon animation. */
+
+@import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700&display=swap');
+
+:root {
+  --token-color-brand-primary: #e31837;
+  --token-color-brand-secondary: #f5f5dc;
+  --token-color-brand-accent: #00d9ff;
+  --token-color-brand-tertiary: #c0c0c0;
+
+  --token-color-background-dark: #1a0f0f;
+  --token-color-background-panel: rgba(35, 15, 15, 0.95);
+  --token-color-border-accent: rgba(227, 24, 55, 0.5);
+
+  --token-typography-font-family-display: 'Boogaloo', 'Comic Sans MS', cursive;
+  --token-typography-font-family-primary: 'Nunito', 'Segoe UI', sans-serif;
+
+  /* Alert type colors — vibrant diner palette */
+  --token-color-alert-follow: #ff69b4;
+  --token-color-alert-sub: #e31837;
+  --token-color-alert-cheer: #ffd700;
+  --token-color-alert-raid: #ff6633;
+  --token-color-alert-donation: #00d9ff;
+  --token-color-alert-redemption: #9b59b6;
+  --token-color-alert-firstword: #7fff00;
+}
+
+/* ===== Animations ===== */
+
+@keyframes nukaNeonPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 4px #e31837,
+      0 0 8px #e31837,
+      0 0 16px rgba(227, 24, 55, 0.4);
+    opacity: 0.9;
+  }
+  50% {
+    box-shadow:
+      0 0 6px #e31837,
+      0 0 12px #e31837,
+      0 0 24px rgba(227, 24, 55, 0.6),
+      0 0 36px rgba(227, 24, 55, 0.2);
+    opacity: 1;
+  }
+}
+
+@keyframes nukaHeartBeat {
+  0%, 100% { transform: scale(1); }
+  10% { transform: scale(1.2); }
+  20% { transform: scale(1); }
+  30% { transform: scale(1.15); }
+  40% { transform: scale(1); }
+}
+
+/* ===== Overlay Bar — Rounded vending machine panel ===== */
+
+.overlay-bar {
+  border-radius: 20px;
+  background: rgba(35, 15, 15, 0.95);
+  border: 3px solid #888;
+  /* Chrome border via inset bevel + neon outline + drop shadow */
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.25),
+    inset 0 3px 2px rgba(255, 255, 255, 0.1),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    inset 0 -3px 2px rgba(0, 0, 0, 0.2),
+    inset 2px 0 0 rgba(255, 255, 255, 0.1),
+    inset -2px 0 0 rgba(0, 0, 0, 0.15),
+    0 0 8px rgba(227, 24, 55, 0.4),
+    0 0 16px rgba(227, 24, 55, 0.2),
+    0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Neon tube top border */
+.overlay-bar::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 40px;
+  right: 40px;
+  height: 4px;
+  background: linear-gradient(90deg,
+    transparent 0%, #e31837 5%, #ff4466 50%, #e31837 95%, transparent 100%
+  );
+  border-radius: 4px;
+  box-shadow:
+    0 0 4px #e31837,
+    0 0 8px #e31837,
+    0 0 16px rgba(227, 24, 55, 0.5),
+    0 0 32px rgba(227, 24, 55, 0.2);
+  animation: nukaNeonPulse 2s ease-in-out infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Neon tube bottom border (out of phase) */
+.overlay-bar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 40px;
+  right: 40px;
+  height: 4px;
+  background: linear-gradient(90deg,
+    transparent 0%, #e31837 5%, #ff4466 50%, #e31837 95%, transparent 100%
+  );
+  border-radius: 4px;
+  box-shadow:
+    0 0 4px #e31837,
+    0 0 8px #e31837,
+    0 0 16px rgba(227, 24, 55, 0.5),
+    0 0 32px rgba(227, 24, 55, 0.2);
+  animation: nukaNeonPulse 2s ease-in-out infinite;
+  animation-delay: 1s;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ===== Sections — Rounded pill-ish panels ===== */
+
+.section {
+  border-radius: 12px;
+  margin: 0 2px;
+  border-right: none;
+  position: relative;
+}
+
+/* Vertical neon tube dividers */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: -1px;
+  width: 2px;
+  height: 70%;
+  background: linear-gradient(180deg,
+    transparent 0%, rgba(227, 24, 55, 0.3) 15%,
+    rgba(227, 24, 55, 0.7) 50%, rgba(227, 24, 55, 0.3) 85%, transparent 100%
+  );
+  box-shadow:
+    0 0 4px rgba(227, 24, 55, 0.4),
+    0 0 8px rgba(227, 24, 55, 0.2);
+  z-index: 12;
+}
+
+.section:last-child::before {
+  display: none;
+}
+
+/* ===== Section Header — Rounded top, neon dot ===== */
+
+.section-header {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(227, 24, 55, 0.4);
+  border-radius: 12px 12px 0 0;
+  position: relative;
+}
+
+/* Neon dot decoration (right side) */
+.section-header::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e31837;
+  box-shadow: 0 0 4px #e31837, 0 0 8px rgba(227, 24, 55, 0.5);
+}
+
+/* ===== Section Content — Spacious diner booth ===== */
+
+.section-content {
+  padding: 14px 20px;
+}
+
+/* ===== Camera Section — Rounded left edge ===== */
+
+.camera-section {
+  background: transparent;
+  border-radius: 20px 0 0 20px;
+  box-shadow: inset -3px 0 10px rgba(227, 24, 55, 0.06);
+}
+
+/* ===== Profile Image — Bottle cap frame ===== */
+
+.profile-image-container {
+  border-radius: 50%;
+  border: 4px solid #999;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+    0 0 0 2px #666,
+    0 0 8px rgba(227, 24, 55, 0.4),
+    0 0 16px rgba(227, 24, 55, 0.2),
+    0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Bottle cap serrated edge */
+.profile-image-container::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  border: 2px dashed rgba(192, 192, 192, 0.3);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Chrome glint reflection */
+.profile-image-container::after {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: 15%;
+  width: 30%;
+  height: 20%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 4;
+  border-radius: 50%;
+}
+
+/* ===== Profile Name ===== */
+
+.profile-name {
+  font-family: 'Boogaloo', cursive;
+  text-shadow: 0 0 8px rgba(227, 24, 55, 0.5), 0 0 16px rgba(227, 24, 55, 0.3);
+}
+
+.profile-link {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ===== Live Indicator — Pill shaped ===== */
+
+.live-indicator {
+  width: 12px;
+  height: 8px;
+  border-radius: 4px;
+  box-shadow:
+    0 0 4px #e31837,
+    0 0 8px rgba(227, 24, 55, 0.5),
+    0 0 12px rgba(227, 24, 55, 0.3);
+}
+
+/* ===== Counter Section ===== */
+
+.counter-value-large {
+  font-family: 'Boogaloo', cursive;
+  text-shadow: 0 0 8px rgba(227, 24, 55, 0.4);
+}
+
+.counter-label-large {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Rounded gauge housing around counter content */
+.counter-content {
+  position: relative;
+}
+
+.counter-content::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px solid rgba(192, 192, 192, 0.15);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+/* ===== Heart Rate — Rounded retro gauge ===== */
+
+.heart-rate-graph {
+  border-radius: 12px;
+  border: 2px solid #888;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 0 6px rgba(227, 24, 55, 0.2);
+}
+
+/* Chrome highlight arc along top */
+.heart-rate-graph::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 8px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 100%
+  );
+  border-radius: 0 0 50% 50%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.heart-rate-container {
+  border-radius: 16px;
+  border: 1px solid rgba(192, 192, 192, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.heart-rate-value {
+  font-family: 'Boogaloo', cursive;
+  text-shadow: 0 0 10px rgba(227, 24, 55, 0.5);
+}
+
+.heart-rate-label {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Animated heart icon before BPM display */
+.heart-rate-display::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e31837'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  animation: nukaHeartBeat 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(227, 24, 55, 0.5));
+}
+
+/* ===== Generic theme1- classes ===== */
+
+.theme1-panel {
+  background: rgba(35, 15, 15, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid #888;
+  border-radius: 16px;
+  position: relative;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(227, 24, 55, 0.3);
+}
+
+.theme1-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 16px; right: 16px;
+  height: 2px;
+  bottom: auto;
+  background: #e31837;
+  border-radius: 2px;
+  box-shadow: 0 0 4px #e31837, 0 0 8px #e31837, 0 0 16px rgba(227, 24, 55, 0.5);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.theme1-panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(245, 245, 220, 0.01) 3px, rgba(245, 245, 220, 0.01) 4px);
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.theme1-panel-title {
+  font-family: 'Boogaloo', cursive;
+  font-size: 22px;
+  font-weight: 400;
+  color: #f5f5dc;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #f5f5dc;
+  background-clip: unset;
+  text-transform: none;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(227, 24, 55, 0.5), 0 0 16px rgba(227, 24, 55, 0.3);
+}
+
+.theme1-btn {
+  background: linear-gradient(180deg, #f0f0f0 0%, #c0c0c0 30%, #808080 50%, #c0c0c0 70%, #f0f0f0 100%);
+  border: 2px solid #e31837;
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #1a0f0f;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme1-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transition: left 0.6s ease;
+}
+
+.theme1-btn:hover::before { left: 150%; }
+.theme1-btn:hover {
+  border-color: #00d9ff;
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.15);
+}
+
+.theme1-alert {
+  background: rgba(35, 15, 15, 0.95);
+  border: 1px solid rgba(227, 24, 55, 0.3);
+  border-left: 4px solid #e31837;
+  border-radius: 12px;
+  animation: theme1AlertEntry 0.8s ease-out;
+}
+
+.theme1-alert::before { content: none; }
+
+.theme1-chat-container {
+  background: rgba(35, 15, 15, 0.95);
+  border: 2px solid rgba(227, 24, 55, 0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.theme1-chat-message {
+  background: rgba(227, 24, 55, 0.05);
+  border-left: 3px solid rgba(227, 24, 55, 0.3);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 12px 16px;
+  animation: theme1MessageSlide 0.4s ease-out;
+}
+
+.theme1-chat-message.moderator { border-left-color: #00d9ff; background: rgba(0, 217, 255, 0.08); }
+.theme1-chat-message.subscriber { border-left-color: #ffd700; background: rgba(255, 215, 0, 0.08); }
+.theme1-chat-message.vip { border-left-color: #e31837; background: rgba(227, 24, 55, 0.08); }
+
+.theme1-progress { background: rgba(227, 24, 55, 0.1); overflow: hidden; height: 24px; position: relative; border-radius: 12px; }
+.theme1-progress-fill {
+  background: linear-gradient(90deg, #e31837, #ff4466);
+  height: 100%;
+  position: relative;
+  border-radius: 12px;
+  transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.theme1-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: theme1ProgressShine 2s infinite;
+}
+
+.theme1-badge {
+  background: rgba(227, 24, 55, 0.8);
+  color: #f5f5dc;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(245, 245, 220, 0.3);
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme1-badge.mod { background: rgba(0, 217, 255, 0.3); border-color: #00d9ff; color: #00d9ff; }
+.theme1-badge.sub { background: rgba(255, 215, 0, 0.3); border-color: #ffd700; color: #ffd700; }
+.theme1-badge.vip { background: rgba(227, 24, 55, 0.4); border-color: #e31837; color: #f5f5dc; }
+
+.theme1-status { position: relative; display: inline-block; }
+.theme1-status::after {
+  content: '';
+  position: absolute;
+  top: 50%; right: -15px;
+  transform: translateY(-50%);
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #e31837;
+  animation: theme1StatusPulse 2s infinite;
+  box-shadow: 0 0 6px #e31837;
+}
+.theme1-status.offline::after { background: #666; box-shadow: 0 0 4px #666; }
+.theme1-status.warning::after { background: #ffd700; box-shadow: 0 0 6px #ffd700; }
+
+.theme1-glow {
+  box-shadow: 0 0 10px rgba(227, 24, 55, 0.4), 0 0 20px rgba(227, 24, 55, 0.2), 0 0 40px rgba(227, 24, 55, 0.1);
+}
+.theme1-glass {
+  background: rgba(227, 24, 55, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(227, 24, 55, 0.15);
+  border-radius: 16px;
+}
+.theme1-floating { animation: theme1Float 6s ease-in-out infinite; }
+
+.theme1-notification {
+  background: rgba(35, 15, 15, 0.95);
+  border: 2px solid #e31837;
+  border-radius: 16px;
+  box-shadow: 0 0 15px rgba(227, 24, 55, 0.3), 0 0 30px rgba(227, 24, 55, 0.15), 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.theme1-notification.success { background: rgba(0, 217, 255, 0.15); border-color: #00d9ff; }
+.theme1-notification.warning { background: rgba(255, 215, 0, 0.15); border-color: #ffd700; }
+.theme1-notification.error { background: rgba(227, 24, 55, 0.2); border-color: #e31837; }
+
+.theme1-bounce-in { animation: theme1BounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.theme1-slide-up { animation: theme1SlideUp 0.6s ease-out; }
+
+.theme1-scroll::-webkit-scrollbar { width: 8px; }
+.theme1-scroll::-webkit-scrollbar-track { background: rgba(35, 15, 15, 0.5); border-radius: 4px; }
+.theme1-scroll::-webkit-scrollbar-thumb { background: #e31837; border-radius: 4px; }
+.theme1-scroll::-webkit-scrollbar-thumb:hover { background: #ff4466; }
+
+/* Carousel indicators */
+.indicator.active {
+  background: #e31837;
+  box-shadow: 0 0 6px rgba(227, 24, 55, 0.5);
+}
+
+/* Nuka-Cola Quantum accent — cyan neon highlight on hover states */
+.overlay-bar a:hover,
+.overlay-bar .interactive:hover {
+  color: #00d9ff;
+  text-shadow: 0 0 8px rgba(0, 217, 255, 0.5);
+}
