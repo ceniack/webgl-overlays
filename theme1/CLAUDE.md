@@ -32,6 +32,7 @@ node build.js
 
 ## Production URLs
 - `/template/overlay` - Main overlay bar (OBS Browser Source)
+- `/template/overlay-all` - All components visible (testing/development)
 - `/template/alerts` - Alert notifications overlay
 - `/debug/system` - System information
 - `/api/global-variables` - Variable API
@@ -69,6 +70,7 @@ theme1/
 │   │   └── stream-overlay.iife.js
 │   ├── templates/
 │   │   ├── overlay.html           # Main overlay bar
+│   │   ├── overlay-all.html       # All components visible (testing)
 │   │   └── alerts.html            # Alert notifications
 │   └── components/                # Legacy component files
 └── src/
@@ -324,6 +326,11 @@ window.listActions()                 // List Streamer.bot actions
 window.runAction('name', {})         // Run a Streamer.bot action
 window.debugAlertFeed()              // Dump AlertFeed internal state
 ```
+
+### Testing All Components
+- **URL**: `http://localhost:3000/template/overlay-all`
+- All sections visible (LatestEvent, counters, heart rate, branding)
+- Same bundle as overlay, different layout for testing
 
 ### File Logging
 ```bash

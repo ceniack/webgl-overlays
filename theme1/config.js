@@ -28,6 +28,12 @@ module.exports = {
         width: 1920,
         height: 257
     },
+
+    canvas: {
+        width: 1920,
+        height: 1080,
+        defaultGrid: { cols: 48, rows: 27 }
+    },
     
     globalVariables: [
         'broadcasterDisplayName',
@@ -66,6 +72,7 @@ module.exports = {
         components: 'public/components',
         layouts: 'public/layouts',
         dist: 'public/dist',
-        data: 'data'
+        data: 'data',
+        canvasLayouts: 'data/layouts'
     }
 };

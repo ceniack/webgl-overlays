@@ -7,3 +7,4 @@ export * from './streamerbot';
 export * from './components';
 export * from './alerts';
 export * from './goals';
+export * from './canvas';

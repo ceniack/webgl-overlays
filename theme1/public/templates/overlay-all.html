@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaming Stream Overlay Bar</title>
+    <title>Stream Overlay — Component Testing</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +16,61 @@
     <link rel="stylesheet" href="../dist/assets/stream-overlay.css">
     <script src="../js/streamerbot-client.js"></script>
     <script src="../dist/stream-overlay.iife.js"></script>
+
+    <!-- Responsive layout overrides for component testing -->
+    <style>
+        html, body {
+            width: 100% !important;
+            max-width: 1920px;
+            height: auto !important;
+            min-height: 100vh;
+            background: var(--bg-panel, #0a0a14);
+        }
+
+        .overlay-bar {
+            width: 100% !important;
+            max-width: 1920px;
+            height: auto !important;
+            flex-wrap: wrap;
+        }
+
+        .overlay-bar::before {
+            /* Keep gradient border but span full width */
+            position: relative;
+            width: 100%;
+            flex-basis: 100%;
+        }
+
+        .section {
+            height: auto;
+            min-height: 200px;
+            min-width: 280px;
+            flex: 1 1 300px;
+            border-right: none;
+            border-bottom: 1px solid var(--border-color, rgba(0, 212, 255, 0.15));
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        /* Hide camera section — not needed for testing */
+        .camera-section {
+            display: none !important;
+        }
+
+        /* Let counters section size naturally */
+        .counters-section .section-content {
+            height: auto;
+            min-height: 180px;
+        }
+
+        /* Let heart rate section size naturally */
+        .heart-rate-container {
+            height: auto;
+            min-height: 180px;
+        }
+    </style>
 </head>
 <body data-component="overlay-html">
 
@@ -35,11 +90,6 @@
     </svg>
 
     <div class="overlay-bar">
-        <!-- Camera Cutout Section -->
-        <div class="section camera-section">
-            <!-- Transparent area for webcam -->
-        </div>
-
         <!-- Branding Section -->
         <div class="section branding-section">
             <div class="section-header">
@@ -104,37 +154,35 @@
             </div>
         </div>
 
-        <!-- Latest Event Sections (enable by removing display:none) -->
-        <div class="section latest-follower-section" style="display: none;">
+        <!-- Latest Event Sections (all visible for testing) -->
+        <div class="section latest-follower-section">
             <div class="section-header">Latest Follower</div>
             <div class="section-content"></div>
         </div>
-        <div class="section latest-sub-section" style="display: none;">
+        <div class="section latest-sub-section">
             <div class="section-header">Latest Sub</div>
             <div class="section-content"></div>
         </div>
-        <div class="section latest-cheer-section" style="display: none;">
+        <div class="section latest-cheer-section">
             <div class="section-header">Latest Cheer</div>
             <div class="section-content"></div>
         </div>
-        <div class="section latest-raid-section" style="display: none;">
+        <div class="section latest-raid-section">
             <div class="section-header">Latest Raid</div>
             <div class="section-content"></div>
         </div>
-        <div class="section latest-donation-section" style="display: none;">
+        <div class="section latest-donation-section">
             <div class="section-header">Latest Donation</div>
             <div class="section-content"></div>
         </div>
-        <div class="section latest-redemption-section" style="display: none;">
+        <div class="section latest-redemption-section">
             <div class="section-header">Latest Redemption</div>
             <div class="section-content"></div>
         </div>
-        <div class="section latest-firstword-section" style="display: none;">
+        <div class="section latest-firstword-section">
             <div class="section-header">Latest First Word</div>
             <div class="section-content"></div>
         </div>
-
-        <!-- Future sections (AlertFeed, GoalTracker, RecentActivity) available in components -->
     </div>
 
 </body>

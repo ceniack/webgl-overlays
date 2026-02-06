@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyberpunk" data-layout="canvas">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Editor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Theme stylesheet -->
+    <link id="theme-stylesheet" rel="stylesheet" href="/css/themes/cyberpunk/theme.css">
+
+    <!-- Bundled overlay system (components need this to render) -->
+    <link rel="stylesheet" href="../dist/assets/stream-overlay.css">
+
+    <!-- Editor-specific styles -->
+    <link rel="stylesheet" href="/css/canvas-editor.css">
+
+    <script src="../js/streamerbot-client.js"></script>
+    <script src="../dist/stream-overlay.iife.js"></script>
+</head>
+<body data-component="canvas-editor-html">
+
+    <!-- Hidden SVG icons -->
+    <svg class="icon-svg">
+        <defs>
+            <symbol id="icon-discord" viewBox="0 0 24 24">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+            </symbol>
+            <symbol id="icon-twitch" viewBox="0 0 24 24">
+                <path d="M11.571 4.714h1.714v5.143h-1.714zm4.714 0H18v5.143h-1.715zM6 24L1.714 19.714V4.286H6.857V0L11.143 4.286h3.428L22.286 12V24zM20.571 12.857L17.143 9.429h-3.429L12 7.714v2.143H6.857V22.286H20.57z"/>
+            </symbol>
+            <symbol id="icon-follow" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <!-- Toolbar -->
+    <div class="editor-toolbar" id="editor-toolbar">
+        <div class="toolbar-left">
+            <span class="toolbar-title">Canvas Editor</span>
+            <select id="layout-selector" class="toolbar-select">
+                <option value="default-canvas">default-canvas</option>
+            </select>
+        </div>
+        <div class="toolbar-center">
+            <button id="btn-grid-toggle" class="toolbar-btn" title="Toggle grid lines">Grid</button>
+            <button id="btn-add-component" class="toolbar-btn" title="Open component palette">+ Add</button>
+        </div>
+        <div class="toolbar-right">
+            <button id="btn-save" class="toolbar-btn toolbar-btn-primary" title="Save layout">Save</button>
+            <button id="btn-save-as" class="toolbar-btn" title="Save as new layout">Save As</button>
+            <button id="btn-delete-layout" class="toolbar-btn toolbar-btn-danger" title="Delete current layout">Delete Layout</button>
+        </div>
+    </div>
+
+    <!-- Component Palette (hidden by default) -->
+    <div class="editor-palette" id="editor-palette">
+        <div class="palette-header">
+            <span>Components</span>
+            <button id="btn-close-palette" class="palette-close">&times;</button>
+        </div>
+        <div class="palette-list" id="palette-list">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Canvas viewport -->
+    <div class="editor-viewport" id="editor-viewport">
+        <div class="canvas-grid" id="canvas-grid">
+            <!-- Cells built dynamically by CanvasRenderer -->
+        </div>
+    </div>
+
+    <!-- Properties Panel (hidden until cell selected) -->
+    <div class="editor-properties" id="editor-properties">
+        <div class="properties-header">
+            <span>Properties</span>
+            <button id="btn-close-properties" class="properties-close">&times;</button>
+        </div>
+        <div class="properties-body" id="properties-body">
+            <div class="prop-group">
+                <label class="prop-label">Cell ID</label>
+                <input type="text" id="prop-id" class="prop-input" readonly>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Component</label>
+                <input type="text" id="prop-component" class="prop-input" readonly>
+            </div>
+            <div class="prop-row">
+                <div class="prop-group prop-half">
+                    <label class="prop-label">X</label>
+                    <input type="number" id="prop-x" class="prop-input" min="0" max="47">
+                </div>
+                <div class="prop-group prop-half">
+                    <label class="prop-label">Y</label>
+                    <input type="number" id="prop-y" class="prop-input" min="0" max="26">
+                </div>
+            </div>
+            <div class="prop-row">
+                <div class="prop-group prop-half">
+                    <label class="prop-label">W</label>
+                    <input type="number" id="prop-w" class="prop-input" min="1" max="48">
+                </div>
+                <div class="prop-group prop-half">
+                    <label class="prop-label">H</label>
+                    <input type="number" id="prop-h" class="prop-input" min="1" max="27">
+                </div>
+            </div>
+            <div class="prop-group">
+                <label class="prop-label">Z-Index</label>
+                <input type="number" id="prop-z" class="prop-input" min="0" max="100">
+            </div>
+            <div class="prop-group">
+                <label class="prop-checkbox-label">
+                    <input type="checkbox" id="prop-visible" checked>
+                    Visible
+                </label>
+            </div>
+            <div class="prop-group">
+                <button id="btn-delete-cell" class="toolbar-btn toolbar-btn-danger prop-btn-full">Delete Cell</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- interact.js + editor logic (outside Vite bundle) -->
+    <script src="/js/interact.min.js"></script>
+    <script src="/js/canvas-editor.js"></script>
+
+</body>
+</html>

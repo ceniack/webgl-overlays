@@ -11,7 +11,7 @@ import type {
   GoalProgressEvent,
   ActivityItemEvent
 } from '../types/events';
-import type { AlertType, AlertPlatform } from '../types/alerts';
+import type { AlertType, AlertPlatform, AlertEvent } from '../types/alerts';
 import type { GoalType } from '../types/goals';
 
 const sbLogger = logger.createChildLogger('Streamerbot');
@@ -150,6 +150,22 @@ class StreamerbotIntegration {
 
     if (name === 'activeGoalTypes' && typeof window.requestGoalVariables === 'function') {
       window.requestGoalVariables(value);
+    }
+
+    // Handle latestEvent persisted globals (e.g., latestEventFollow, latestEventSub)
+    if (name.startsWith('latestEvent')) {
+      const eventType = name.replace('latestEvent', '').toLowerCase() as AlertType;
+      try {
+        const event: AlertEvent = typeof value === 'string' ? JSON.parse(value) : value;
+        // Normalize timestamp: Streamer.bot %unixtime% is in seconds, JS uses milliseconds
+        if (event.timestamp && event.timestamp < 1e12) {
+          event.timestamp = event.timestamp * 1000;
+        }
+        eventBus.emit(EVENT_TYPES.LATEST_EVENT_RESTORE, { eventType, event });
+        sbLogger.debug(`Emitted latestEvent restore: ${eventType} = ${event.user}`);
+      } catch (e) {
+        sbLogger.error(`Failed to parse latestEvent global: ${name}`, e);
+      }
     }
 
     // Also call the legacy window function for backwards compatibility

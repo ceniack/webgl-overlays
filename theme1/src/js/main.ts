@@ -2,6 +2,7 @@ import '@splidejs/splide/css';
 import '../css/index.css';
 
 import '../components/sections/AlertFeed/AlertFeed.css';
+import '../components/sections/LatestEvent/LatestEvent.css';
 
 // Component styles available but not yet integrated:
 // import '../components/sections/GoalTracker/GoalTracker.css';
@@ -13,6 +14,7 @@ import { logger } from './Logger';
 import { initializeTheme } from './ThemeManager';
 import { streamerbotIntegration } from './streamerbot-integration';
 import { ComponentComposer } from '../composition/ComponentComposer';
+import { CanvasRenderer } from '../composition/CanvasRenderer';
 
 const mainLogger = logger.createChildLogger('Main');
 
@@ -73,7 +75,15 @@ async function initializeApp(): Promise<void> {
       const componentConfigs = [
         { name: 'BroadcasterInfo', path: '.branding-section' },
         { name: 'CounterCarousel', path: '.counters-section' },
-        { name: 'HealthMonitor', path: '.heart-rate-section' }
+        { name: 'HealthMonitor', path: '.heart-rate-section' },
+        // LatestEvent instances — hidden by default, enable by removing display:none in overlay.html
+        { name: 'LatestEvent', path: '.latest-follower-section', data: { eventType: 'follow', label: 'Latest Follower' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-sub-section', data: { eventType: 'sub', label: 'Latest Sub' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-cheer-section', data: { eventType: 'cheer', label: 'Latest Cheer' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-raid-section', data: { eventType: 'raid', label: 'Latest Raid' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-donation-section', data: { eventType: 'donation', label: 'Latest Donation' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-redemption-section', data: { eventType: 'redemption', label: 'Latest Redemption' }, optional: true },
+        { name: 'LatestEvent', path: '.latest-firstword-section', data: { eventType: 'firstword', label: 'Latest First Word' }, optional: true }
         // Components available but not yet integrated:
         // { name: 'AlertFeed', path: '.alert-section', optional: true },
         // { name: 'GoalTracker', path: '.goal-section', optional: true },
@@ -136,6 +146,49 @@ async function initializeApp(): Promise<void> {
       (window as any).ComponentComposer = composer;
 
       mainLogger.info('ComponentComposer initialized for alerts page');
+    } else if (componentName === 'canvas-html') {
+      mainLogger.debug('Initializing CanvasRenderer for canvas overlay');
+
+      const composer = new ComponentComposer();
+      const gridElement = document.getElementById('canvas-grid');
+
+      if (!gridElement) {
+        mainLogger.error('Canvas grid element (#canvas-grid) not found');
+      } else {
+        const renderer = new CanvasRenderer(gridElement, composer);
+        await renderer.initialize();
+
+        // Setup global functions for canvas too
+        setupGlobalFunctions(composer);
+
+        // Expose for debugging
+        (window as any).canvasRenderer = renderer;
+        (window as any).debugCanvas = () => renderer.debug();
+      }
+
+      mainLogger.info('CanvasRenderer initialized');
+    } else if (componentName === 'canvas-editor-html') {
+      mainLogger.debug('Initializing CanvasRenderer for canvas editor');
+
+      const composer = new ComponentComposer();
+      const gridElement = document.getElementById('canvas-grid');
+
+      if (!gridElement) {
+        mainLogger.error('Canvas grid element (#canvas-grid) not found');
+      } else {
+        // Read layout name from URL query param (set by canvas-editor.js)
+        const urlParams = new URLSearchParams(window.location.search);
+        const canvasLayout = urlParams.get('canvasLayout') || 'default-canvas';
+        const renderer = new CanvasRenderer(gridElement, composer, canvasLayout);
+        await renderer.initialize();
+
+        setupGlobalFunctions(composer);
+
+        (window as any).canvasRenderer = renderer;
+        (window as any).debugCanvas = () => renderer.debug();
+      }
+
+      mainLogger.info('CanvasRenderer initialized for editor');
     } else {
       mainLogger.info(`Skipping ComponentComposer for ${componentName} - streamerbot connection active`);
     }

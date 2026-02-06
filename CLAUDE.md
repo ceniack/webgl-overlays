@@ -297,3 +297,11 @@ npm start
 - **Event Testing**: Comprehensive event monitoring and analysis
 
 **Result**: A modern, flexible theme framework with easy template development, real-time data access, and visual layout editing capabilities.
+
+## Automatic Cleanup
+
+A pre-commit hook automatically deletes before each commit:
+- `.tmp*` files (created by Claude Code edit operations)
+- `nul` files (Windows artifacts from `/dev/null` redirects)
+
+No manual cleanup needed - the hook handles it.

@@ -95,6 +95,123 @@ app.get('/debug/system', (req, res) => {
   });
 });
 
+// Canvas layout API routes
+app.get('/api/canvas-layout/:name', (req, res) => {
+  const layoutName = req.params.name;
+
+  // Input validation: prevent path traversal
+  if (!/^[a-zA-Z0-9_-]+$/.test(layoutName)) {
+    return res.status(400).json({ error: 'Invalid layout name' });
+  }
+
+  const layoutPath = path.join(__dirname, 'data', 'layouts', `${layoutName}.json`);
+
+  if (!fs.existsSync(layoutPath)) {
+    return res.status(404).json({ error: `Layout '${layoutName}' not found` });
+  }
+
+  try {
+    const layoutData = JSON.parse(fs.readFileSync(layoutPath, 'utf-8'));
+    res.json(layoutData);
+  } catch (error) {
+    console.error(`Failed to read layout ${layoutName}:`, error.message);
+    res.status(500).json({ error: 'Failed to read layout file' });
+  }
+});
+
+app.get('/api/canvas-layouts', (req, res) => {
+  const layoutsDir = path.join(__dirname, 'data', 'layouts');
+
+  if (!fs.existsSync(layoutsDir)) {
+    return res.json({ layouts: [] });
+  }
+
+  try {
+    const files = fs.readdirSync(layoutsDir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => f.replace('.json', ''));
+    res.json({ layouts: files });
+  } catch (error) {
+    console.error('Failed to list layouts:', error.message);
+    res.status(500).json({ error: 'Failed to list layouts' });
+  }
+});
+
+// Save canvas layout
+app.post('/api/canvas-layout/:name', (req, res) => {
+  const layoutName = req.params.name;
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(layoutName)) {
+    return res.status(400).json({ error: 'Invalid layout name. Use only letters, numbers, hyphens, and underscores.' });
+  }
+
+  const body = req.body;
+
+  // Validate top-level structure
+  if (!body.meta || !body.grid || !Array.isArray(body.cells)) {
+    return res.status(400).json({ error: 'Layout must have meta, grid, and cells array' });
+  }
+
+  // Validate grid dimensions
+  if (body.grid.cols !== 48 || body.grid.rows !== 27) {
+    return res.status(400).json({ error: 'Grid must be 48x27' });
+  }
+
+  // Validate each cell
+  for (const cell of body.cells) {
+    if (!cell.id || !cell.component || cell.x == null || cell.y == null || cell.w == null || cell.h == null) {
+      return res.status(400).json({ error: `Cell missing required fields: ${JSON.stringify(cell)}` });
+    }
+    if (cell.x < 0 || cell.y < 0 || cell.x + cell.w > 48 || cell.y + cell.h > 27) {
+      return res.status(400).json({ error: `Cell '${cell.id}' is out of grid bounds` });
+    }
+  }
+
+  const layoutsDir = path.join(__dirname, 'data', 'layouts');
+  if (!fs.existsSync(layoutsDir)) {
+    fs.mkdirSync(layoutsDir, { recursive: true });
+  }
+
+  const layoutPath = path.join(layoutsDir, `${layoutName}.json`);
+
+  try {
+    fs.writeFileSync(layoutPath, JSON.stringify(body, null, 2), 'utf-8');
+    console.log(`Layout saved: ${layoutName}`);
+    res.json({ success: true, name: layoutName });
+  } catch (error) {
+    console.error(`Failed to save layout ${layoutName}:`, error.message);
+    res.status(500).json({ error: 'Failed to save layout' });
+  }
+});
+
+// Delete canvas layout
+app.delete('/api/canvas-layout/:name', (req, res) => {
+  const layoutName = req.params.name;
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(layoutName)) {
+    return res.status(400).json({ error: 'Invalid layout name' });
+  }
+
+  if (layoutName === 'default-canvas') {
+    return res.status(403).json({ error: 'Cannot delete the default-canvas layout' });
+  }
+
+  const layoutPath = path.join(__dirname, 'data', 'layouts', `${layoutName}.json`);
+
+  if (!fs.existsSync(layoutPath)) {
+    return res.status(404).json({ error: `Layout '${layoutName}' not found` });
+  }
+
+  try {
+    fs.unlinkSync(layoutPath);
+    console.log(`Layout deleted: ${layoutName}`);
+    res.json({ success: true, name: layoutName });
+  } catch (error) {
+    console.error(`Failed to delete layout ${layoutName}:`, error.message);
+    res.status(500).json({ error: 'Failed to delete layout' });
+  }
+});
+
 // PAGE ROUTES SECOND
 
 // Basic route for clean example.html system - now redirects to template
@@ -103,8 +220,8 @@ app.get('/', (req, res) => {
 });
 
 // Valid themes and layouts for query parameter injection
-const VALID_THEMES = ['cyberpunk', 'dark-minimal'];
-const VALID_LAYOUTS = ['default', 'wide', 'compact', 'fullscreen'];
+const VALID_THEMES = ['cyberpunk', 'dark-minimal', 'arc-raiders'];
+const VALID_LAYOUTS = ['default', 'wide', 'compact', 'fullscreen', 'canvas'];
 
 // Routes for template rendering
 app.get('/template/:name', (req, res) => {
@@ -134,10 +251,12 @@ app.get('/template/:name', (req, res) => {
   }
 
   // Read and inject theme/layout parameters into HTML
-  const theme = VALID_THEMES.includes(req.query.theme) ? req.query.theme : 'cyberpunk';
-  const layout = VALID_LAYOUTS.includes(req.query.layout) ? req.query.layout : 'default';
-
   let html = fs.readFileSync(filePath, 'utf-8');
+
+  const theme = VALID_THEMES.includes(req.query.theme) ? req.query.theme : 'cyberpunk';
+  // Preserve the template's own data-layout value as the default (e.g., canvas.html uses "canvas")
+  const currentLayout = (html.match(/data-layout="([^"]*)"/) || [])[1] || 'default';
+  const layout = VALID_LAYOUTS.includes(req.query.layout) ? req.query.layout : currentLayout;
 
   // Inject data-theme and data-layout attributes
   html = html.replace(/data-theme="[^"]*"/, `data-theme="${theme}"`);
@@ -244,6 +363,15 @@ app.get('/favicon.ico', (req, res) => {
   res.status(204).send(); // No content - prevents 404 errors
 });
 
+// Disable caching for built assets (JS/CSS bundles change on every build)
+app.use('/dist', express.static(path.join(__dirname, 'public', 'dist'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'no-store');
+  }
+}));
+
 // STATIC MIDDLEWARE LAST - catch-all for files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -254,6 +382,8 @@ const server = app.listen(PORT, () => {
   console.log(`🎯 Add to OBS Browser Source with URL above`);
   console.log(`✨ Modular TypeScript components with ComponentComposer`);
   console.log(`🔗 Official @streamerbot/client integration`);
+  console.log(`🖼️ Canvas Overlay: http://localhost:${PORT}/template/canvas`);
+  console.log(`🎨 Editor: http://localhost:${PORT}/template/canvas-editor`);
 });
 
 // WebSocket server for real-time updates from streamer.bot

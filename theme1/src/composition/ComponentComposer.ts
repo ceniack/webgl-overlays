@@ -21,7 +21,8 @@ import { logger } from '../js/Logger';
 const composerLogger = logger.createChildLogger('ComponentComposer');
 
 import { AlertFeed } from '../components/sections/AlertFeed/AlertFeed';
-import type { AlertFeedConfig } from '../types/alerts';
+import { LatestEvent } from '../components/sections/LatestEvent/LatestEvent';
+import type { AlertFeedConfig, LatestEventConfig } from '../types/alerts';
 
 // Components available but not yet integrated into overlay:
 // import { GoalTracker } from '../components/sections/GoalTracker/GoalTracker';
@@ -198,6 +199,14 @@ export class ComponentComposer implements IComponentComposer {
         throw new Error(`Container not found for AlertFeed: ${config.path}`);
       }
       return new AlertFeed(container, config.data as Partial<AlertFeedConfig>) as unknown as Component;
+    });
+
+    this.registry.register('LatestEvent', async (config: ComponentConfig) => {
+      const container = document.querySelector(config.path) as HTMLElement;
+      if (!container) {
+        throw new Error(`Container not found for LatestEvent: ${config.path}`);
+      }
+      return new LatestEvent(container, config.data as Partial<LatestEventConfig>) as unknown as Component;
     });
 
     // Components available but not yet integrated:

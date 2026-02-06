@@ -9,6 +9,7 @@ export const EVENT_TYPES = {
   COMPONENT_READY: 'component:ready' as EventType,
   // Alert system events
   ALERT_TRIGGER: 'alert:trigger' as EventType,
+  LATEST_EVENT_RESTORE: 'latestEvent:restore' as EventType,
   STREAM_STATUS: 'stream:status' as EventType,
   GOAL_PROGRESS: 'goal:progress' as EventType,
   ACTIVITY_ITEM: 'activity:item' as EventType,

@@ -102,8 +102,9 @@ html, body {
 /* ===== Branding Section ===== */
 
 .branding-section {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: var(--layout-section-min-width);
+  max-width: 50%;
 }
 
 .branding-section .section-content {
@@ -117,6 +118,8 @@ html, body {
   align-items: center;
   gap: 12px;
   margin-bottom: 15px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .profile-image-container {
@@ -167,7 +170,6 @@ html, body {
   letter-spacing: 1px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .profile-link {
@@ -432,5 +434,150 @@ html[data-layout="fullscreen"] body {
   align-items: center;
   justify-content: center;
   padding: 40px;
+  pointer-events: none;
+}
+
+/* ===== Canvas Grid Layout ===== */
+
+html[data-layout="canvas"],
+html[data-layout="canvas"] body {
+  width: 1920px;
+  height: 1080px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.canvas-grid {
+  --canvas-cols: 48;
+  --canvas-rows: 27;
+  --canvas-gap: 0px;
+  width: 1920px;
+  height: 1080px;
+  display: grid;
+  grid-template-columns: repeat(var(--canvas-cols), 1fr);
+  grid-template-rows: repeat(var(--canvas-rows), 1fr);
+  gap: var(--canvas-gap);
+  background: transparent;
+}
+
+.canvas-cell {
+  grid-column: calc(var(--x) + 1) / span var(--w);
+  grid-row: calc(var(--y) + 1) / span var(--h);
+  z-index: var(--z, 1);
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+.canvas-cell[data-visible="false"] {
+  display: none;
+}
+
+.canvas-cell-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Reset overlay-bar section styles inside canvas cells */
+.canvas-cell .section {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  border-right: none;
+  background: var(--bg-panel);
+}
+
+.canvas-cell .branding-section {
+  max-width: none;
+}
+
+.canvas-cell .counters-section .section-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.canvas-cell .counter-splide {
+  height: 100%;
+}
+
+/* Canvas-scoped component scaling */
+.canvas-cell .profile-image-container {
+  width: 80px;
+  height: 80px;
+}
+
+.canvas-cell .profile-name {
+  font-size: 36px;
+}
+
+.canvas-cell .profile-link {
+  font-size: 16px;
+}
+
+.canvas-cell .section-header {
+  font-size: 14px;
+  padding: 6px 10px 4px;
+}
+
+.canvas-cell .section-content {
+  padding: 6px 10px;
+}
+
+.canvas-cell .section-content {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Debug grid (activate with ?debug=grid) */
+.canvas-grid.show-grid {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 212, 255, 0.05) 0px,
+      rgba(0, 212, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 212, 255, 0.05) 0px,
+      rgba(0, 212, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 40px
+    );
+}
+
+.canvas-cell.show-outline {
+  outline: 1px dashed rgba(0, 212, 255, 0.2);
+}
+
+/* Canvas cell component sections */
+.canvas-cell .latest-event-section { /* inherits .canvas-cell .section */ }
+.canvas-cell .alert-feed-section .section-content { position: relative; padding: 0; }
+
+/* Webcam placeholder — transparent in OBS, dashed outline in editor/debug */
+.canvas-cell .webcam-section {
+  background: transparent;
+}
+
+.canvas-cell .webcam-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  background: transparent;
+}
+
+.canvas-cell .webcam-placeholder-label {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 4px;
   pointer-events: none;
 }
