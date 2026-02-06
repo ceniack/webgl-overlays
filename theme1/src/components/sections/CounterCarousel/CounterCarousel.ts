@@ -64,6 +64,8 @@ export class CounterCarousel implements SectionComponent {
   private splide: Splide | null = null;
   private splideOptions: SplideOptions;
   private counterVisibility: Record<string, boolean> = {};
+  private counterValues: Record<string, string> = {};
+  private counterLabels: Record<string, string> = {};
   private resizeObserver: ResizeObserver | null = null;
 
   /**
@@ -131,10 +133,12 @@ export class CounterCarousel implements SectionComponent {
       ...config
     };
 
-    // Initialize visibility state
+    // Initialize visibility state and value/label stores
     Object.keys(this.config).forEach(counterId => {
       const cfg = this.config[counterId as keyof CounterCarouselConfig];
       this.counterVisibility[counterId] = cfg.defaultVisible;
+      this.counterValues[counterId] = String(cfg.defaultValue);
+      this.counterLabels[counterId] = cfg.defaultLabel;
     });
 
     // Splide configuration
@@ -206,8 +210,9 @@ export class CounterCarousel implements SectionComponent {
     const splideList = document.createElement('ul');
     splideList.className = 'splide__list';
 
-    // Create slides for each counter
+    // Create slides only for visible counters
     Object.keys(this.config).forEach(counterId => {
+      if (!this.counterVisibility[counterId]) return;
       const cfg = this.config[counterId as keyof CounterCarouselConfig];
       const slide = this.createCounterSlide(counterId, cfg);
       splideList.appendChild(slide);
@@ -578,6 +583,9 @@ export class CounterCarousel implements SectionComponent {
   private updateCounterValue(counterId: string, value: string | number | boolean): void {
     const displayValue = value === undefined || value === null || value === 'undefined' ? '0' : String(value);
 
+    // Always persist to in-memory store (even if slide isn't in DOM)
+    this.counterValues[counterId] = displayValue;
+
     // Update ALL matching elements (including Splide clones in loop mode)
     // Splide clones slides for seamless looping, so we need querySelectorAll
     const carouselElements = document.querySelectorAll(`[data-counter-id="${counterId}"][data-counter-type="value"]`) as NodeListOf<HTMLElement>;
@@ -597,6 +605,9 @@ export class CounterCarousel implements SectionComponent {
   private updateCounterLabel(counterId: string, label: string): void {
     const config = this.config[counterId as keyof CounterCarouselConfig];
     const displayLabel = label || config.defaultLabel;
+
+    // Always persist to in-memory store (even if slide isn't in DOM)
+    this.counterLabels[counterId] = displayLabel;
 
     // Update ALL matching elements (including Splide clones in loop mode)
     // Splide clones slides for seamless looping, so we need querySelectorAll
@@ -624,27 +635,43 @@ export class CounterCarousel implements SectionComponent {
       isVisible = visible !== 0;
     }
 
+    const changed = this.counterVisibility[counterId] !== isVisible;
     this.counterVisibility[counterId] = isVisible;
 
-    // Find the Splide slide for this counter — use CSS class for visibility
-    const slide = this.container.querySelector(`.splide__slide[data-counter-id="${counterId}"]`) as HTMLElement;
+    // Also toggle legacy counter box if present
     const counterBox = document.querySelector(`#${counterId}-box`) as HTMLElement;
-
-    if (slide) {
-      slide.classList.toggle('is-hidden', !isVisible);
-      componentLogger.debug(`Set carousel ${counterId} visibility: ${isVisible}`);
-    }
     if (counterBox) {
       counterBox.classList.toggle('is-hidden', !isVisible);
     }
 
-    // Refresh Splide to handle hidden slides
+    componentLogger.debug(`Set ${counterId} visibility: ${isVisible}`);
+
+    // Rebuild carousel with only visible slides (Splide can't hide slides via CSS)
+    if (changed) {
+      this.rebuildCarousel();
+    }
+  }
+
+  private rebuildCarousel(): void {
+    // Destroy existing Splide
     if (this.splide) {
-      this.splide.refresh();
+      this.splide.destroy();
+      this.splide = null;
     }
 
-    // Update indicators
-    this.updateIndicators();
+    // Rebuild DOM with only visible slides
+    this.buildCarouselStructure();
+
+    // Restore values/labels from in-memory stores
+    Object.keys(this.config).forEach(counterId => {
+      const valueEl = this.container.querySelector(`[data-counter-id="${counterId}"][data-counter-type="value"]`) as HTMLElement;
+      const labelEl = this.container.querySelector(`[data-counter-id="${counterId}"][data-counter-type="label"]`) as HTMLElement;
+      if (valueEl) valueEl.textContent = this.counterValues[counterId];
+      if (labelEl) labelEl.textContent = this.counterLabels[counterId];
+    });
+
+    // Remount Splide
+    this.initializeSplide();
   }
 
   // Public methods for testing

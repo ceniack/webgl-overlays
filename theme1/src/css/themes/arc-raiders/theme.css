@@ -1,0 +1,255 @@
+/* ===== ARC RAIDERS THEME ===== */
+/* 1970s-80s retro sci-fi "NASA-punk" aesthetic — warm cream on near-black, */
+/* crimson brand accent, earth-tone palette, utilitarian stencil typography */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Barlow:wght@400;500;600;700&display=swap');
+
+:root {
+  --token-color-brand-primary: #eae0cd;
+  --token-color-brand-secondary: #ff2439;
+  --token-color-brand-accent: #b65e48;
+  --token-color-brand-tertiary: #aea75f;
+
+  --token-color-background-dark: #191a1b;
+  --token-color-background-panel: rgba(25, 26, 27, 0.92);
+  --token-color-border-accent: rgba(234, 224, 205, 0.2);
+
+  --token-typography-font-family-display: 'Chakra Petch', 'Segoe UI', sans-serif;
+  --token-typography-font-family-primary: 'Barlow', 'Segoe UI', sans-serif;
+
+  /* Alert type colors — warm/muted but distinguishable */
+  --token-color-alert-follow: #e8beaa;
+  --token-color-alert-sub: #b65e48;
+  --token-color-alert-cheer: #d4a843;
+  --token-color-alert-raid: #ff2439;
+  --token-color-alert-donation: #aea75f;
+  --token-color-alert-redemption: #8a9ea0;
+  --token-color-alert-firstword: #c9815a;
+}
+
+/* --- Panels --- */
+.theme1-panel {
+  background: rgba(25, 26, 27, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(234, 224, 205, 0.15);
+}
+
+/* ARC signature stripe — warm earth-tone gradient across top */
+.theme1-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  bottom: auto;
+  background: linear-gradient(90deg, #ff2439, #e87c3a, #d4a843, #aea75f);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.theme1-panel-title {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #eae0cd;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #eae0cd;
+  background-clip: unset;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* --- Buttons --- */
+.theme1-btn {
+  background: rgba(25, 26, 27, 0.95);
+  border: 1px solid rgba(234, 224, 205, 0.3);
+  padding: 8px 16px;
+  color: #eae0cd;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme1-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(234, 224, 205, 0.08), transparent);
+  transition: left 0.5s ease;
+}
+
+.theme1-btn:hover::before { left: 100%; }
+.theme1-btn:hover {
+  border-color: #ff2439;
+  box-shadow: 0 0 12px rgba(255, 36, 57, 0.25);
+}
+
+/* --- Alerts --- */
+.theme1-alert {
+  background: rgba(25, 26, 27, 0.95);
+  border: 1px solid rgba(234, 224, 205, 0.15);
+  border-left: 3px solid var(--token-color-brand-accent);
+  animation: theme1AlertEntry 0.8s ease-out;
+}
+
+.theme1-alert::before {
+  content: none;
+}
+
+/* --- Chat --- */
+.theme1-chat-container {
+  background: rgba(25, 26, 27, 0.95);
+  border: 1px solid rgba(234, 224, 205, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.theme1-chat-message {
+  background: rgba(234, 224, 205, 0.05);
+  border-left: 3px solid rgba(234, 224, 205, 0.2);
+  margin: 8px 0;
+  padding: 12px 16px;
+  animation: theme1MessageSlide 0.4s ease-out;
+}
+
+.theme1-chat-message.moderator { border-left-color: #aea75f; background: rgba(174, 167, 95, 0.1); }
+.theme1-chat-message.subscriber { border-left-color: #d4a843; background: rgba(212, 168, 67, 0.1); }
+.theme1-chat-message.vip { border-left-color: #ff2439; background: rgba(255, 36, 57, 0.1); }
+
+/* --- Progress bars --- */
+.theme1-progress { background: rgba(234, 224, 205, 0.08); overflow: hidden; height: 24px; position: relative; }
+.theme1-progress-fill {
+  background: linear-gradient(90deg, #b65e48, #c9815a);
+  height: 100%;
+  position: relative;
+  transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.theme1-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(234, 224, 205, 0.2), transparent);
+  animation: theme1ProgressShine 2s infinite;
+}
+
+/* --- Badges --- */
+.theme1-badge {
+  background: rgba(25, 26, 27, 0.95);
+  color: #eae0cd;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(234, 224, 205, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme1-badge.mod { background: rgba(174, 167, 95, 0.2); border-color: #aea75f; }
+.theme1-badge.sub { background: rgba(212, 168, 67, 0.2); border-color: #d4a843; color: #eae0cd; }
+.theme1-badge.vip { background: rgba(255, 36, 57, 0.2); border-color: #ff2439; }
+
+/* --- Status indicators --- */
+.theme1-status { position: relative; display: inline-block; }
+.theme1-status::after {
+  content: '';
+  position: absolute;
+  top: 50%; right: -15px;
+  transform: translateY(-50%);
+  width: 8px; height: 8px;
+  background: #b65e48;
+  animation: theme1StatusPulse 2s infinite;
+}
+.theme1-status.offline::after { background: #ff2439; }
+.theme1-status.warning::after { background: #d4a843; }
+
+/* --- Glow / Glass effects — warm muted sienna-based --- */
+.theme1-glow {
+  box-shadow: 0 0 10px rgba(182, 94, 72, 0.3), 0 0 20px rgba(182, 94, 72, 0.15), 0 0 30px rgba(182, 94, 72, 0.05);
+}
+.theme1-glass {
+  background: rgba(234, 224, 205, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(234, 224, 205, 0.12);
+}
+.theme1-floating { animation: theme1Float 6s ease-in-out infinite; }
+
+/* --- Notifications --- */
+.theme1-notification {
+  background: rgba(25, 26, 27, 0.95);
+  border: 1px solid #ff2439;
+  box-shadow: 0 0 20px rgba(255, 36, 57, 0.2), 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.theme1-notification.success { background: rgba(174, 167, 95, 0.2); border-color: #aea75f; }
+.theme1-notification.warning { background: rgba(212, 168, 67, 0.2); border-color: #d4a843; }
+.theme1-notification.error { background: rgba(255, 36, 57, 0.2); border-color: #ff2439; }
+
+/* --- Animation utilities --- */
+.theme1-bounce-in { animation: theme1BounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.theme1-slide-up { animation: theme1SlideUp 0.6s ease-out; }
+
+/* --- Scrollbar --- */
+.theme1-scroll::-webkit-scrollbar { width: 8px; }
+.theme1-scroll::-webkit-scrollbar-track { background: rgba(25, 26, 27, 0.5); }
+.theme1-scroll::-webkit-scrollbar-thumb { background: #b65e48; }
+.theme1-scroll::-webkit-scrollbar-thumb:hover { background: #c9815a; }
+
+/* ===== Overlay component tweaks ===== */
+
+.profile-name {
+  text-shadow: 0 0 10px rgba(182, 94, 72, 0.4);
+  font-family: 'Chakra Petch', sans-serif;
+}
+
+.section-header {
+  text-shadow: none;
+  letter-spacing: 4px;
+  font-weight: 600;
+  font-family: 'Chakra Petch', sans-serif;
+  text-transform: uppercase;
+}
+
+.counter-value-large {
+  text-shadow: 0 0 8px rgba(182, 94, 72, 0.3);
+}
+
+.heart-rate-value {
+  text-shadow: 0 0 8px rgba(255, 36, 57, 0.3);
+}
+
+/* Live indicator — crimson pulse */
+.live-indicator {
+  box-shadow: 0 0 4px #ff2439, 0 0 8px rgba(255, 36, 57, 0.4);
+}
+
+/* Subtle camera section border */
+.camera-section {
+  box-shadow: inset -3px 0 10px rgba(182, 94, 72, 0.08);
+}
+
+/* Profile image — warm glow */
+.profile-image-container {
+  box-shadow: 0 0 10px rgba(182, 94, 72, 0.25);
+}
+
+/* Top bar gradient stripe */
+.overlay-bar::before {
+  height: 2px;
+  background: linear-gradient(90deg, #ff2439, #e87c3a, #d4a843, #aea75f);
+  opacity: 1;
+}
