@@ -37,7 +37,9 @@ function getThemeFromUrl(): ThemeName {
  */
 function getLayoutFromUrl(): string {
   const params = new URLSearchParams(window.location.search);
-  return params.get('layout') || 'default';
+  // Fall back to whatever the HTML already has (server sets it), not a hardcoded default
+  const current = document.documentElement.getAttribute('data-layout') || 'default';
+  return params.get('layout') || current;
 }
 
 /**

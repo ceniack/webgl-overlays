@@ -64,6 +64,7 @@ export class CounterCarousel implements SectionComponent {
   private splide: Splide | null = null;
   private splideOptions: SplideOptions;
   private counterVisibility: Record<string, boolean> = {};
+  private resizeObserver: ResizeObserver | null = null;
 
   /**
    * Static factory method - returns existing instance if one exists
@@ -272,9 +273,8 @@ export class CounterCarousel implements SectionComponent {
         pagination: this.splideOptions.pagination,
         speed: this.splideOptions.speed,
         rewind: this.splideOptions.rewind,
-        // Explicit sizing
+        // Explicit sizing — height controlled by CSS
         width: '100%',
-        height: '180px',
         gap: 0,
         padding: 0,
         // Fix for slide width calculation
@@ -315,6 +315,14 @@ export class CounterCarousel implements SectionComponent {
           componentLogger.debug('Splide refreshed after mount');
         }
       }, 100);
+
+      // Watch for container resizes (e.g. editor cell resize) and refresh Splide
+      this.resizeObserver = new ResizeObserver(() => {
+        if (this.splide) {
+          this.splide.refresh();
+        }
+      });
+      this.resizeObserver.observe(splideElement);
 
       // Set initial indicator
       this.updateActiveIndicator(0);
@@ -365,6 +373,11 @@ export class CounterCarousel implements SectionComponent {
   }
 
   destroy(): void {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+
     if (this.splide) {
       this.splide.destroy();
       this.splide = null;

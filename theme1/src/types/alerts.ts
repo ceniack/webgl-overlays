@@ -129,7 +129,7 @@ export interface LatestEventConfig {
   showTimestamp: boolean;
   /** Interval (ms) to refresh relative timestamp display */
   timestampInterval: number;
-  /** Persist latest event to localStorage for OBS reload survival */
+  /** Whether to restore from Streamer.bot global variables */
   persist: boolean;
   /** Text shown when no event has occurred yet */
   placeholderText: string;

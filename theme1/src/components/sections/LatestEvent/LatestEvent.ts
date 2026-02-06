@@ -2,7 +2,7 @@
  * LatestEvent Section Component
  * Displays the most recent event of a configured type (follow, sub, cheer, etc.)
  * One class, instantiated per type - each instance filters for its configured event type
- * Supports localStorage persistence for OBS reload survival
+ * Persistence via Streamer.bot global variables (read-only — SB is source of truth)
  */
 
 import type { SectionComponent, ComponentData } from '../../../types';
@@ -74,7 +74,7 @@ export class LatestEvent implements SectionComponent {
 
     this.buildDOM();
     this.setupEventListeners();
-    this.loadPersisted();
+    this.setupRestoreListener();
 
     // Start timestamp refresh interval
     if (this.config.showTimestamp && this.config.timestampInterval > 0) {
@@ -188,7 +188,6 @@ export class LatestEvent implements SectionComponent {
 
     this.latestEvent = event;
     this.render();
-    this.persistEvent();
     this.triggerUpdateAnimation();
   }
 
@@ -310,34 +309,16 @@ export class LatestEvent implements SectionComponent {
   }
 
   // ============================================
-  // PERSISTENCE
+  // RESTORE (from Streamer.bot global variables)
   // ============================================
 
-  private get storageKey(): string {
-    return `latestEvent:${this.config.eventType}`;
-  }
-
-  private persistEvent(): void {
-    if (!this.config.persist || !this.latestEvent) return;
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.latestEvent));
-    } catch (e) {
-      latestLogger.debug(`LatestEvent[${this.config.eventType}] persist failed:`, e);
-    }
-  }
-
-  private loadPersisted(): void {
-    if (!this.config.persist) return;
-    try {
-      const stored = localStorage.getItem(this.storageKey);
-      if (stored) {
-        this.latestEvent = JSON.parse(stored) as AlertEvent;
-        this.render();
-        latestLogger.debug(`LatestEvent[${this.config.eventType}] loaded persisted event: ${this.latestEvent.user}`);
-      }
-    } catch (e) {
-      latestLogger.debug(`LatestEvent[${this.config.eventType}] load persisted failed:`, e);
-    }
+  private setupRestoreListener(): void {
+    eventBus.on(EVENT_TYPES.LATEST_EVENT_RESTORE, (data: { eventType: AlertType; event: AlertEvent }) => {
+      if (data.eventType !== this.config.eventType) return;
+      latestLogger.info(`LatestEvent[${this.config.eventType}] restored: ${data.event.user}`);
+      this.latestEvent = data.event;
+      this.render();
+    });
   }
 
   // ============================================
@@ -419,19 +400,17 @@ export class LatestEvent implements SectionComponent {
           initialized: inst.isInitialized,
           hasEvent: !!inst.latestEvent,
           user: inst.latestEvent?.user || null,
-          timestamp: inst.latestEvent?.timestamp || null,
-          persist: inst.config.persist,
-          storageKey: inst.storageKey
+          platform: inst.latestEvent?.platform || null,
+          timestamp: inst.latestEvent?.timestamp || null
         });
       });
     };
 
     windowAny.clearLatestEvents = () => {
-      const types: AlertType[] = ['follow', 'sub', 'cheer', 'raid', 'donation', 'redemption', 'firstword'];
-      types.forEach(type => {
-        localStorage.removeItem(`latestEvent:${type}`);
+      instances.forEach(inst => {
+        inst.latestEvent = null;
       });
-      console.log('Cleared all latestEvent localStorage keys');
+      console.log('Cleared all LatestEvent in-memory state. Persistence is managed by Streamer.bot globals.');
     };
 
     latestLogger.info(`Debug functions registered: testLatestEvent(), testAllLatestEvents(), debugLatestEvents(), clearLatestEvents()`);

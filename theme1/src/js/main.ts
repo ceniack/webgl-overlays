@@ -14,6 +14,7 @@ import { logger } from './Logger';
 import { initializeTheme } from './ThemeManager';
 import { streamerbotIntegration } from './streamerbot-integration';
 import { ComponentComposer } from '../composition/ComponentComposer';
+import { CanvasRenderer } from '../composition/CanvasRenderer';
 
 const mainLogger = logger.createChildLogger('Main');
 
@@ -145,6 +146,49 @@ async function initializeApp(): Promise<void> {
       (window as any).ComponentComposer = composer;
 
       mainLogger.info('ComponentComposer initialized for alerts page');
+    } else if (componentName === 'canvas-html') {
+      mainLogger.debug('Initializing CanvasRenderer for canvas overlay');
+
+      const composer = new ComponentComposer();
+      const gridElement = document.getElementById('canvas-grid');
+
+      if (!gridElement) {
+        mainLogger.error('Canvas grid element (#canvas-grid) not found');
+      } else {
+        const renderer = new CanvasRenderer(gridElement, composer);
+        await renderer.initialize();
+
+        // Setup global functions for canvas too
+        setupGlobalFunctions(composer);
+
+        // Expose for debugging
+        (window as any).canvasRenderer = renderer;
+        (window as any).debugCanvas = () => renderer.debug();
+      }
+
+      mainLogger.info('CanvasRenderer initialized');
+    } else if (componentName === 'canvas-editor-html') {
+      mainLogger.debug('Initializing CanvasRenderer for canvas editor');
+
+      const composer = new ComponentComposer();
+      const gridElement = document.getElementById('canvas-grid');
+
+      if (!gridElement) {
+        mainLogger.error('Canvas grid element (#canvas-grid) not found');
+      } else {
+        // Read layout name from URL query param (set by canvas-editor.js)
+        const urlParams = new URLSearchParams(window.location.search);
+        const canvasLayout = urlParams.get('canvasLayout') || 'default-canvas';
+        const renderer = new CanvasRenderer(gridElement, composer, canvasLayout);
+        await renderer.initialize();
+
+        setupGlobalFunctions(composer);
+
+        (window as any).canvasRenderer = renderer;
+        (window as any).debugCanvas = () => renderer.debug();
+      }
+
+      mainLogger.info('CanvasRenderer initialized for editor');
     } else {
       mainLogger.info(`Skipping ComponentComposer for ${componentName} - streamerbot connection active`);
     }
