@@ -220,7 +220,7 @@ app.get('/', (req, res) => {
 });
 
 // Valid themes and layouts for query parameter injection
-const VALID_THEMES = ['cyberpunk', 'dark-minimal', 'arc-raiders'];
+const VALID_THEMES = ['cyberpunk', 'dark-minimal', 'arc-raiders', 'fallout-pipboy', 'fallout-vaulttec', 'fallout-wasteland', 'fallout-nukacola'];
 const VALID_LAYOUTS = ['default', 'wide', 'compact', 'fullscreen', 'canvas'];
 
 // Routes for template rendering

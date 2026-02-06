@@ -1,0 +1,730 @@
+/* ===== FALLOUT WASTELAND THEME — RUSTY SCRAP METAL ===== */
+/* Torn jagged edges via clip-path. Corrugated metal texture. Welded seam */
+/* dividers with glowing orange weld spots. Barbed wire SVG. Rust stains. */
+
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Roboto+Condensed:wght@400;700&family=Bungee+Shade&family=Permanent+Marker&display=swap');
+
+:root {
+  --token-color-brand-primary: #d4a574;
+  --token-color-brand-secondary: #e85d26;
+  --token-color-brand-accent: #cd853f;
+  --token-color-brand-tertiary: #8b7355;
+
+  --token-color-background-dark: #1a1410;
+  --token-color-background-panel: rgba(40, 32, 24, 0.94);
+  --token-color-border-accent: rgba(212, 165, 116, 0.3);
+
+  --token-typography-font-family-display: 'Russo One', 'Impact', sans-serif;
+  --token-typography-font-family-primary: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+
+  /* Alert type colors — muted earth/fire tones */
+  --token-color-alert-follow: #d4a574;
+  --token-color-alert-sub: #e85d26;
+  --token-color-alert-cheer: #daa520;
+  --token-color-alert-raid: #a0522d;
+  --token-color-alert-donation: #8b7355;
+  --token-color-alert-redemption: #b8860b;
+  --token-color-alert-firstword: #c4956a;
+}
+
+/* ===== Animations ===== */
+/* (No weld/spark animations — using static overlapping sheet metal seams) */
+
+/* ===== Overlay Bar — Jagged torn edges + corrugated metal ===== */
+
+.overlay-bar {
+  background:
+    /* Corrugated metal ridges */
+    repeating-linear-gradient(
+      90deg,
+      rgba(60, 48, 36, 0.3) 0px,
+      rgba(80, 64, 48, 0.1) 3px,
+      rgba(40, 32, 24, 0.3) 6px
+    ),
+    /* Rust stain top-left */
+    radial-gradient(ellipse 120px 80px at 15% 30%, rgba(160, 82, 45, 0.15) 0%, transparent 70%),
+    /* Rust stain bottom-right */
+    radial-gradient(ellipse 100px 60px at 80% 70%, rgba(139, 69, 19, 0.12) 0%, transparent 70%),
+    /* Bottom grime */
+    linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, transparent 30%),
+    /* Base */
+    rgba(40, 32, 24, 0.94);
+  /* Jagged torn top and bottom edges */
+  clip-path: polygon(
+    0% 4px, 2% 0px, 4% 3px, 6% 1px, 8% 4px, 10% 2px,
+    12% 5px, 14% 0px, 16% 3px, 18% 1px, 20% 4px, 22% 0px,
+    24% 3px, 26% 2px, 28% 5px, 30% 1px, 32% 4px, 34% 0px,
+    36% 3px, 38% 2px, 40% 5px, 42% 1px, 44% 3px, 46% 0px,
+    48% 4px, 50% 2px, 52% 5px, 54% 0px, 56% 3px, 58% 1px,
+    60% 4px, 62% 2px, 64% 5px, 66% 0px, 68% 3px, 70% 1px,
+    72% 4px, 74% 2px, 76% 5px, 78% 0px, 80% 3px, 82% 1px,
+    84% 4px, 86% 2px, 88% 5px, 90% 0px, 92% 3px, 94% 1px,
+    96% 4px, 98% 2px, 100% 0px,
+    100% 100%,
+    98% calc(100% - 2px), 96% 100%, 94% calc(100% - 3px),
+    92% calc(100% - 1px), 90% calc(100% - 4px), 88% 100%,
+    86% calc(100% - 3px), 84% calc(100% - 1px), 82% calc(100% - 4px),
+    80% calc(100% - 2px), 78% calc(100% - 5px), 76% 100%,
+    74% calc(100% - 3px), 72% calc(100% - 1px), 70% calc(100% - 4px),
+    68% calc(100% - 2px), 66% calc(100% - 5px), 64% 100%,
+    62% calc(100% - 3px), 60% calc(100% - 1px), 58% calc(100% - 4px),
+    56% calc(100% - 2px), 54% calc(100% - 5px), 52% 100%,
+    50% calc(100% - 3px), 48% calc(100% - 1px), 46% calc(100% - 4px),
+    44% calc(100% - 2px), 42% calc(100% - 5px), 40% 100%,
+    38% calc(100% - 3px), 36% calc(100% - 1px), 34% calc(100% - 4px),
+    32% calc(100% - 2px), 30% calc(100% - 5px), 28% 100%,
+    26% calc(100% - 3px), 24% calc(100% - 1px), 22% calc(100% - 4px),
+    20% calc(100% - 2px), 18% calc(100% - 5px), 16% 100%,
+    14% calc(100% - 3px), 12% calc(100% - 1px), 10% calc(100% - 4px),
+    8% calc(100% - 2px), 6% calc(100% - 5px), 4% 100%,
+    2% calc(100% - 3px), 0% calc(100% - 1px)
+  );
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Barbed wire decoration along top — kill inherited gradientFlow animation */
+.overlay-bar::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='10' viewBox='0 0 80 10'%3E%3Cpath d='M0,5 Q10,3 20,5 Q30,7 40,5 Q50,3 60,5 Q70,7 80,5' stroke='%238b7355' stroke-width='1.5' fill='none' opacity='0.5'/%3E%3Ccircle cx='10' cy='4' r='2' fill='%238b7355' opacity='0.4'/%3E%3Ccircle cx='30' cy='6' r='2' fill='%238b7355' opacity='0.4'/%3E%3Ccircle cx='50' cy='4' r='2' fill='%238b7355' opacity='0.4'/%3E%3Ccircle cx='70' cy='6' r='2' fill='%238b7355' opacity='0.4'/%3E%3Cline x1='8' y1='2' x2='12' y2='6' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3Cline x1='12' y1='2' x2='8' y2='6' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3Cline x1='28' y1='4' x2='32' y2='8' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3Cline x1='32' y1='4' x2='28' y2='8' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3Cline x1='48' y1='2' x2='52' y2='6' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3Cline x1='52' y1='2' x2='48' y2='6' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3Cline x1='68' y1='4' x2='72' y2='8' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3Cline x1='72' y1='4' x2='68' y2='8' stroke='%238b7355' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 80px 10px;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.7;
+  animation: none;
+}
+
+/* Additional rust stain overlay */
+.overlay-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 80px 50px at 40% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 60px 40px at 70% 80%, rgba(160, 82, 45, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 90px 45px at 25% 75%, rgba(139, 69, 19, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===== Sections — Overlapping sheet metal panels ===== */
+
+.section {
+  border-right: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* Raised metal edge — bright highlight on the overlapping lip */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(160, 140, 110, 0.1) 0%,
+    rgba(180, 155, 120, 0.35) 15%,
+    rgba(200, 175, 140, 0.45) 30%,
+    rgba(170, 145, 110, 0.3) 50%,
+    rgba(190, 165, 130, 0.4) 70%,
+    rgba(175, 150, 115, 0.35) 85%,
+    rgba(140, 120, 90, 0.15) 100%
+  );
+  z-index: 12;
+  pointer-events: none;
+}
+
+/* Shadow underneath the overlapping sheet — depth gap between panels */
+.section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -6px;
+  width: 8px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.3) 25%,
+    rgba(0, 0, 0, 0.1) 60%,
+    transparent 100%
+  );
+  z-index: 11;
+  pointer-events: none;
+}
+
+.section:last-child::before,
+.section:last-child::after {
+  display: none;
+}
+
+/* ===== Section Header — Grime gradient ===== */
+
+.section-header {
+  font-family: 'Russo One', sans-serif;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(212, 165, 116, 0.15);
+  position: relative;
+}
+
+/* Rust drip mark */
+.section-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg,
+    rgba(139, 69, 19, 0.4) 0%,
+    rgba(139, 69, 19, 0.15) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* ===== Camera Section ===== */
+
+.camera-section {
+  background: transparent;
+  box-shadow: inset -3px 0 10px rgba(212, 165, 116, 0.06);
+}
+
+/* ===== Profile Image — Rough welded frame ===== */
+
+.profile-image-container {
+  border-radius: 4px;
+  border: 3px solid rgba(139, 115, 85, 0.7);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 0 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Rust corner stain */
+.profile-image-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(
+    ellipse at top right,
+    rgba(160, 82, 45, 0.25) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Diagonal scratch marks */
+.profile-image-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(135deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.03) 41%,
+      rgba(255, 255, 255, 0.03) 42%,
+      transparent 43%
+    ),
+    linear-gradient(135deg,
+      transparent 55%,
+      rgba(255, 255, 255, 0.02) 56%,
+      rgba(255, 255, 255, 0.02) 57%,
+      transparent 58%
+    );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Desaturated/weathered profile photo */
+.profile-image {
+  filter: saturate(0.6) contrast(1.1) brightness(0.9);
+}
+
+/* ===== Profile Name ===== */
+
+.profile-name {
+  font-family: 'Russo One', sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.profile-link {
+  font-family: 'Roboto Condensed', sans-serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Live Indicator — Rough square ===== */
+
+.live-indicator {
+  border-radius: 2px;
+  box-shadow: 0 0 4px #e85d26, 0 0 8px rgba(232, 93, 38, 0.4);
+}
+
+/* ===== Counter Section — Handmade cardboard tags ===== */
+
+/* Cardboard card taped to scrap metal — worn and ragged */
+.counter-content {
+  position: relative;
+  background:
+    /* Crease / fold line */
+    linear-gradient(
+      160deg,
+      transparent 38%,
+      rgba(100, 75, 45, 0.12) 39%,
+      rgba(100, 75, 45, 0.08) 40%,
+      transparent 41%
+    ),
+    /* Water stain ring */
+    radial-gradient(ellipse 50px 40px at 75% 30%, rgba(140, 105, 60, 0.15) 0%, transparent 70%),
+    /* Wear scuff mark */
+    radial-gradient(ellipse 35px 20px at 25% 70%, rgba(90, 65, 35, 0.1) 0%, transparent 70%),
+    /* Torn edge darkening — top */
+    linear-gradient(180deg, rgba(90, 65, 35, 0.2) 0%, transparent 6px),
+    /* Torn edge darkening — bottom */
+    linear-gradient(0deg, rgba(90, 65, 35, 0.18) 0%, transparent 6px),
+    /* Torn edge darkening — left */
+    linear-gradient(90deg, rgba(90, 65, 35, 0.15) 0%, transparent 6px),
+    /* Torn edge darkening — right */
+    linear-gradient(270deg, rgba(90, 65, 35, 0.15) 0%, transparent 6px),
+    /* Corrugated inner layer peeking at edges */
+    repeating-linear-gradient(
+      90deg,
+      rgba(160, 120, 70, 0.08) 0px,
+      rgba(140, 100, 55, 0.04) 2px,
+      transparent 3px,
+      transparent 6px
+    ),
+    /* Fine paper fiber texture */
+    repeating-linear-gradient(
+      0deg,
+      rgba(180, 150, 110, 0.06) 0px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(160, 130, 90, 0.04) 0px,
+      transparent 1px,
+      transparent 4px
+    ),
+    /* Base cardboard — uneven color */
+    linear-gradient(
+      175deg,
+      #c4a67a 0%,
+      #bfa072 20%,
+      #b89968 40%,
+      #c9ad80 60%,
+      #b89060 80%,
+      #b08f5e 100%
+    );
+  transform: rotate(-1.2deg);
+  /* Rough uneven border — different widths per side for hand-cut look */
+  border-top: 2px solid rgba(100, 75, 45, 0.5);
+  border-right: 1px solid rgba(110, 80, 50, 0.45);
+  border-bottom: 2px solid rgba(90, 65, 35, 0.55);
+  border-left: 1px solid rgba(100, 70, 40, 0.4);
+  border-radius: 1px 3px 2px 1px;
+  box-shadow:
+    2px 3px 8px rgba(0, 0, 0, 0.5),
+    1px 1px 0 rgba(80, 60, 35, 0.3),
+    inset 0 0 20px rgba(100, 70, 35, 0.2),
+    /* Slight worn glow at edges */
+    inset 2px 2px 4px rgba(80, 55, 30, 0.15),
+    inset -2px -2px 4px rgba(80, 55, 30, 0.1);
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 18px 16px 14px;
+  overflow: visible;
+}
+
+/* Duct tape strip — top center */
+.counter-content::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 12%;
+  width: 76%;
+  height: 26px;
+  background:
+    /* Woven cloth fiber mesh — horizontal threads */
+    repeating-linear-gradient(
+      0deg,
+      rgba(160, 160, 160, 0.2) 0px,
+      rgba(140, 140, 140, 0.05) 1px,
+      transparent 1.5px,
+      transparent 3px
+    ),
+    /* Woven cloth fiber mesh — vertical threads */
+    repeating-linear-gradient(
+      90deg,
+      rgba(150, 150, 150, 0.15) 0px,
+      rgba(130, 130, 130, 0.04) 1px,
+      transparent 1.5px,
+      transparent 3px
+    ),
+    /* Subtle lengthwise sheen (tape stretch direction) */
+    linear-gradient(
+      90deg,
+      rgba(120, 120, 120, 0.0) 0%,
+      rgba(180, 180, 180, 0.08) 30%,
+      rgba(200, 200, 200, 0.12) 50%,
+      rgba(180, 180, 180, 0.08) 70%,
+      rgba(120, 120, 120, 0.0) 100%
+    ),
+    /* Base duct tape — matte silver with slight warmth */
+    linear-gradient(
+      180deg,
+      rgba(155, 155, 148, 0.82) 0%,
+      rgba(140, 140, 134, 0.85) 40%,
+      rgba(130, 130, 125, 0.8) 100%
+    );
+  transform: rotate(1.5deg);
+  border-radius: 0;
+  border-top: 1px solid rgba(180, 180, 175, 0.4);
+  border-bottom: 1px solid rgba(90, 90, 85, 0.3);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 -1px 2px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Duct tape strip — bottom-right corner */
+.counter-content::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  right: 5%;
+  width: 50%;
+  height: 22px;
+  background:
+    /* Woven cloth fiber mesh */
+    repeating-linear-gradient(
+      0deg,
+      rgba(160, 160, 160, 0.18) 0px,
+      rgba(140, 140, 140, 0.04) 1px,
+      transparent 1.5px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(150, 150, 150, 0.12) 0px,
+      rgba(130, 130, 130, 0.03) 1px,
+      transparent 1.5px,
+      transparent 3px
+    ),
+    /* Lengthwise sheen */
+    linear-gradient(
+      90deg,
+      rgba(120, 120, 120, 0.0) 0%,
+      rgba(180, 180, 180, 0.07) 40%,
+      rgba(200, 200, 200, 0.1) 55%,
+      rgba(120, 120, 120, 0.0) 100%
+    ),
+    /* Base — slightly different shade for realism */
+    linear-gradient(
+      180deg,
+      rgba(148, 148, 142, 0.78) 0%,
+      rgba(135, 135, 130, 0.82) 50%,
+      rgba(125, 125, 120, 0.76) 100%
+    );
+  transform: rotate(-2.5deg);
+  border-radius: 0;
+  border-top: 1px solid rgba(175, 175, 170, 0.35);
+  border-bottom: 1px solid rgba(85, 85, 80, 0.25);
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.3),
+    0 -1px 1px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Hand-scrawled counter numbers */
+.counter-value-large {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 80px;
+  color: #2a1f14;
+  -webkit-text-fill-color: #2a1f14;
+  text-shadow:
+    /* Hard offset — hand tremor */
+    2px 1px 0 rgba(60, 40, 20, 0.4),
+    /* Ink bleed */
+    0 0 3px rgba(42, 31, 20, 0.3),
+    /* Downward drip */
+    1px 4px 2px rgba(42, 31, 20, 0.15),
+    /* Ambient spray mist */
+    0 0 8px rgba(42, 31, 20, 0.1);
+  line-height: 1;
+}
+
+/* Hand-written counter labels */
+.counter-label-large {
+  font-family: 'Permanent Marker', cursive;
+  font-weight: 400;
+  color: #3d2e1f;
+  -webkit-text-fill-color: #3d2e1f;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 27px;
+  text-shadow:
+    1px 1px 0 rgba(61, 46, 31, 0.3),
+    0 0 2px rgba(61, 46, 31, 0.15);
+}
+
+/* ===== Heart Rate — Cracked screen ===== */
+
+.heart-rate-graph {
+  border: 2px solid rgba(139, 115, 85, 0.4);
+}
+
+/* Crack line + rust in corner */
+.heart-rate-graph::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(135deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.06) 20.5%,
+      rgba(255, 255, 255, 0.06) 21%,
+      transparent 21.5%
+    ),
+    radial-gradient(ellipse 25px 20px at 90% 85%, rgba(160, 82, 45, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.heart-rate-value {
+  font-family: 'Russo One', sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.heart-rate-label {
+  font-family: 'Roboto Condensed', sans-serif;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.heart-rate-container {
+  border: 1px solid rgba(139, 115, 85, 0.3);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Generic theme1- classes ===== */
+
+.theme1-panel {
+  background: rgba(40, 32, 24, 0.94);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  position: relative;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.theme1-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  bottom: auto;
+  background: linear-gradient(90deg,
+    rgba(212, 165, 116, 0.5) 0%, rgba(160, 82, 45, 0.7) 25%,
+    rgba(212, 165, 116, 0.3) 50%, rgba(160, 82, 45, 0.6) 75%,
+    rgba(212, 165, 116, 0.4) 100%
+  );
+  opacity: 1;
+  pointer-events: none;
+}
+
+.theme1-panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(212, 165, 116, 0.02) 3px, rgba(212, 165, 116, 0.02) 4px),
+    repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(160, 82, 45, 0.02) 3px, rgba(160, 82, 45, 0.02) 4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.theme1-panel-title {
+  font-family: 'Russo One', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #d4a574;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #d4a574;
+  background-clip: unset;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.theme1-btn {
+  background: rgba(40, 32, 24, 0.95);
+  border: 1px solid rgba(212, 165, 116, 0.35);
+  padding: 8px 16px;
+  color: #d4a574;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme1-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.08), transparent);
+  transition: left 0.5s ease;
+}
+
+.theme1-btn:hover::before { left: 100%; }
+.theme1-btn:hover {
+  border-color: #e85d26;
+  box-shadow: 0 0 10px rgba(232, 93, 38, 0.3);
+}
+
+.theme1-alert {
+  background: rgba(40, 32, 24, 0.95);
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  border-left: 3px solid #e85d26;
+  animation: theme1AlertEntry 0.8s ease-out;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.theme1-alert::before { content: none; }
+
+.theme1-chat-container {
+  background: rgba(40, 32, 24, 0.95);
+  border: 1px solid rgba(212, 165, 116, 0.15);
+  backdrop-filter: blur(6px);
+}
+
+.theme1-chat-message {
+  background: rgba(212, 165, 116, 0.04);
+  border-left: 3px solid rgba(212, 165, 116, 0.25);
+  margin: 8px 0;
+  padding: 12px 16px;
+  animation: theme1MessageSlide 0.4s ease-out;
+}
+
+.theme1-chat-message.moderator { border-left-color: #cd853f; background: rgba(205, 133, 63, 0.08); }
+.theme1-chat-message.subscriber { border-left-color: #daa520; background: rgba(218, 165, 32, 0.08); }
+.theme1-chat-message.vip { border-left-color: #e85d26; background: rgba(232, 93, 38, 0.08); }
+
+.theme1-progress { background: rgba(212, 165, 116, 0.08); overflow: hidden; height: 24px; position: relative; }
+.theme1-progress-fill {
+  background: linear-gradient(90deg, #8b7355, #e85d26);
+  height: 100%;
+  position: relative;
+  transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.theme1-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.2), transparent);
+  animation: theme1ProgressShine 2s infinite;
+}
+
+.theme1-badge {
+  background: rgba(40, 32, 24, 0.95);
+  color: #d4a574;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(212, 165, 116, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme1-badge.mod { background: rgba(205, 133, 63, 0.2); border-color: #cd853f; }
+.theme1-badge.sub { background: rgba(218, 165, 32, 0.2); border-color: #daa520; color: #daa520; }
+.theme1-badge.vip { background: rgba(232, 93, 38, 0.2); border-color: #e85d26; }
+
+.theme1-status { position: relative; display: inline-block; }
+.theme1-status::after {
+  content: '';
+  position: absolute;
+  top: 50%; right: -15px;
+  transform: translateY(-50%);
+  width: 8px; height: 8px;
+  background: #e85d26;
+  animation: theme1StatusPulse 2s infinite;
+}
+.theme1-status.offline::after { background: #a0522d; }
+.theme1-status.warning::after { background: #daa520; }
+
+.theme1-glow {
+  box-shadow: 0 0 10px rgba(232, 93, 38, 0.3), 0 0 20px rgba(232, 93, 38, 0.15), 0 0 30px rgba(232, 93, 38, 0.05);
+}
+.theme1-glass {
+  background: rgba(212, 165, 116, 0.04);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(212, 165, 116, 0.1);
+}
+.theme1-floating { animation: theme1Float 6s ease-in-out infinite; }
+
+.theme1-notification {
+  background: rgba(40, 32, 24, 0.95);
+  border: 1px solid #e85d26;
+  box-shadow: 0 0 15px rgba(232, 93, 38, 0.3), 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.theme1-notification.success { background: rgba(205, 133, 63, 0.2); border-color: #cd853f; }
+.theme1-notification.warning { background: rgba(218, 165, 32, 0.2); border-color: #daa520; }
+.theme1-notification.error { background: rgba(232, 93, 38, 0.2); border-color: #e85d26; }
+
+.theme1-bounce-in { animation: theme1BounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.theme1-slide-up { animation: theme1SlideUp 0.6s ease-out; }
+
+.theme1-scroll::-webkit-scrollbar { width: 8px; }
+.theme1-scroll::-webkit-scrollbar-track { background: rgba(40, 32, 24, 0.5); }
+.theme1-scroll::-webkit-scrollbar-thumb { background: #8b7355; }
+.theme1-scroll::-webkit-scrollbar-thumb:hover { background: #e85d26; }
+
+/* Carousel indicators */
+.indicator.active {
+  background: #e85d26;
+  box-shadow: 0 0 6px rgba(232, 93, 38, 0.5);
+}

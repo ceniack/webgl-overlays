@@ -1,0 +1,468 @@
+/* ===== FALLOUT VAULT-TEC THEME — RIVETED BUNKER PANEL ===== */
+/* Heavy industrial panel bolted together. Chevron hazard stripes, riveted */
+/* corners, square beveled profile frame, stenciled text, gold star emblems. */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;600;700&display=swap');
+
+:root {
+  --token-color-brand-primary: #ffd700;
+  --token-color-brand-secondary: #0052a5;
+  --token-color-brand-accent: #ffeb3b;
+  --token-color-brand-tertiary: #1976d2;
+
+  --token-color-background-dark: #1a1f2e;
+  --token-color-background-panel: rgba(28, 40, 60, 0.95);
+  --token-color-border-accent: rgba(255, 215, 0, 0.4);
+
+  --token-typography-font-family-display: 'Bebas Neue', 'Impact', sans-serif;
+  --token-typography-font-family-primary: 'Archivo', 'Segoe UI', sans-serif;
+
+  /* Alert type colors — bright retro palette */
+  --token-color-alert-follow: #ffeb3b;
+  --token-color-alert-sub: #ffd700;
+  --token-color-alert-cheer: #ffb300;
+  --token-color-alert-raid: #ff8f00;
+  --token-color-alert-donation: #66bb6a;
+  --token-color-alert-redemption: #42a5f5;
+  --token-color-alert-firstword: #ffc107;
+}
+
+/* ===== Animations ===== */
+
+@keyframes vaulttecStamp {
+  0% { transform: scale(1.3) rotate(-2deg); opacity: 0; }
+  60% { transform: scale(0.98) rotate(0.5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ===== Overlay Bar — Beveled metal panel ===== */
+
+.overlay-bar {
+  background: rgba(28, 40, 60, 0.95);
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  /* 3D metal bevel — top highlight, bottom shadow */
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    inset 2px 0 0 rgba(255, 255, 255, 0.06),
+    inset -2px 0 0 rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Chevron hazard stripe — TOP */
+.overlay-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #ffd700 0px,
+    #ffd700 8px,
+    #0052a5 8px,
+    #0052a5 16px
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Chevron hazard stripe — BOTTOM */
+.overlay-bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #ffd700 0px,
+    #ffd700 8px,
+    #0052a5 8px,
+    #0052a5 16px
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* ===== Sections — Institutional panels ===== */
+
+.section {
+  border-right: 3px double rgba(255, 215, 0, 0.3);
+  position: relative;
+}
+
+.section:last-child {
+  border-right: none;
+}
+
+/* Corner rivet — top-right */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: -6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(255, 255, 255, 0.4) 0%,
+    #888 30%,
+    #555 60%,
+    #333 100%
+  );
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), inset 0 0 1px rgba(255, 255, 255, 0.2);
+  z-index: 15;
+}
+
+/* Corner rivet — bottom-right */
+.section::after {
+  content: '';
+  position: absolute;
+  bottom: 12px;
+  right: -6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(255, 255, 255, 0.4) 0%,
+    #888 30%,
+    #555 60%,
+    #333 100%
+  );
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), inset 0 0 1px rgba(255, 255, 255, 0.2);
+  z-index: 15;
+}
+
+.section:last-child::before,
+.section:last-child::after {
+  display: none;
+}
+
+/* ===== Section Header — Stenciled with star emblem ===== */
+
+.section-header {
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: 400;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+  background: rgba(255, 215, 0, 0.06);
+  border-bottom: 2px solid rgba(255, 215, 0, 0.25);
+  position: relative;
+}
+
+/* Gold star emblem before header text */
+.section-header::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffd700'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+}
+
+/* ===== Camera Section ===== */
+
+.camera-section {
+  background: transparent;
+  box-shadow: inset -3px 0 10px rgba(255, 215, 0, 0.06);
+}
+
+/* ===== Profile Image — Square chamfered frame ===== */
+
+.profile-image-container {
+  border-radius: 6px;
+  border: 3px solid #ffd700;
+  /* Beveled metal frame */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+/* "VAULT RESIDENT" label underneath */
+.profile-image-container::before {
+  content: 'VAULT RESIDENT';
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Archivo', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(255, 215, 0, 0.6);
+  text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+/* ===== Profile Name ===== */
+
+.profile-name {
+  font-family: 'Bebas Neue', sans-serif;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+}
+
+.profile-link {
+  font-family: 'Archivo', sans-serif;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Live Indicator ===== */
+
+.live-indicator {
+  box-shadow: 0 0 4px #ffd700, 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+/* ===== Counter Section ===== */
+
+.counter-value-large {
+  font-family: 'Bebas Neue', sans-serif;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.counter-label-large {
+  font-family: 'Archivo', sans-serif;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+  letter-spacing: 3px;
+}
+
+/* ===== Heart Rate — Vital Monitoring ===== */
+
+.heart-rate-graph {
+  border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+/* "VITAL MONITORING SYSTEM" label */
+.heart-rate-graph::before {
+  content: 'VITAL MONITORING SYSTEM';
+  position: absolute;
+  top: 2px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'Archivo', sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(255, 215, 0, 0.35);
+  text-transform: uppercase;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.heart-rate-value {
+  font-family: 'Bebas Neue', sans-serif;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.heart-rate-label {
+  font-family: 'Archivo', sans-serif;
+  letter-spacing: 3px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.heart-rate-container {
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Generic theme1- classes ===== */
+
+.theme1-panel {
+  background: rgba(28, 40, 60, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  position: relative;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.theme1-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  bottom: auto;
+  background: repeating-linear-gradient(-45deg, #ffd700 0px, #ffd700 8px, #0052a5 8px, #0052a5 16px);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.theme1-panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.04) 1px, transparent 1px);
+  background-size: 16px 16px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.theme1-panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #ffd700;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #ffd700;
+  background-clip: unset;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  text-align: center;
+  text-shadow: 3px 3px 0 rgba(0, 82, 165, 0.6);
+}
+
+.theme1-btn {
+  background: linear-gradient(180deg, #ffd700 0%, #e6c200 100%);
+  border: 2px solid #0052a5;
+  padding: 8px 16px;
+  color: #1a1f2e;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 3px 0 #0052a5;
+}
+
+.theme1-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.theme1-btn:hover::before { left: 100%; }
+.theme1-btn:hover {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 #0052a5;
+  background: linear-gradient(180deg, #ffeb3b 0%, #ffd700 100%);
+}
+
+.theme1-alert {
+  background: rgba(28, 40, 60, 0.95);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-left: 4px solid #ffd700;
+  animation: theme1AlertEntry 0.8s ease-out;
+}
+
+.theme1-alert::before { content: none; }
+
+.theme1-chat-container {
+  background: rgba(28, 40, 60, 0.95);
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.theme1-chat-message {
+  background: rgba(255, 215, 0, 0.05);
+  border-left: 3px solid rgba(255, 215, 0, 0.3);
+  margin: 8px 0;
+  padding: 12px 16px;
+  animation: theme1MessageSlide 0.4s ease-out;
+}
+
+.theme1-chat-message.moderator { border-left-color: #66bb6a; background: rgba(102, 187, 106, 0.1); }
+.theme1-chat-message.subscriber { border-left-color: #ffd700; background: rgba(255, 215, 0, 0.1); }
+.theme1-chat-message.vip { border-left-color: #0052a5; background: rgba(0, 82, 165, 0.1); }
+
+.theme1-progress { background: rgba(255, 215, 0, 0.1); overflow: hidden; height: 24px; position: relative; }
+.theme1-progress-fill {
+  background: linear-gradient(90deg, #ffd700, #ffeb3b);
+  height: 100%;
+  position: relative;
+  transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.theme1-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: theme1ProgressShine 2s infinite;
+}
+
+.theme1-badge {
+  background: rgba(0, 82, 165, 0.8);
+  color: #ffd700;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme1-badge.mod { background: rgba(102, 187, 106, 0.3); border-color: #66bb6a; color: #66bb6a; }
+.theme1-badge.sub { background: rgba(255, 215, 0, 0.3); border-color: #ffd700; color: #ffd700; }
+.theme1-badge.vip { background: rgba(0, 82, 165, 0.3); border-color: #42a5f5; color: #42a5f5; }
+
+.theme1-status { position: relative; display: inline-block; }
+.theme1-status::after {
+  content: '';
+  position: absolute;
+  top: 50%; right: -15px;
+  transform: translateY(-50%);
+  width: 8px; height: 8px;
+  background: #ffd700;
+  animation: theme1StatusPulse 2s infinite;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
+.theme1-status.offline::after { background: #e53935; box-shadow: 0 0 6px rgba(229, 57, 53, 0.5); }
+.theme1-status.warning::after { background: #ff8f00; box-shadow: 0 0 6px rgba(255, 143, 0, 0.5); }
+
+.theme1-glow {
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.15), 0 0 30px rgba(255, 215, 0, 0.05);
+}
+.theme1-glass {
+  background: rgba(255, 215, 0, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+}
+.theme1-floating { animation: theme1Float 6s ease-in-out infinite; }
+
+.theme1-notification {
+  background: rgba(28, 40, 60, 0.95);
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.theme1-notification.success { background: rgba(102, 187, 106, 0.2); border-color: #66bb6a; }
+.theme1-notification.warning { background: rgba(255, 143, 0, 0.2); border-color: #ff8f00; }
+.theme1-notification.error { background: rgba(229, 57, 53, 0.2); border-color: #e53935; }
+
+.theme1-bounce-in { animation: theme1BounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.theme1-slide-up { animation: theme1SlideUp 0.6s ease-out; }
+
+.theme1-scroll::-webkit-scrollbar { width: 8px; }
+.theme1-scroll::-webkit-scrollbar-track { background: rgba(28, 40, 60, 0.5); }
+.theme1-scroll::-webkit-scrollbar-thumb { background: #0052a5; }
+.theme1-scroll::-webkit-scrollbar-thumb:hover { background: #1976d2; }
+
+/* Carousel indicators */
+.indicator.active {
+  background: #ffd700;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
