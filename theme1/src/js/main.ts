@@ -15,6 +15,8 @@ import { initializeTheme } from './ThemeManager';
 import { streamerbotIntegration } from './streamerbot-integration';
 import { ComponentComposer } from '../composition/ComponentComposer';
 import { CanvasRenderer } from '../composition/CanvasRenderer';
+import { initializeGLOverlay } from '../gl/index';
+import { overlayStore, loggingMiddleware, alertQueueMiddleware, persistenceMiddleware } from '../store';
 
 const mainLogger = logger.createChildLogger('Main');
 
@@ -52,6 +54,12 @@ async function initializeApp(): Promise<void> {
     // Get component name from body data attribute for conditional initialization
     const componentName = document.body.getAttribute('data-component') || 'unknown';
     mainLogger.debug(`Component identified: ${componentName}`);
+
+    // Register store middleware before any data flows
+    overlayStore.use(loggingMiddleware);
+    overlayStore.use(alertQueueMiddleware);
+    overlayStore.use(persistenceMiddleware);
+    mainLogger.debug('Store middleware registered');
 
     mainLogger.debug('DOM ready, initializing Streamer.bot client first');
 
@@ -189,6 +197,15 @@ async function initializeApp(): Promise<void> {
       }
 
       mainLogger.info('CanvasRenderer initialized for editor');
+    } else if (componentName === 'webgl-overlay') {
+      mainLogger.info('Initializing WebGL overlay');
+
+      const sceneManager = await initializeGLOverlay();
+
+      // Expose for debugging
+      (window as any).sceneManager = sceneManager;
+
+      mainLogger.info('WebGL overlay initialized');
     } else {
       mainLogger.info(`Skipping ComponentComposer for ${componentName} - streamerbot connection active`);
     }

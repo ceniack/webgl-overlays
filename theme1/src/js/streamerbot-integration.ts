@@ -1,6 +1,7 @@
 import { eventBus } from './EventBus';
 import { EVENT_TYPES, HEALTH_STATUS } from './EventConstants';
 import { logger } from './Logger';
+import { overlayStore } from '../store';
 import type {
   CounterUpdateEvent,
   BroadcasterInfoEvent,
@@ -116,6 +117,9 @@ class StreamerbotIntegration {
           isLabel: true,
           timestamp: Date.now()
         });
+        // Dual-write: store dispatch
+        const labelCounterId = name.replace('label', '').replace('Label', '');
+        overlayStore.dispatch({ type: 'COUNTER_LABEL_SET', counterId: labelCounterId, label: String(value) });
         sbLogger.debug(`Emitted counter label update: ${name} = ${value}`);
       } else if (name.includes('toggle')) {
         // Counter toggles (visibility)
@@ -125,6 +129,10 @@ class StreamerbotIntegration {
           isToggle: true,
           timestamp: Date.now()
         });
+        // Dual-write: store dispatch
+        const toggleCounterId = name.replace('toggle', '').replace('Toggle', '');
+        const isVisible = value === true || value === 'true' || value === '1' || value === 1;
+        overlayStore.dispatch({ type: 'COUNTER_VISIBILITY_SET', counterId: toggleCounterId, visible: isVisible });
         sbLogger.debug(`Emitted counter toggle update: ${name} = ${value}`);
       } else {
         // Counter values
@@ -135,6 +143,8 @@ class StreamerbotIntegration {
             value: counterValue,
             timestamp: Date.now()
           });
+          // Dual-write: store dispatch
+          overlayStore.dispatch({ type: 'COUNTER_VALUE_SET', counterId: name, value: counterValue });
           sbLogger.debug(`Emitted counter value update: ${name} = ${counterValue}`);
         }
       }
@@ -162,6 +172,25 @@ class StreamerbotIntegration {
           event.timestamp = event.timestamp * 1000;
         }
         eventBus.emit(EVENT_TYPES.LATEST_EVENT_RESTORE, { eventType, event });
+        // Dual-write: store dispatch
+        overlayStore.dispatch({
+          type: 'LATEST_EVENT_RESTORED',
+          eventType,
+          data: {
+            user: event.user || 'Unknown',
+            platform: (event.platform || 'twitch') as AlertPlatform,
+            timestamp: event.timestamp || Date.now(),
+            amount: event.amount,
+            tier: event.tier,
+            months: event.months,
+            isGift: event.isGift,
+            giftRecipient: event.giftRecipient,
+            viewers: event.viewers,
+            reward: event.reward,
+            cost: event.cost,
+            message: event.message,
+          },
+        });
         sbLogger.debug(`Emitted latestEvent restore: ${eventType} = ${event.user}`);
       } catch (e) {
         sbLogger.error(`Failed to parse latestEvent global: ${name}`, e);
@@ -212,6 +241,16 @@ class StreamerbotIntegration {
     };
 
     eventBus.emit(EVENT_TYPES.GOAL_PROGRESS, goalEvent);
+
+    // Dual-write: store dispatch
+    overlayStore.dispatch({
+      type: 'GOAL_UPDATED',
+      goalId,
+      goalType,
+      current: valueType === 'current' ? numericValue : 0,
+      target: valueType === 'target' ? numericValue : undefined,
+      timestamp: Date.now(),
+    });
   }
 
   private async waitForClientReady(maxWait: number = 1000): Promise<boolean> {
@@ -378,6 +417,48 @@ class StreamerbotIntegration {
     // Emit main alert trigger event
     eventBus.emit(EVENT_TYPES.ALERT_TRIGGER, alertEvent);
 
+    // Dual-write: enqueue alert in store
+    overlayStore.dispatch({
+      type: 'ALERT_ENQUEUED',
+      alert: {
+        id: alertEvent.id || `${alertEvent.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: alertEvent.type,
+        platform: alertEvent.platform as AlertPlatform,
+        user: alertEvent.user,
+        amount: alertEvent.amount,
+        currency: alertEvent.currency,
+        message: alertEvent.message,
+        tier: alertEvent.tier,
+        months: alertEvent.months,
+        isGift: alertEvent.isGift,
+        giftRecipient: alertEvent.giftRecipient,
+        viewers: alertEvent.viewers,
+        reward: alertEvent.reward,
+        cost: alertEvent.cost,
+        isTest: alertEvent.isTest,
+        timestamp: alertEvent.timestamp,
+      },
+    });
+
+    // Dual-write: update latest event in store
+    overlayStore.dispatch({
+      type: 'LATEST_EVENT_SET',
+      eventType: alertEvent.type,
+      user: alertEvent.user,
+      platform: alertEvent.platform as AlertPlatform,
+      timestamp: alertEvent.timestamp,
+      amount: alertEvent.amount,
+      currency: alertEvent.currency,
+      tier: alertEvent.tier,
+      months: alertEvent.months,
+      isGift: alertEvent.isGift,
+      giftRecipient: alertEvent.giftRecipient,
+      viewers: alertEvent.viewers,
+      reward: alertEvent.reward,
+      cost: alertEvent.cost,
+      message: alertEvent.message,
+    });
+
     // Also emit as activity item for the activity feed
     const activityItem: ActivityItemEvent = {
       id: alertEvent.id || `activity-${Date.now()}`,
@@ -388,6 +469,19 @@ class StreamerbotIntegration {
       timestamp: alertEvent.timestamp
     };
     eventBus.emit(EVENT_TYPES.ACTIVITY_ITEM, activityItem);
+
+    // Dual-write: add to activity in store
+    overlayStore.dispatch({
+      type: 'ACTIVITY_ADDED',
+      item: {
+        id: activityItem.id,
+        type: activityItem.type as AlertType,
+        platform: activityItem.platform as AlertPlatform,
+        user: activityItem.user,
+        detail: activityItem.detail,
+        timestamp: activityItem.timestamp,
+      },
+    });
   }
 
   /**
@@ -570,6 +664,8 @@ class StreamerbotIntegration {
         timestamp: Date.now()
       };
       eventBus.emit(EVENT_TYPES.STREAM_STATUS, statusEvent);
+      // Dual-write: store dispatch
+      overlayStore.dispatch({ type: 'STREAM_ONLINE', platform: 'twitch', timestamp: Date.now() });
     });
 
     this.client.on('Twitch.StreamOffline', ({ event, data }: any) => {
@@ -580,6 +676,8 @@ class StreamerbotIntegration {
         timestamp: Date.now()
       };
       eventBus.emit(EVENT_TYPES.STREAM_STATUS, statusEvent);
+      // Dual-write: store dispatch
+      overlayStore.dispatch({ type: 'STREAM_OFFLINE', platform: 'twitch', timestamp: Date.now() });
     });
 
     // ============================================
@@ -801,6 +899,15 @@ class StreamerbotIntegration {
         timestamp: Date.now()
       };
       eventBus.emit(EVENT_TYPES.GOAL_PROGRESS, goalEvent);
+      // Dual-write: store dispatch
+      overlayStore.dispatch({
+        type: 'GOAL_UPDATED',
+        goalId: goalEvent.goalId,
+        goalType: 'custom',
+        current: goalEvent.current,
+        target: goalEvent.target,
+        timestamp: Date.now(),
+      });
     });
 
     // ============================================
@@ -832,6 +939,10 @@ class StreamerbotIntegration {
         timestamp: Date.now()
       });
 
+      // Dual-write: store dispatch
+      overlayStore.dispatch({ type: 'CONNECTION_OPENED', timestamp: Date.now() });
+      overlayStore.dispatch({ type: 'HEALTH_STATUS_CHANGED', status: 'connected', message: 'Connected to Streamer.bot', timestamp: Date.now() });
+
       eventBus.emit(EVENT_TYPES.HEALTH_STATUS, {
         status: HEALTH_STATUS.CONNECTED,
         message: 'Connected to Streamer.bot',
@@ -852,6 +963,10 @@ class StreamerbotIntegration {
         connected: false,
         timestamp: Date.now()
       });
+
+      // Dual-write: store dispatch
+      overlayStore.dispatch({ type: 'CONNECTION_CLOSED', timestamp: Date.now() });
+      overlayStore.dispatch({ type: 'HEALTH_STATUS_CHANGED', status: 'disconnected', message: 'Disconnected from Streamer.bot', timestamp: Date.now() });
 
       eventBus.emit(EVENT_TYPES.HEALTH_STATUS, {
         status: HEALTH_STATUS.DISCONNECTED,
@@ -899,19 +1014,59 @@ class StreamerbotIntegration {
     }
 
     try {
-      const broadcaster = await this.client.getBroadcaster();
-      if (broadcaster) {
-        sbLogger.debug('Received broadcaster info', broadcaster);
-        
+      const broadcasterResponse = await this.client.getBroadcaster();
+      if (broadcasterResponse) {
+        sbLogger.debug('Received broadcaster info', broadcasterResponse);
+
+        // Extract broadcaster data from nested platform structure
+        // Response shape: { platforms: { twitch: { broadcastUser, broadcastUserName, broadcastUserId }, kick: {...} }, connected: [...] }
+        const platforms = broadcasterResponse.platforms || {};
+        const twitch = platforms.twitch || {};
+        const kick = platforms.kick || {};
+
+        const displayName = twitch.broadcastUser || kick.broadcasterUserName || '';
+        const username = twitch.broadcastUserName || kick.broadcasterLogin || '';
+        const userId = twitch.broadcastUserId || kick.broadcasterUserId || '';
+
+        // Fetch Twitch profile image via DecAPI (returns CDN URL, 300x300).
+        // Fall back to Kick profile URL if DecAPI fails or no Twitch username.
+        let profileImageUrl: string | null = kick.broadcasterProfileUrl || null;
+        if (username) {
+          try {
+            const decApiUrl = `https://decapi.me/twitch/avatar/${username}`;
+            const resp = await fetch(decApiUrl);
+            const cdnUrl = (await resp.text()).trim();
+            if (cdnUrl && cdnUrl.startsWith('http') &&
+                !cdnUrl.toLowerCase().includes('error') &&
+                !cdnUrl.toLowerCase().includes('user not found')) {
+              profileImageUrl = cdnUrl;
+              sbLogger.debug(`DecAPI profile image: ${cdnUrl}`);
+            }
+          } catch (decApiErr) {
+            sbLogger.warn('DecAPI avatar fetch failed, using fallback', decApiErr);
+          }
+        }
+
         const broadcasterEvent: BroadcasterInfoEvent = {
-          displayName: broadcaster.displayName,
-          profileImageUrl: broadcaster.profileImageUrl,
-          description: broadcaster.description,
-          viewCount: broadcaster.viewCount,
-          followerCount: broadcaster.followerCount
+          displayName,
+          profileImageUrl,
+          description: '',
+          viewCount: 0,
+          followerCount: 0
         };
 
         eventBus.emit(EVENT_TYPES.BROADCASTER_UPDATE, broadcasterEvent);
+
+        // Store dispatch
+        overlayStore.dispatch({
+          type: 'BROADCASTER_UPDATED',
+          displayName,
+          username,
+          userId,
+          profileImageUrl,
+          twitchUrl: username ? `twitch.tv/${username}` : undefined,
+        });
+
         this.initState.broadcasterLoaded = true;
       }
     } catch (error) {
@@ -971,6 +1126,29 @@ class StreamerbotIntegration {
       },
       onConnect: async (data: any) => {
         sbLogger.info('Connected to Streamer.bot', data);
+        this.initState.connected = true;
+
+        eventBus.emit(EVENT_TYPES.STREAMERBOT_CONNECTION, {
+          connected: true,
+          timestamp: Date.now()
+        });
+
+        // Store dispatch
+        overlayStore.dispatch({ type: 'CONNECTION_OPENED', timestamp: Date.now() });
+        overlayStore.dispatch({ type: 'HEALTH_STATUS_CHANGED', status: 'connected', message: 'Connected to Streamer.bot', timestamp: Date.now() });
+
+        eventBus.emit(EVENT_TYPES.HEALTH_STATUS, {
+          status: HEALTH_STATUS.CONNECTED,
+          message: 'Connected to Streamer.bot',
+          timestamp: Date.now()
+        });
+
+        // Fetch initial data after connection stabilizes
+        setTimeout(async () => {
+          await this.waitForClientReady();
+          await this.requestInitialData();
+        }, 200);
+
         // Log subscription status and ensure subscriptions after connection
         setTimeout(async () => {
           try {
@@ -993,6 +1171,23 @@ class StreamerbotIntegration {
       },
       onDisconnect: () => {
         sbLogger.warn('Disconnected from Streamer.bot');
+        this.initState.connected = false;
+
+        eventBus.emit(EVENT_TYPES.STREAMERBOT_CONNECTION, {
+          connected: false,
+          timestamp: Date.now()
+        });
+
+        // Store dispatch
+        overlayStore.dispatch({ type: 'CONNECTION_CLOSED', timestamp: Date.now() });
+        overlayStore.dispatch({ type: 'HEALTH_STATUS_CHANGED', status: 'disconnected', message: 'Disconnected from Streamer.bot', timestamp: Date.now() });
+
+        eventBus.emit(EVENT_TYPES.HEALTH_STATUS, {
+          status: HEALTH_STATUS.DISCONNECTED,
+          message: 'Disconnected from Streamer.bot',
+          timestamp: Date.now()
+        });
+
         this.resetState();
       },
       onError: (error: any) => {
@@ -1003,6 +1198,9 @@ class StreamerbotIntegration {
           message: `Connection error: ${error}`,
           timestamp: Date.now()
         });
+
+        // Dual-write: store dispatch
+        overlayStore.dispatch({ type: 'CONNECTION_ERROR', message: `Connection error: ${error}`, timestamp: Date.now() });
       }
     };
 

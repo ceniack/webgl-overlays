@@ -384,6 +384,7 @@ const server = app.listen(PORT, () => {
   console.log(`🔗 Official @streamerbot/client integration`);
   console.log(`🖼️ Canvas Overlay: http://localhost:${PORT}/template/canvas`);
   console.log(`🎨 Editor: http://localhost:${PORT}/template/canvas-editor`);
+  console.log(`🔮 WebGL Overlay: http://localhost:${PORT}/template/webgl-overlay`);
 });
 
 // WebSocket server for real-time updates from streamer.bot

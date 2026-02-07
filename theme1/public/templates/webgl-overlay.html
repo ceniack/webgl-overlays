@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyberpunk" data-layout="default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL Stream Overlay</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Theme stylesheet (swappable via ?theme= query parameter) -->
+    <link id="theme-stylesheet" rel="stylesheet" href="/css/themes/cyberpunk/theme.css">
+
+    <style>
+        /* Minimal styles for WebGL canvas — no DOM layout needed */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            background: transparent;
+        }
+        /* Fixed canvas size at 1920x1080 — scrollable when viewport is smaller */
+        canvas {
+            display: block;
+            width: 1920px;
+            height: 1080px;
+        }
+    </style>
+
+    <!-- Streamer.bot client (loaded before main bundle) -->
+    <script src="../js/streamerbot-client.js"></script>
+
+    <!-- Main application bundle (IIFE) -->
+    <script src="../dist/stream-overlay.iife.js"></script>
+</head>
+<body data-component="webgl-overlay">
+    <!-- Three.js canvas is injected here by SceneManager -->
+</body>
+</html>

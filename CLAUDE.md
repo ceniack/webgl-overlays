@@ -4,7 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Overview
 
-This is a **modular component overlay system** for OBS Studio featuring **TypeScript components** that integrate with **Streamer.bot** using the **official @streamerbot/client**. The system uses semantic atomic design with ComponentComposer for orchestration.
+This is a **modular component overlay system** for OBS Studio featuring **TypeScript components** that integrate with **Streamer.bot** using the **official @streamerbot/client**. The system has two rendering paths: the original DOM/CSS path (ComponentComposer) and a WebGL/Three.js path (GLComponent) currently being built.
+
+**WebGL Migration Status (Phases 0-2.5 complete, Phase 3 next):**
+
+- Phase 0: Three.js scaffolding, transparent canvas in OBS
+- Phase 1: Centralized Redux-like state store (OverlayStore) with dual-write
+- Phase 2: BroadcasterInfoGL — first WebGL component with textured panel
+- Phase 2.5: Texture refinement — punch-through scratches, Z-layer reorder
+- Phase 3 (next): Theme Material System — GLThemeConfig, ThemeMaterialFactory
 
 **Target Users**: Live streamers and developers who want a modular, type-safe overlay system with reusable components.
 
@@ -35,11 +43,16 @@ node build.js
 **Note:** `npm run build` does not work reliably on this system due to npm/Windows shell issues. Always use `node build.js` directly to ensure the build runs.
 
 ## Production URLs
+
+**DOM overlay** (port 3000): Original CSS-based rendering path.
+**WebGL overlay** (port 3001): Three.js rendering path (in development).
+
 - `/template/overlay` - Main overlay bar (OBS Browser Source)
 - `/template/overlay-all` - All components visible (testing/development)
 - `/template/alerts` - Alert notifications overlay
 - `/template/canvas` - Canvas grid overlay (1920×1080, OBS Browser Source)
 - `/template/canvas-editor` - Visual canvas editor with drag-and-drop
+- `/template/webgl-overlay` - WebGL/Three.js overlay (1920×1080, transparent canvas)
 - `/debug/system` - System information
 - `/api/global-variables` - Variable API
 
@@ -78,12 +91,16 @@ theme1/
 │   │   └── canvas-editor.js
 │   ├── dist/                      # Vite build output
 │   │   └── stream-overlay.iife.js
+│   ├── assets/
+│   │   └── textures/
+│   │       └── arc-raiders/       # TextureLabs textures for Arc Raiders theme
 │   ├── templates/
 │   │   ├── overlay.html           # Main overlay bar
 │   │   ├── overlay-all.html       # All components visible (testing)
 │   │   ├── alerts.html            # Alert notifications
 │   │   ├── canvas.html            # Canvas grid overlay
-│   │   └── canvas-editor.html     # Visual canvas editor
+│   │   ├── canvas-editor.html     # Visual canvas editor
+│   │   └── webgl-overlay.html     # WebGL/Three.js overlay
 │   └── components/                # Legacy component files
 └── src/
     ├── js/
@@ -148,6 +165,26 @@ theme1/
     │   └── RecentActivity/        # Available, not yet integrated
     │       ├── RecentActivity.ts
     │       └── RecentActivity.css
+    ├── gl/                            # WebGL/Three.js rendering system
+    │   ├── index.ts                   # GL entry point (initializeGLOverlay)
+    │   ├── core/
+    │   │   ├── SceneManager.ts        # Scene, renderer, camera, render loop
+    │   │   ├── CameraController.ts    # Narrow-FOV perspective camera + idle drift
+    │   │   └── TextureLibrary.ts      # Texture loading, caching, disposal
+    │   ├── components/
+    │   │   ├── GLComponent.ts         # Abstract base (group, subscriptions, lifecycle)
+    │   │   └── BroadcasterInfoGL.ts   # Broadcaster panel (white-painted metal theme)
+    │   └── text/
+    │       └── TextRenderer.ts        # troika-three-text wrapper
+    ├── store/                         # Centralized Redux-like state store
+    │   ├── index.ts                   # Re-exports
+    │   ├── types.ts                   # OverlayState, action types
+    │   ├── actions.ts                 # Action type constants
+    │   ├── initialState.ts            # Default state
+    │   ├── OverlayStore.ts            # Store implementation (dispatch, subscribe, middleware)
+    │   ├── selectors.ts               # Selector functions
+    │   ├── reducers/                  # Slice reducers (9 slices)
+    │   └── middleware/                # logging, alertQueue, persistence
     └── composition/
         ├── ComponentComposer.ts   # Component orchestration
         └── CanvasRenderer.ts      # Canvas grid layout renderer
@@ -171,6 +208,53 @@ Orchestrates component lifecycle and registration. Components are registered by 
 
 ### Canvas System
 - **CanvasRenderer** (`theme1/src/composition/CanvasRenderer.ts`): Builds 1920×1080 CSS Grid canvas from layout JSON. Creates cell wrappers, mounts components via ComponentComposer. Fetches layout from `/api/canvas-layout/:name`. Debug mode: `?debug=grid`.
+
+### WebGL System
+
+The WebGL path renders overlay components in Three.js instead of DOM/CSS. Activated by `data-component="webgl-overlay"` on the body element.
+
+**Core infrastructure:**
+
+- **SceneManager** (`src/gl/core/SceneManager.ts`): WebGLRenderer (alpha: true, premultipliedAlpha: false), PerspectiveCamera (FOV=18, distance=1000), render loop via `setAnimationLoop()`. Transparent canvas for OBS compositing.
+- **CameraController** (`src/gl/core/CameraController.ts`): Narrow FOV creates near-orthographic projection with z-parallax. Idle drift: subtle sinusoidal x/y sway for organic movement.
+- **TextureLibrary** (`src/gl/core/TextureLibrary.ts`): Centralized texture loading with cache, deduplication, and error handling. Supports `colorSpace` options for alphaMap/data textures (`THREE.NoColorSpace`).
+- **TextRenderer** (`src/gl/text/TextRenderer.ts`): Wraps troika-three-text for SDF text rendering. Supports Google Fonts TTF URLs.
+
+**Component pattern:**
+
+- **GLComponent** (`src/gl/components/GLComponent.ts`): Abstract base class. Provides: THREE.Group scene node, TextureLibrary injection, store subscription helpers (fire-immediately pattern), owned-texture tracking for disposal, lifecycle (initialize/destroy).
+- Components subscribe to OverlayStore selectors, NOT EventBus. Store subscriptions fire immediately with current value.
+
+**BroadcasterInfoGL** — Arc Raiders / NASApunk theme:
+
+Layered Z-stack texture system on a white-painted aluminum panel. Crackle ages the paint surface below text; scratch punch-through sits ABOVE text to fully erase it where paint is scraped:
+
+| Z   | Layer              | Description                                                          |
+| --- | ------------------ | -------------------------------------------------------------------- |
+| 0.0 | Metal 290          | White-painted aluminum base with natural cracks                      |
+| 0.5 | Grunge 330         | Paint crackle (MultiplyBlending, ages paint only, below text)        |
+| 0.8 | Accent bar         | NASA red left edge                                                   |
+| 1.0 | Text + Avatar      | Bold black stencil name, NASA red URL (ABOVE crackle = crisp)        |
+| 2.0 | Scratch punch-thru | Metal 269 (.map) + Grunge 338 (.alphaMap) — bare metal covers text   |
+| 2.0 | Avatar scratch     | Same textures at lower opacity on avatar area                        |
+| 3.0 | Border + Live      | Panel outline, pulsing live indicator                                |
+
+**Texture source:** [TextureLabs.org](https://texturelabs.org/) — free JPG textures. Stored in `public/assets/textures/{theme}/`. Medium size (1920px) for 1080p overlays.
+
+### OverlayStore (Centralized State)
+
+Redux-like state store replacing EventBus for data flow to GL components. Both DOM and GL paths can subscribe.
+
+**Key APIs:**
+
+- `overlayStore.dispatch(action)` — runs middleware chain → rootReducer → notifies subscribers
+- `overlayStore.subscribe(selector, callback)` — selector-based with reference equality change detection
+- `overlayStore.getState()` — returns readonly state snapshot
+- `overlayStore.use(middleware)` — middleware receives `(action, state, next)`
+
+**State slices:** connection, broadcaster, counters, health, alerts, latestEvents, goals, activity, stream, _meta.
+
+**Dual-write pattern:** `streamerbot-integration.ts` dispatches to both EventBus (DOM components) and OverlayStore (GL components) simultaneously. EventBus will be removed after full GL migration.
 
 ## CSS Layer Architecture
 
@@ -286,8 +370,10 @@ Overlay Server (localhost:3000) ← Variables persist to theme1/data/globalVaria
 ```
 
 **Port Usage:**
+
 - **Port 8080**: Streamer.bot WebSocket server
-- **Port 3000**: Overlay Express server
+- **Port 3000**: Overlay Express server (original DOM/CSS path)
+- **Port 3001**: Overlay Express server (WebGL fork — use `PORT=3001 node server.js`)
 
 ## Global Variables
 
@@ -377,6 +463,17 @@ window.debugCounters()            // Dump counter state
 window.testCounterValues()        // Random test values
 window.testCounterLabels()        // Test label updates
 window.testCounterVisibility()    // Toggle random visibility
+
+// --- WebGL overlay (on /template/webgl-overlay page) ---
+window.debugGL()                  // Renderer stats (triangles, draw calls, memory)
+window.glScene                    // SceneManager instance
+window.glTextureLibrary           // TextureLibrary instance
+window.glComponents               // All GL component instances
+window.sceneManager               // SceneManager (alias)
+
+// --- OverlayStore (available on all pages) ---
+window.debugStore()               // Log full store state
+window.overlayState()             // Return current state snapshot
 ```
 
 ### Testing All Components
@@ -404,6 +501,14 @@ DEBUG_TO_FILE=true npm run dev
 - `data-component="alerts-html"` initializes AlertFeed with `maxVisible: 3`
 - No inline JS/CSS — shares `dist/assets/stream-overlay.css` with overlay
 - Theme switching: append `?theme=dark-minimal` to URL
+
+### WebGL Overlay
+
+- **URL**: `http://localhost:3001/template/webgl-overlay`
+- **Resolution**: 1920×1080 (full screen, transparent canvas)
+- Three.js renders all components — no DOM elements
+- `data-component="webgl-overlay"` triggers GL initialization
+- Currently renders: BroadcasterInfoGL (textured panel with store integration)
 
 ### Canvas Overlay
 - **URL**: `http://localhost:3000/template/canvas`

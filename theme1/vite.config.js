@@ -35,7 +35,9 @@ export default defineConfig({
       '@js': resolve(__dirname, 'src/js'),
       '@css': resolve(__dirname, 'src/css'),
       '@types': resolve(__dirname, 'src/types'),
-      '@composition': resolve(__dirname, 'src/composition')
+      '@composition': resolve(__dirname, 'src/composition'),
+      '@gl': resolve(__dirname, 'src/gl'),
+      '@store': resolve(__dirname, 'src/store')
     }
   },
   server: {
